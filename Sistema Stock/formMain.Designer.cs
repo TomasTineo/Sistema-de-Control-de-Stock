@@ -28,67 +28,71 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btn_login = new System.Windows.Forms.Button();
-            this.Titulo = new System.Windows.Forms.Label();
-            this.btn_register = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            btn_login = new System.Windows.Forms.Button();
+            Titulo = new System.Windows.Forms.Label();
+            btn_register = new System.Windows.Forms.Button();
+            SuspendLayout();
             // 
             // btn_login
             // 
-            this.btn_login.BackColor = System.Drawing.Color.GhostWhite;
-            this.btn_login.FlatAppearance.BorderSize = 0;
-            this.btn_login.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btn_login.Location = new System.Drawing.Point(581, 391);
-            this.btn_login.Name = "btn_login";
-            this.btn_login.Size = new System.Drawing.Size(121, 44);
-            this.btn_login.TabIndex = 0;
-            this.btn_login.Text = "Login";
-            this.btn_login.UseVisualStyleBackColor = false;
-            this.btn_login.Click += new System.EventHandler(this.btn_login_Click);
+            btn_login.BackColor = System.Drawing.Color.GhostWhite;
+            btn_login.FlatAppearance.BorderSize = 0;
+            btn_login.ForeColor = System.Drawing.SystemColors.ControlText;
+            btn_login.Location = new System.Drawing.Point(678, 451);
+            btn_login.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            btn_login.Name = "btn_login";
+            btn_login.Size = new System.Drawing.Size(141, 51);
+            btn_login.TabIndex = 0;
+            btn_login.Text = "Login";
+            btn_login.UseVisualStyleBackColor = false;
+            btn_login.Click += btn_login_Click;
             // 
             // Titulo
             // 
-            this.Titulo.AutoSize = true;
-            this.Titulo.BackColor = System.Drawing.Color.Transparent;
-            this.Titulo.Font = new System.Drawing.Font("MS UI Gothic", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Titulo.ForeColor = System.Drawing.SystemColors.HighlightText;
-            this.Titulo.Location = new System.Drawing.Point(12, 9);
-            this.Titulo.Name = "Titulo";
-            this.Titulo.Size = new System.Drawing.Size(249, 37);
-            this.Titulo.TabIndex = 2;
-            this.Titulo.Text = "Stock Manager";
-            this.Titulo.Click += new System.EventHandler(this.label1_Click);
+            Titulo.AutoSize = true;
+            Titulo.BackColor = System.Drawing.Color.Transparent;
+            Titulo.Font = new System.Drawing.Font("MS UI Gothic", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            Titulo.ForeColor = System.Drawing.SystemColors.HighlightText;
+            Titulo.Location = new System.Drawing.Point(14, 10);
+            Titulo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            Titulo.Name = "Titulo";
+            Titulo.Size = new System.Drawing.Size(249, 37);
+            Titulo.TabIndex = 2;
+            Titulo.Text = "Stock Manager";
+            Titulo.Click += label1_Click;
             // 
             // btn_register
             // 
-            this.btn_register.BackColor = System.Drawing.Color.GhostWhite;
-            this.btn_register.FlatAppearance.BorderSize = 0;
-            this.btn_register.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btn_register.Location = new System.Drawing.Point(445, 391);
-            this.btn_register.Name = "btn_register";
-            this.btn_register.Size = new System.Drawing.Size(121, 44);
-            this.btn_register.TabIndex = 0;
-            this.btn_register.Text = "Register";
-            this.btn_register.UseVisualStyleBackColor = false;
-            this.btn_register.Click += new System.EventHandler(this.btn_register_Click);
+            btn_register.BackColor = System.Drawing.Color.GhostWhite;
+            btn_register.FlatAppearance.BorderSize = 0;
+            btn_register.ForeColor = System.Drawing.SystemColors.ControlText;
+            btn_register.Location = new System.Drawing.Point(519, 451);
+            btn_register.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            btn_register.Name = "btn_register";
+            btn_register.Size = new System.Drawing.Size(141, 51);
+            btn_register.TabIndex = 0;
+            btn_register.Text = "Register";
+            btn_register.UseVisualStyleBackColor = false;
+            btn_register.Click += btn_register_Click;
             // 
             // formMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::Sistema_Stock.Properties.Resources.background;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(714, 447);
-            this.Controls.Add(this.Titulo);
-            this.Controls.Add(this.btn_register);
-            this.Controls.Add(this.btn_login);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "formMain";
-            this.Text = "Form1";
-            this.Load += new System.EventHandler(this.formMain_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackgroundImage = SistemaStock.Properties.Resources.background;
+            BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            ClientSize = new System.Drawing.Size(833, 516);
+            Controls.Add(Titulo);
+            Controls.Add(btn_register);
+            Controls.Add(btn_login);
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "formMain";
+            Text = "Form1";
+            Load += formMain_Load;
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
