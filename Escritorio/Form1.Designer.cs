@@ -1,6 +1,6 @@
 ﻿namespace Escritorio
 {
-    partial class Form_acceso
+    partial class form
     {
         /// <summary>
         /// Required designer variable.
@@ -30,12 +30,12 @@
         {
             SuspendLayout();
             // 
-            // Form_acceso
+            // form
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Name = "Form_acceso";
+            Name = "form";
             Text = "Acceso";
             ResumeLayout(false);
         }
