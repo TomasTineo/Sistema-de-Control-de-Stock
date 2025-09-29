@@ -1,4 +1,4 @@
-﻿using Sistema_Stock;
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Escritorio
 {
@@ -18,26 +19,21 @@ namespace Escritorio
             InitializeComponent();
         }
 
-
-
         private void btn_register_click(object sender, EventArgs e)
         {
-            Form_Registro form_registro = new Form_Registro();
+            var form_registro = Program.ServiceProvider.GetRequiredService<Form_Registro>();
             form_registro.Show();
-            
         }
 
         private void btn_login_click(object sender, EventArgs e)
         {
-            Form_Login form_login = new Form_Login();
+            var form_login = Program.ServiceProvider.GetRequiredService<Form_Login>();
             form_login.Show();
-            
-            
-        }
+        }               
 
         private void Form_Acceso_Load(object sender, EventArgs e)
         {
-
+            // Configuraciones iniciales
         }
     }
 }

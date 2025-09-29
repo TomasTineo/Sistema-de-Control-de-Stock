@@ -1,4 +1,4 @@
-﻿using Dominio;
+﻿using Domain.Model;
 
 namespace Data
 {
@@ -6,7 +6,7 @@ namespace Data
     {
         public static List<Producto> Productos;
 
-        static ProductsInMemory()
+        /* static ProductsInMemory()
         {
             Productos = new List<Producto>()
             {
@@ -21,5 +21,6 @@ namespace Data
 
             };
         }
+        */
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sistema_Stock {
+namespace Domain.Model {
     public static class DatosGlobales
     {
         public static List<Usuario> Usuarios = new List<Usuario>();
