@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+        using Microsoft.EntityFrameworkCore;
 using Domain.Model;
 
 namespace Data
@@ -25,6 +25,7 @@ namespace Data
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd(); 
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Apellido).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
@@ -39,6 +40,7 @@ namespace Data
             modelBuilder.Entity<Cliente>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Apellido).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
@@ -50,6 +52,7 @@ namespace Data
             modelBuilder.Entity<Evento>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.NombreEvento).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.FechaEvento).IsRequired();
             });
@@ -58,6 +61,7 @@ namespace Data
             modelBuilder.Entity<Categoria>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
             });
 
@@ -65,6 +69,7 @@ namespace Data
             modelBuilder.Entity<Producto>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Descripcion).IsRequired().HasMaxLength(500);
                 entity.Property(e => e.Precio).IsRequired().HasColumnType("decimal(18,2)");
@@ -81,6 +86,7 @@ namespace Data
             modelBuilder.Entity<Reserva>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.FechaReserva).IsRequired();
                 entity.Property(e => e.Estado).IsRequired().HasMaxLength(50);
 

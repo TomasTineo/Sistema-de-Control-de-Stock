@@ -45,7 +45,7 @@ namespace Application.Services
 
         public async Task<ProductoDTO> CreateAsync(CreateProductoRequest request)
         {
-            var producto = new Producto(0, request.Nombre, request.Precio, request.Descripcion, request.Stock, request.CategoriaId);
+            var producto = new Producto(request.Nombre, request.Precio, request.Descripcion, request.Stock, request.CategoriaId);
             
             var productoCreado = await _productoRepository.AddAsync(producto);
 

@@ -13,9 +13,17 @@ namespace Domain.Model
         public string NombreEvento { get; private set; }
         public DateTime FechaEvento { get; private set; }
 
+        
         public Evento(int id, string nombreEvento, DateTime fechaEvento)
         {
             SetId(id);
+            SetNombre(nombreEvento);
+            SetFecha(fechaEvento);
+        }
+
+        
+        public Evento(string nombreEvento, DateTime fechaEvento)
+        {
             SetNombre(nombreEvento);
             SetFecha(fechaEvento);
         }

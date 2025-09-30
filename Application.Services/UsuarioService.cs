@@ -36,13 +36,14 @@ namespace Application.Services
             if (await _usuarioRepository.ExisteUsernameAsync(request.Username))
                 throw new InvalidOperationException("El nombre de usuario ya existe");
 
-            var usuario = new Usuario(0, request.Nombre, request.Apellido, request.Email, request.Username, request.Password);
+            // Constructor SIN ID - EF asignará automáticamente
+            var usuario = new Usuario(request.Nombre, request.Apellido, request.Email, request.Username, request.Password);
             
             var usuarioCreado = await _usuarioRepository.AddAsync(usuario);
 
             return new UsuarioDTO
             {
-                Id = usuarioCreado.Id,
+                Id = usuarioCreado.Id, //  Ahora tendrá el ID asignado por la BD
                 Nombre = usuarioCreado.Nombre,
                 Apellido = usuarioCreado.Apellido,
                 Email = usuarioCreado.Email,

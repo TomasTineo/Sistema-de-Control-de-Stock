@@ -11,6 +11,17 @@
 
         protected Usuario() { }
 
+        // Constructor SIN ID - para nuevos objetos
+        public Usuario(string nombre, string apellido, string email, string username, string password)
+        {
+            SetNombre(nombre);
+            SetApellido(apellido);
+            SetEmail(email);
+            SetUsername(username);
+            SetPassword(password);
+        }
+
+        // Constructor CON ID - para cargar desde BD
         public Usuario(int id, string nombre, string apellido, string email, string username, string password)
         {
             SetId(id);
@@ -25,6 +36,12 @@
         {
             if (id <= 0)
                 throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
+            Id = id;
+        }
+
+        // ← Permitir que EF asigne el ID internamente
+        internal void SetIdInternal(int id)
+        {
             Id = id;
         }
 

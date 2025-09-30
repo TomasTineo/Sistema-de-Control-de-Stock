@@ -15,9 +15,15 @@ namespace Domain.Model
 
         protected Categoria() { }
 
+        
         public Categoria(int id, string nombre)
         {
             SetId(id);
+            SetNombre(nombre);
+        }
+
+        public Categoria(string nombre)
+        {
             SetNombre(nombre);
         }
 

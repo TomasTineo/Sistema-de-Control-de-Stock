@@ -32,8 +32,19 @@ namespace Domain.Model
             }
         }
 
-        protected Producto() { }    
+        protected Producto() { }
 
+        // Constructor SIN ID - para nuevos objetos
+        public Producto(string nombre, decimal precio, string descripcion, int stock, int categoriaId)
+        {
+            SetNombre(nombre);
+            SetPrecio(precio);
+            SetDescripcion(descripcion);
+            SetStock(stock);
+            SetCategoriaId(categoriaId);
+        }
+
+        // Constructor CON ID - para cargar desde BD
         public Producto(int id, string nombre, decimal precio, string descripcion, int stock, int categoriaId)
         {
             SetID(id);
@@ -85,7 +96,6 @@ namespace Domain.Model
                 throw new ArgumentException("El ID de la categoría debe ser un número positivo.", nameof(categoriaId));
             CategoriaId = categoriaId;
         }
-
     }
 }
 
