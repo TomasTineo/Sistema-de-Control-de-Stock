@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Services;
 using DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<UsuarioDTO>>> GetUsuarios()
         {
             var usuarios = await _usuarioService.GetAllAsync();
@@ -23,6 +25,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<UsuarioDTO>> GetUsuario(int id)
         {
             var usuario = await _usuarioService.GetAsync(id);
@@ -34,6 +37,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]  // Permitir registro sin autenticación
         public async Task<ActionResult<UsuarioDTO>> PostUsuario([FromBody] CreateUsuarioRequest request)
         {
             try
@@ -48,6 +52,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutUsuario(int id, [FromBody] UpdateUsuarioRequest request)
         {
             if (id != request.Id)
@@ -69,6 +74,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             var result = await _usuarioService.DeleteAsync(id);
@@ -80,6 +86,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]  // Permitir login sin autenticación
         public async Task<ActionResult<UsuarioDTO>> Login([FromBody] LoginRequest request)
         {
             var usuario = await _usuarioService.LoginAsync(request.Username, request.Password);
@@ -91,16 +98,11 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("exists/{username}")]
+        [AllowAnonymous]  // Permitir verificación de username sin autenticación
         public async Task<ActionResult<bool>> ExisteUsername(string username)
         {
             var existe = await _usuarioService.ExisteUsernameAsync(username);
             return Ok(existe);
         }
-    }
-
-    public class LoginRequest
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
     }
 }

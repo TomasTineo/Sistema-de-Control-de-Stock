@@ -10,14 +10,14 @@ namespace Escritorio
 {
     public partial class FormProducts : Form
     {
-        private readonly IProductoApiClient _productoApiClient;
+        private readonly ProductoApiClient _productoApiClient;
         private List<ProductoDTO> _productos = new List<ProductoDTO>();
 
         public FormProducts()
         {
             InitializeComponent();
             // Obtener el servicio desde el contenedor DI
-            _productoApiClient = Program.ServiceProvider.GetRequiredService<IProductoApiClient>();
+            _productoApiClient = Program.ServiceProvider.GetRequiredService<ProductoApiClient>();
         }
 
         private async void FormProducts_Load(object sender, EventArgs e)
@@ -79,6 +79,12 @@ namespace Escritorio
                 GrdVw_Product.DataSource = null;
                 GrdVw_Product.DataSource = _productos;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, "Sesión Expirada", 
+                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar productos: {ex.Message}", 
@@ -133,6 +139,12 @@ namespace Escritorio
 
                 // Recargar productos
                 await CargarProductosAsync();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, "Sesión Expirada", 
+                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
             }
             catch (Exception ex)
             {
@@ -200,6 +212,12 @@ namespace Escritorio
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, "Sesión Expirada", 
+                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al actualizar producto: {ex.Message}", 
@@ -238,6 +256,12 @@ namespace Escritorio
                         MessageBox.Show("No se pudo eliminar el producto.", "Error", 
                                       MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    MessageBox.Show(ex.Message, "Sesión Expirada", 
+                                  MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    this.Close();
                 }
                 catch (Exception ex)
                 {

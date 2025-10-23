@@ -1,4 +1,4 @@
-        using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Domain.Model;
 
 namespace Data
@@ -30,7 +30,8 @@ namespace Data
                 entity.Property(e => e.Apellido).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.Password).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Salt).IsRequired().HasMaxLength(100);
                 
                 // Índice único para Username
                 entity.HasIndex(e => e.Username).IsUnique();

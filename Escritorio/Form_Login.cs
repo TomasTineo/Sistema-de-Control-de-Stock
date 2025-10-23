@@ -14,13 +14,15 @@ namespace Escritorio
 {
     public partial class Form_Login : Form
     {
-        private readonly IUsuarioApiClient _usuarioApiClient;
+        private readonly UsuarioApiClient _usuarioApiClient;
+        private readonly IAuthService _authService;
 
         public Form_Login()
         {
             InitializeComponent();
-            // Obtener el servicio desde el contenedor DI
-            _usuarioApiClient = Program.ServiceProvider.GetRequiredService<IUsuarioApiClient>();
+            // Obtener los servicios desde el contenedor DI
+            _usuarioApiClient = Program.ServiceProvider.GetRequiredService<UsuarioApiClient>();
+            _authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
         }
 
         private async void btn_enviarLogin_Click(object sender, EventArgs e)
@@ -40,12 +42,13 @@ namespace Escritorio
                 btn_enviarLogin.Enabled = false;
                 btn_enviarLogin.Text = "Iniciando sesión...";
 
-                // Llamada a la API
-                var usuario = await _usuarioApiClient.LoginAsync(username, password);
+                // Usar el AuthService para hacer login
+                bool loginExitoso = await _authService.LoginAsync(username, password);
                 
-                if (usuario != null)
+                if (loginExitoso)
                 {
-                    MessageBox.Show($"Bienvenido {usuario.Nombre} {usuario.Apellido}!", 
+                    var nombreUsuario = await _authService.GetUsernameAsync();
+                    MessageBox.Show($"Bienvenido {nombreUsuario}!", 
                                   "Login exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                     // Crear y mostrar el formulario de productos

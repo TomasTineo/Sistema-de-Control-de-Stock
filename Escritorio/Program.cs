@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using API.Clients;
+using API.Auth.WindowsForms;
 
 namespace Escritorio
 {
@@ -26,17 +27,8 @@ namespace Escritorio
             // HttpClient Factory con configuración desde appsettings
             var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001/";
 
-            services.AddHttpClient<IUsuarioApiClient, UsuarioApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(apiBaseUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
-            });
-
-            services.AddHttpClient<IProductoApiClient, ProductoApiClient>(client =>
-            {
-                client.BaseAddress = new Uri(apiBaseUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
-            });
+            // Ejecutar async main
+            Task.Run(async () => await MainAsync()).GetAwaiter().GetResult();
 
             // Forms
             services.AddTransient<Form_Acceso>();
@@ -69,6 +61,32 @@ namespace Escritorio
                 {
                     var mainForm = ServiceProvider.GetRequiredService<Form_Acceso>();
                     Application.Run(mainForm);
+                }
+            }
+        }
+
+        static async Task MainAsync()
+        {
+            // Registrar AuthService en singleton
+            var authService = new WindowsFormsAuthService();
+            AuthServiceProvider.Register(authService);
+
+            // Loop principal de autenticación
+            while (true)
+            {
+
+
+                try
+                {
+                    Application.Run(new Form_Acceso());
+                    break; // La aplicación se cerró normalmente
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    // Sesión expirada, mostrar mensaje y volver al login
+                    MessageBox.Show(ex.Message, "Sesión Expirada",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    // El loop continuará y volverá a mostrar login
                 }
             }
         }

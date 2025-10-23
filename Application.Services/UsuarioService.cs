@@ -17,7 +17,7 @@ namespace Application.Services
         {
             var usuario = await _usuarioRepository.GetByUsernameAsync(username);
             
-            if (usuario == null || usuario.Password != password)
+            if (usuario == null || usuario.PasswordHash != password)
                 return null;
 
             return new UsuarioDTO

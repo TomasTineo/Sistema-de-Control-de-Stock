@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Services;
 using DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EventosController : ControllerBase
     {
         private readonly IEventoService _eventoService;

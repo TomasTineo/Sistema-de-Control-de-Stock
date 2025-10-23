@@ -15,13 +15,13 @@ namespace Escritorio
 {
     public partial class Form_Registro : Form
     {
-        private readonly IUsuarioApiClient _usuarioApiClient;
+        private readonly UsuarioApiClient _usuarioApiClient;
 
         public Form_Registro()
         {
             InitializeComponent();
             // Obtener el servicio desde el contenedor DI
-            _usuarioApiClient = Program.ServiceProvider.GetRequiredService<IUsuarioApiClient>();
+            _usuarioApiClient = Program.ServiceProvider.GetRequiredService<UsuarioApiClient>();
         }
 
         private void Form_Registro_Load(object sender, EventArgs e)
@@ -31,7 +31,7 @@ namespace Escritorio
 
         private async void btn_enviarRegistro_Click(object sender, EventArgs e)
         {
-            string name = txt_name.Text.Trim();     // Corregir: era txt_username
+            string name = txt_name.Text.Trim();
             string surname = txt_surname.Text.Trim();
             string username = txt_username.Text.Trim();
             string password = txt_password.Text.Trim();
