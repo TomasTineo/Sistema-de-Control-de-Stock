@@ -23,8 +23,6 @@ namespace Application.Services
             return new UsuarioDTO
             {
                 Id = usuario.Id,
-                Nombre = usuario.Nombre,
-                Apellido = usuario.Apellido,
                 Email = usuario.Email,
                 Username = usuario.Username
             };
@@ -37,15 +35,13 @@ namespace Application.Services
                 throw new InvalidOperationException("El nombre de usuario ya existe");
 
             // Constructor SIN ID - EF asignará automáticamente
-            var usuario = new Usuario(request.Nombre, request.Apellido, request.Email, request.Username, request.Password);
+            var usuario = new Usuario(request.Username, request.Email, request.Password);
             
             var usuarioCreado = await _usuarioRepository.AddAsync(usuario);
 
             return new UsuarioDTO
             {
-                Id = usuarioCreado.Id, //  Ahora tendrá el ID asignado por la BD
-                Nombre = usuarioCreado.Nombre,
-                Apellido = usuarioCreado.Apellido,
+                Id = usuarioCreado.Id,
                 Email = usuarioCreado.Email,
                 Username = usuarioCreado.Username
             };
@@ -60,8 +56,6 @@ namespace Application.Services
             return new UsuarioDTO
             {
                 Id = usuario.Id,
-                Nombre = usuario.Nombre,
-                Apellido = usuario.Apellido,
                 Email = usuario.Email,
                 Username = usuario.Username
             };
@@ -74,8 +68,6 @@ namespace Application.Services
             return usuarios.Select(u => new UsuarioDTO
             {
                 Id = u.Id,
-                Nombre = u.Nombre,
-                Apellido = u.Apellido,
                 Email = u.Email,
                 Username = u.Username
             });
@@ -91,8 +83,6 @@ namespace Application.Services
                 throw new InvalidOperationException("El nombre de usuario ya existe");
 
             // Actualizar propiedades
-            usuario.SetNombre(request.Nombre);
-            usuario.SetApellido(request.Apellido);
             usuario.SetEmail(request.Email);
             usuario.SetUsername(request.Username);
             

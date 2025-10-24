@@ -62,7 +62,7 @@ namespace Application.Services
             };
 
             // Agregar permisos como claims para UI
-            
+
             var permisos = usuario.ObtenerTodosLosPermisos();
             foreach (var permiso in permisos)
             {
@@ -73,6 +73,7 @@ namespace Application.Services
             var grupo = usuario.ObtenerNombreGrupo();
             if (!string.IsNullOrEmpty(grupo))
             {
+                //claims.Add(new Claim(ClaimTypes.Role, grupo));
                 claims.Add(new Claim("group", grupo));
             }
         

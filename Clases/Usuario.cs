@@ -8,10 +8,8 @@ namespace Domain.Model
     public class Usuario
     {
         public int Id { get; private set; }
-        public string Nombre { get; private set; } = string.Empty;
-        public string Apellido { get; private set; } = string.Empty;
-        public string Email { get; private set; } = string.Empty;
         public string Username { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
         public string PasswordHash { get; private set; } = string.Empty;
         public string Salt { get; private set; }
 
@@ -19,15 +17,13 @@ namespace Domain.Model
         public int? GrupoPermisoId { get; private set; }
         public virtual GrupoPermiso? Grupo { get; private set; }
 
-        protected Usuario() { }
+        private Usuario() { }
 
         // Constructor SIN ID - para nuevos objetos
-        public Usuario(string nombre, string apellido, string email, string username, string password)
+        public Usuario(string username, string email, string password)
         {
-            SetNombre(nombre);
-            SetApellido(apellido);
-            SetEmail(email);
             SetUsername(username);
+            SetEmail(email);
             SetPassword(password);
         }
         
@@ -43,20 +39,6 @@ namespace Domain.Model
         internal void SetIdInternal(int id)
         {
             Id = id;
-        }
-
-        public void SetNombre(string nombre)
-        {
-            if (string.IsNullOrWhiteSpace(nombre))
-                throw new ArgumentException("El nombre no puede estar vacío.", nameof(nombre));
-            Nombre = nombre;
-        }
-
-        public void SetApellido(string apellido)
-        {
-            if (string.IsNullOrWhiteSpace(apellido))
-                throw new ArgumentException("El apellido no puede estar vacío.", nameof(apellido));
-            Apellido = apellido;
         }
 
         public void SetEmail(string email)
@@ -104,11 +86,6 @@ namespace Domain.Model
             using var pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), 10000, HashAlgorithmName.SHA256);
             byte[] hashBytes = pbkdf2.GetBytes(32);
             return Convert.ToBase64String(hashBytes);
-        }
-
-        public override string ToString()
-        {
-            return $"{Id} - {Nombre} {Apellido}";
         }
 
         // Métodos para manejo de grupo y permisos (simplificado a UN grupo)

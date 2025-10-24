@@ -15,17 +15,25 @@ namespace Data.Repositories
         public async Task<Usuario?> GetByUsernameAsync(string username)
         {
             return await _context.Usuarios
+                .Include(u => u.Grupo)              // ? Cargar Grupo
+                    .ThenInclude(g => g.Permisos)   // ? Cargar Permisos del Grupo
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<Usuario?> GetAsync(int id)
         {
-            return await _context.Usuarios.FindAsync(id);
+            return await _context.Usuarios
+                .Include(u => u.Grupo)              // ? Cargar Grupo
+                    .ThenInclude(g => g.Permisos)   // ? Cargar Permisos del Grupo
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Usuarios
+                .Include(u => u.Grupo)              // ? Cargar Grupo
+                    .ThenInclude(g => g.Permisos)   // ? Cargar Permisos del Grupo
+                .ToListAsync();
         }
 
         public async Task<Usuario> AddAsync(Usuario usuario)

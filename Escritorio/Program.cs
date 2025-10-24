@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using API.Clients;
-using API.Auth.WindowsForms;
+using API.Auth.WindowsForm;
 
 namespace Escritorio
 {
@@ -13,6 +13,10 @@ namespace Escritorio
         [STAThread]
         static async Task Main()
         {
+            // Registrar AuthService PRIMERO (antes de DI)
+            var authService = new WindowsFormsAuthService();
+            AuthServiceProvider.Register(authService);
+
             // Configurar servicios
             var services = new ServiceCollection();
 
@@ -27,8 +31,33 @@ namespace Escritorio
             // HttpClient Factory con configuración desde appsettings
             var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001/";
 
-            // Ejecutar async main
-            Task.Run(async () => await MainAsync()).GetAwaiter().GetResult();
+            // Registrar ApiClients con HttpClient (clases concretas, sin interfaces)
+            services.AddHttpClient<UsuarioApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<ProductoApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<CategoriaApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<EventoApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            // Registrar AuthService como singleton
+            services.AddSingleton<IAuthService>(authService);
 
             // Forms
             services.AddTransient<Form_Acceso>();
@@ -61,32 +90,6 @@ namespace Escritorio
                 {
                     var mainForm = ServiceProvider.GetRequiredService<Form_Acceso>();
                     Application.Run(mainForm);
-                }
-            }
-        }
-
-        static async Task MainAsync()
-        {
-            // Registrar AuthService en singleton
-            var authService = new WindowsFormsAuthService();
-            AuthServiceProvider.Register(authService);
-
-            // Loop principal de autenticación
-            while (true)
-            {
-
-
-                try
-                {
-                    Application.Run(new Form_Acceso());
-                    break; // La aplicación se cerró normalmente
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    // Sesión expirada, mostrar mensaje y volver al login
-                    MessageBox.Show(ex.Message, "Sesión Expirada",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    // El loop continuará y volverá a mostrar login
                 }
             }
         }

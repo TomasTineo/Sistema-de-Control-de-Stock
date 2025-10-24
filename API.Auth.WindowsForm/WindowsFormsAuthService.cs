@@ -3,7 +3,7 @@ using API.Clients;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace API.Auth.WindowsForms
+namespace API.Auth.WindowsForm
 {
     public class WindowsFormsAuthService : IAuthService
     {
@@ -76,9 +76,7 @@ namespace API.Auth.WindowsForms
                         {
                             Id = userId,
                             Username = response.Username,
-                            Email = emailClaim?.Value ?? string.Empty,
-                            Nombre = string.Empty,
-                            Apellido = string.Empty
+                            Email = emailClaim?.Value ?? string.Empty
                         };
                     }
 

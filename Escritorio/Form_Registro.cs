@@ -31,20 +31,16 @@ namespace Escritorio
 
         private async void btn_enviarRegistro_Click(object sender, EventArgs e)
         {
-            string name = txt_name.Text.Trim();
-            string surname = txt_surname.Text.Trim();
             string username = txt_username.Text.Trim();
             string password = txt_password.Text.Trim();
             string email = txt_email.Text.Trim();
 
             // Validaciones
-            if (string.IsNullOrEmpty(name) ||
-               string.IsNullOrEmpty(surname) ||
-               string.IsNullOrEmpty(username) ||
+            if (string.IsNullOrEmpty(username) ||
                string.IsNullOrEmpty(password) ||
                string.IsNullOrEmpty(email))
             {
-                MessageBox.Show("Alguno de los campos no está completo", 
+                MessageBox.Show("Todos los campos son requeridos", 
                               "Campos requeridos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -81,8 +77,6 @@ namespace Escritorio
                 // Crear el request
                 var createRequest = new CreateUsuarioRequest
                 {
-                    Nombre = name,
-                    Apellido = surname,
                     Email = email,
                     Username = username,
                     Password = password
@@ -95,8 +89,6 @@ namespace Escritorio
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Limpiar los campos
-                txt_name.Clear();
-                txt_surname.Clear();
                 txt_username.Clear();
                 txt_password.Clear();
                 txt_email.Clear();
