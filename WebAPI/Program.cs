@@ -1,12 +1,13 @@
 using Application.Services;
 using Data;
 using Data.Repositories;
-using Microsoft.EntityFrameworkCore;
+using Data.Repositories.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens; 
+using Microsoft.OpenApi.Models;
 using System.Text;
 using WebAPI;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,9 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>(); 
 builder.Services.AddScoped<IEventoRepository, EventoRepository>();
+// Reportes
+builder.Services.AddScoped<IReportesRepository, ReporteRepository>();
+builder.Services.AddScoped<IReportesService, ReporteService>();
 
 // Dependency Injection - Application Services
 builder.Services.AddScoped<AuthService>();
@@ -27,6 +31,8 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>(); 
 builder.Services.AddScoped<IEventoService, EventoService>();      
+
+
 
 // CORS
 builder.Services.AddCors(options =>
@@ -169,11 +175,12 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
     // Borrar y recrear (SOLO EN DESARROLLO)
-    if (app.Environment.IsDevelopment())
-    {
-        await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
+
+ //   if (app.Environment.IsDevelopment())
+ //   {
+       // await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
         await context.Database.EnsureCreatedAsync();  // ? CREA NUEVA
-    }
+ //   }
 }
 
 // Configure the HTTP request pipeline.
@@ -206,6 +213,8 @@ app.MapUsuariosEndpoints();
 app.MapEventosEndpoints();
 app.MapProductosEndpoints();
 app.MapCategoriasEndpoints();
+
+app.MapReportesEndpoints();
 
 // Health Check
 app.MapHealthChecks("/api/health");
