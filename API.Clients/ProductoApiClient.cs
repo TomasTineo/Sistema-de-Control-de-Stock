@@ -1,4 +1,4 @@
-using DTOs;
+using DTOs.Productos;
 using System.Text;
 using System.Text.Json;
 
@@ -57,7 +57,7 @@ namespace API.Clients
             return JsonSerializer.Deserialize<ProductoDTO>(responseContent, _jsonOptions)!;
         }
 
-        public async Task<bool> UpdateAsync(UpdateProductoRequest request)
+        public async Task<bool> UpdateAsync(ProductoDTO request)
         {
             await EnsureAuthenticatedAsync();
             

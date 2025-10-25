@@ -1,4 +1,5 @@
-using Application.Services;
+using Application.Services.Interfaces;
+using Application.Services.Implementations;
 using Data;
 using Data.Repositories;
 using Data.Repositories.Implementations;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens; 
 using Microsoft.OpenApi.Models;
 using System.Text;
-using WebAPI;
+using WebAPI.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>(); 
 builder.Services.AddScoped<IEventoRepository, EventoRepository>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+builder.Services.AddScoped<IReportesRepository, ReporteRepository>();
 
 // Dependency Injection - Application Services
 builder.Services.AddScoped<AuthService>();
@@ -29,6 +33,8 @@ builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>(); 
 builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IReportesService, ReporteService>();
 
 
 
@@ -141,7 +147,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UsuariosEliminar", policy => policy.RequireClaim("permission", "usuarios.eliminar"));
 
     // Políticas para Productos
-    options.AddPolicy("ProductosLeer", policy => policy.RequireClaim("permission", "productos.leer"));
+    options.AddPolicy(" ProductosLeer", policy => policy.RequireClaim("permission", "productos.leer"));
     options.AddPolicy("ProductosAgregar", policy => policy.RequireClaim("permission", "productos.agregar"));
     options.AddPolicy("ProductosActualizar", policy => policy.RequireClaim("permission", "productos.actualizar"));
     options.AddPolicy("ProductosEliminar", policy => policy.RequireClaim("permission", "productos.eliminar"));
@@ -212,8 +218,7 @@ app.MapEventosEndpoints();
 app.MapProductosEndpoints();
 app.MapCategoriasEndpoints();
 app.MapReservasEndpoints();
-
-
+app.MapClientesEndpoints();
 app.MapReportesEndpoints();
 
 // Health Check

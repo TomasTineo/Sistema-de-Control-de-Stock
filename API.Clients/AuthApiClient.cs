@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DTOs;
+using DTOs.Auth;
 using System.Text.Json;
 
 namespace API.Clients

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using API.Clients;
-using DTOs;
+using DTOs.Productos;
 
 namespace Escritorio
 {
@@ -186,7 +186,7 @@ namespace Escritorio
 
             try
             {
-                var updateRequest = new UpdateProductoRequest
+                var updateRequest = new ProductoDTO
                 {
                     Id = id,
                     Nombre = txt_Name.Text,
