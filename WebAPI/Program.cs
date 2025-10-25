@@ -23,14 +23,17 @@ builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IEventoRepository, EventoRepository>();
 // Reportes
 builder.Services.AddScoped<IReportesRepository, ReporteRepository>();
-builder.Services.AddScoped<IReportesService, ReporteService>();
+
 
 // Dependency Injection - Application Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>(); 
-builder.Services.AddScoped<IEventoService, EventoService>();      
+builder.Services.AddScoped<IEventoService, EventoService>();
+
+// Reportes
+builder.Services.AddScoped<IReportesService, ReporteService>();
 
 
 
