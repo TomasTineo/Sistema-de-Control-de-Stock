@@ -59,6 +59,12 @@ namespace Domain.Model
         public DateTime FechaReserva { get; private set; }
         public string Estado { get; private set; }
 
+        // Constructor privado para Entity Framework
+        private Reserva() 
+        {
+            Estado = "Pendiente";
+        }
+
         // Constructor para nuevas reservas (sin ID, lo generará la BD)
         public Reserva(int clienteId, int eventoId, DateTime fechaReserva, string estado = "Pendiente")
         {
@@ -67,18 +73,6 @@ namespace Domain.Model
             SetEventoId(eventoId);
             SetFechaReserva(fechaReserva);
             SetEstado(estado);
-        }
-
-        // Constructor para cargar desde BD (con ID ya asignado)
-        public Reserva(int id, int clienteId, int eventoId, DateTime fechaReserva, string estado, 
-                      List<ReservaProducto>? productos = null)
-        {
-            Productos = productos ?? new List<ReservaProducto>();
-            SetId(id);
-            SetClienteId(clienteId);
-            SetEventoId(eventoId);
-            SetFechaReserva(fechaReserva);
-            SetEstado(estado ?? throw new ArgumentNullException(nameof(estado), "El estado no puede ser nulo."));
         }
 
         public void SetId(int id)
@@ -106,10 +100,12 @@ namespace Domain.Model
         {
             if (fechaReserva == default(DateTime))
                 throw new ArgumentException("La fecha de reserva no puede estar vacía.", nameof(fechaReserva));
-            
+
+            /*
             if (fechaReserva < DateTime.Now.Date)
-                throw new ArgumentException("La fecha de reserva no puede ser en el pasado.", nameof(fechaReserva));
-            
+            throw new ArgumentException("La fecha de reserva no puede ser en el pasado.", nameof(fechaReserva));
+            */
+            // Permitir fechas pasadas para edición de reservas existentes
             FechaReserva = fechaReserva;
         }
 
@@ -171,6 +167,11 @@ namespace Domain.Model
             {
                 throw new ArgumentException($"No existe un producto con ID {productoId} en esta reserva.");
             }
+        }
+
+        public void LimpiarProductos()
+        {
+            Productos.Clear();
         }
 
         // Propiedades calculadas
