@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using API.Clients;
-using DTOs;
+using DTOs.Usuarios;
 
 namespace Escritorio
 {

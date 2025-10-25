@@ -1,4 +1,5 @@
-using DTOs;
+using DTOs.Usuarios;
+using DTOs.Auth;
 using API.Clients;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

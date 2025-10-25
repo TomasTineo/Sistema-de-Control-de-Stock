@@ -1,4 +1,4 @@
-using DTOs;
+using DTOs.Eventos;
 using System.Text;
 using System.Text.Json;
 
@@ -57,7 +57,7 @@ namespace API.Clients
             return JsonSerializer.Deserialize<EventoDTO>(responseContent, _jsonOptions)!;
         }
 
-        public async Task<bool> UpdateAsync(UpdateEventoRequest request)
+        public async Task<bool> UpdateAsync(EventoDTO request)
         {
             await EnsureAuthenticatedAsync();
             

@@ -1,4 +1,4 @@
-using DTOs;
+using DTOs.Categorias;
 using System.Text;
 using System.Text.Json;
 
@@ -57,7 +57,7 @@ namespace API.Clients
             return JsonSerializer.Deserialize<CategoriaDTO>(responseContent, _jsonOptions)!;
         }
 
-        public async Task<bool> UpdateAsync(UpdateCategoriaRequest request)
+        public async Task<bool> UpdateAsync(CategoriaDTO request)
         {
             await EnsureAuthenticatedAsync();
             

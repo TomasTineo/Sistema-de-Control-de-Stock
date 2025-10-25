@@ -1,4 +1,5 @@
 using DTOs;
+using DTOs.Usuarios;
 using System.Text;
 using System.Text.Json;
 

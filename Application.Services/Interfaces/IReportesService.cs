@@ -1,9 +1,8 @@
-﻿using DTOs.Reportes;
+using DTOs.Reportes;
 
-namespace Data.Repositories
+namespace Application.Services.Interfaces
 {
-    // Contrato para los reportes que usan consultas específicas (ADO.NET)
-    public interface IReportesRepository
+    public interface IReportesService
     {
         Task<IEnumerable<ProductoStockDTO>> GetProductosBajoStockAsync(int stockMinimo);
         Task<IEnumerable<ReservasPorMesDTO>> GetReservasPorMesAsync(int anio);

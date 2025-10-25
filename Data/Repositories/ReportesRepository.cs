@@ -1,4 +1,4 @@
-﻿using DTOs;
+﻿using DTOs.Reportes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Data.SqlClient; // Necesario para ADO.NET
 using System.Globalization;
@@ -37,7 +37,7 @@ namespace Data.Repositories.Implementations
                         {
                             productos.Add(new ProductoStockDTO
                             {
-                                NombreProducto = reader["Nombre"].ToString(),
+                                NombreProducto = reader["Nombre"].ToString() ?? string.Empty,
                                 StockActual = Convert.ToInt32(reader["Stock"])
                             });
                         }
