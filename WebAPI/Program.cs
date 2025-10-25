@@ -20,13 +20,17 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>(); 
 builder.Services.AddScoped<IEventoRepository, EventoRepository>();
+builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 
 // Dependency Injection - Application Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>(); 
-builder.Services.AddScoped<IEventoService, EventoService>();      
+builder.Services.AddScoped<IEventoService, EventoService>();
+builder.Services.AddScoped<IReservaService, ReservaService>();
+
 
 // CORS
 builder.Services.AddCors(options =>
@@ -206,6 +210,8 @@ app.MapUsuariosEndpoints();
 app.MapEventosEndpoints();
 app.MapProductosEndpoints();
 app.MapCategoriasEndpoints();
+app.MapReservasEndpoints();
+
 
 // Health Check
 app.MapHealthChecks("/api/health");
