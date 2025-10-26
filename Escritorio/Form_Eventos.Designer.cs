@@ -1,6 +1,6 @@
 ﻿namespace Escritorio
 {
-    partial class Form_Categorias
+    partial class Form_Eventos
 
     {
         /// <summary>
@@ -31,23 +31,27 @@
         {
             components = new System.ComponentModel.Container();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            categoriasInMemoryBindingSource = new BindingSource(components);
+            eventosInMemoryBindingSource = new BindingSource(components);
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             btn_Borrar = new Button();
             txt_Name = new TextBox();
-            GrdVw_Categoria = new DataGridView();
-            Categoria_ID = new DataGridViewTextBoxColumn();
-            Categoria_Name = new DataGridViewTextBoxColumn();
+            GrdVw_Evento = new DataGridView();
             btn_agregar = new Button();
             btn_Editar = new Button();
             txt_ID = new TextBox();
-            ((System.ComponentModel.ISupportInitialize)categoriasInMemoryBindingSource).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)GrdVw_Categoria).BeginInit();
+
+            Evento_ID = new DataGridViewTextBoxColumn();
+            Evento_Name = new DataGridViewTextBoxColumn();
+            Evento_Fecha = new DataGridViewTextBoxColumn();
+
+
+            ((System.ComponentModel.ISupportInitialize)eventosInMemoryBindingSource).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)GrdVw_Evento).BeginInit();
             SuspendLayout();
             // 
-            // categoriasInMemoryBindingSource
+            // eventosInMemoryBindingSource
             // 
-            categoriasInMemoryBindingSource.CurrentChanged += productsInMemoryBindingSource_CurrentChanged;
+            eventosInMemoryBindingSource.CurrentChanged += eventosInMemoryBindingSource_CurrentChanged;
             // 
             // btn_Borrar
             // 
@@ -67,37 +71,50 @@
             txt_Name.Size = new Size(169, 23);
             txt_Name.TabIndex = 9;
             // 
-            // GrdVw_Categoria
+            // GrdVw_Evento
             // 
-            GrdVw_Categoria.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            GrdVw_Categoria.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            GrdVw_Categoria.Columns.AddRange(new DataGridViewColumn[] { Categoria_ID, Categoria_Name });
-            GrdVw_Categoria.Dock = DockStyle.Top;
-            GrdVw_Categoria.Location = new Point(0, 0);
-            GrdVw_Categoria.Name = "GrdVw_Categoria";
-            GrdVw_Categoria.Size = new Size(922, 241);
-            GrdVw_Categoria.TabIndex = 0;
-            GrdVw_Categoria.CellContentClick += dataGridView1_CellContentClick;
-            GrdVw_Categoria.CellDoubleClick += GrdVw_Categoria_CellDoubleClick;
+            GrdVw_Evento.AllowUserToOrderColumns = true;
+            GrdVw_Evento.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            GrdVw_Evento.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            GrdVw_Evento.Columns.AddRange(new DataGridViewColumn[] { Evento_ID, Evento_Name, Evento_Fecha });
+            GrdVw_Evento.Location = new Point(0, 0);
+            GrdVw_Evento.Name = "GrdVw_Evento";
+            GrdVw_Evento.Size = new Size(922, 241);
+            GrdVw_Evento.TabIndex = 0;
+            GrdVw_Evento.CellContentClick += dataGridView1_CellContentClick;
+            GrdVw_Evento.CellDoubleClick += GrdVw_Evento_CellDoubleClick;
             // 
-            // Categoria_ID
+            // Evento_ID
             // 
-            Categoria_ID.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            Evento_ID.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             dataGridViewCellStyle1.Format = "N0";
             dataGridViewCellStyle1.NullValue = "0";
-            Categoria_ID.DefaultCellStyle = dataGridViewCellStyle1;
-            Categoria_ID.HeaderText = "ID";
-            Categoria_ID.Name = "Categoria_ID";
-            Categoria_ID.ReadOnly = true;
-            Categoria_ID.Resizable = DataGridViewTriState.True;
+            Evento_ID.DefaultCellStyle = dataGridViewCellStyle1;
+            Evento_ID.Frozen = true;
+            Evento_ID.HeaderText = "ID";
+            Evento_ID.Name = "Evento_ID";
+            Evento_ID.Resizable = DataGridViewTriState.True;
             // 
-            // Categoria_Name
+            // Evento_Name
             // 
-            Categoria_Name.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            Categoria_Name.FillWeight = 61.4562263F;
-            Categoria_Name.HeaderText = "Nombre";
-            Categoria_Name.Name = "Categoria_Name";
-            Categoria_Name.ReadOnly = true;
+            Evento_Name.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            Evento_Name.FillWeight = 61.4562263F;
+            Evento_Name.Frozen = true;
+            Evento_Name.HeaderText = "Nombre";
+            Evento_Name.Name = "Evento_Name";
+            Evento_Name.Width = 779;
+
+            // 
+            // Evento_Fecha
+            // 
+            Evento_Fecha.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            Evento_Fecha.FillWeight = 61.4562263F;
+            Evento_Fecha.Frozen = true;
+            Evento_Fecha.HeaderText = "Fecha";
+            Evento_Fecha.Name = "Evento_Fecha";
+            Evento_Fecha.Width = 779;
+
+
             // 
             // btn_agregar
             // 
@@ -129,7 +146,7 @@
             txt_ID.Size = new Size(169, 23);
             txt_ID.TabIndex = 9;
             // 
-            // Form_Categorias
+            // Form_Eventos
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -139,27 +156,32 @@
             Controls.Add(btn_Borrar);
             Controls.Add(txt_ID);
             Controls.Add(txt_Name);
-            Controls.Add(GrdVw_Categoria);
-            Name = "Form_Categorias";
-            Text = "Categorias";
-            Load += FormProducts_Load;
-            ((System.ComponentModel.ISupportInitialize)categoriasInMemoryBindingSource).EndInit();
-            ((System.ComponentModel.ISupportInitialize)GrdVw_Categoria).EndInit();
+           
+            Controls.Add(GrdVw_Evento);
+            Name = "Form_Eventos";
+            Text = "Eventos";
+            Load += FormEventos_load;
+            ((System.ComponentModel.ISupportInitialize)eventosInMemoryBindingSource).EndInit();
+            ((System.ComponentModel.ISupportInitialize)GrdVw_Evento).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private BindingSource categoriasInMemoryBindingSource;
+        private BindingSource eventosInMemoryBindingSource;
         private Button btn_Borrar;
         private TextBox txt_Name;
-        private DataGridView GrdVw_Categoria;
-        private DataGridViewTextBoxColumn Categoria_ID;
-        private DataGridViewTextBoxColumn Categoria_Name;
+
+        private DataGridView GrdVw_Evento;
      
         private Button btn_agregar;
         private Button btn_Editar;
         private TextBox txt_ID;
+      
+
+        private DataGridViewTextBoxColumn Evento_ID;
+        private DataGridViewTextBoxColumn Evento_Name;
+        private DataGridViewTextBoxColumn Evento_Fecha;
     }
 }

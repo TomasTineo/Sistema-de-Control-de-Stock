@@ -22,8 +22,8 @@ namespace Escritorio
         }
         private void buttonCategorias_Click(object sender, EventArgs e)
         {
-            var formCategorias = Program.ServiceProvider.GetRequiredService<Form_Categorias>();
-            formCategorias.Show();
+            var formEventos = Program.ServiceProvider.GetRequiredService<Form_Eventos>();
+            formEventos.Show();
         }
         
 
