@@ -27,7 +27,7 @@ namespace API.Clients
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync("api/auth/login", content);
+            var response = await httpClient.PostAsync("/auth/login", content);
             
             if (response.IsSuccessStatusCode)
             {

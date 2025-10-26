@@ -14,6 +14,7 @@ namespace Data
         public DbSet<ReservaProducto> ReservaProductos { get; set; } = null!;
         public DbSet<Permiso> Permisos { get; set; } = null!;
         public DbSet<GrupoPermiso> GruposPermisos { get; set; } = null!;
+        
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
             this.Database.EnsureCreated();
@@ -50,28 +51,9 @@ namespace Data
                     .HasForeignKey(e => e.GrupoPermisoId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                // Usuarios iniciales (usar constructor sin ID)
-                var adminUsuario = new Domain.Model.Usuario("admin", "admin@sics.com", "admin123");
-                var operadorUsuario = new Domain.Model.Usuario("operador", "operador@sics.com", "operador123");
-
-                entity.HasData(
-                    new
-                    {
-                        Id = 1, // EF asignará este ID en la BD
-                        Username = adminUsuario.Username,
-                        Email = adminUsuario.Email,
-                        PasswordHash = adminUsuario.PasswordHash,
-                        Salt = adminUsuario.Salt,
-                    },
-                    new
-                    {
-                        Id = 2, // EF asignará este ID en la BD
-                        Username = operadorUsuario.Username,
-                        Email = operadorUsuario.Email,
-                        PasswordHash = operadorUsuario.PasswordHash,
-                        Salt = operadorUsuario.Salt,
-                    }
-                );
+                
+                // Los usuarios  se crean dinámicamente en SeedInitialData()
+                // para garantizar que el hash de contraseña sea correcto
             });
 
             // Configuración de Cliente
@@ -256,7 +238,7 @@ namespace Data
                 new { Id = 27, Nombre = "actualizar", Descripcion = "Actualizar productos de reserva", Categoria = "reservaproducto", Activo = true },
                 new { Id = 28, Nombre = "eliminar", Descripcion = "Eliminar productos de reserva", Categoria = "reservaproducto", Activo = true }
 
-                );
+            );
 
             // seed de grupos de permisos
             var fechaCreacion = DateTime.Now;
@@ -268,73 +250,149 @@ namespace Data
 
         }
 
+        /// <summary>
+        /// ? Método refactorizado para crear datos iniciales dinámicamente
+        /// </summary>
         private void SeedInitialData()
         {
             try
             {
-                // Verificar si ya existen las relaciones
-                if (!Usuarios.Any(u => u.GrupoPermisoId != null) &&
-                    Usuarios.Any() &&
-                    GruposPermisos.Any() &&
-                    Permisos.Any())
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] Iniciando SeedInitialData");
+
+                // Verificar si ya existen usuarios
+                if (Usuarios.Any())
                 {
-                    // Cargar datos necesarios
-                    var adminUser = Usuarios.Include(u => u.Grupo).FirstOrDefault(u => u.Username == "admin");
-                    var operadorUser = Usuarios.Include(u => u.Grupo).FirstOrDefault(u => u.Username == "operador");
-                    var grupoAdmin = GruposPermisos.Include(g => g.Permisos).FirstOrDefault(g => g.Nombre == "Administrador");
-                    var grupoOperador = GruposPermisos.Include(g => g.Permisos).FirstOrDefault(g => g.Nombre == "Operador");
-                    var todosLosPermisos = Permisos.ToList();
-
-                    if (grupoAdmin != null && grupoOperador != null && todosLosPermisos.Any())
+                    System.Diagnostics.Debug.WriteLine($"[AppDbContext] Ya existen {Usuarios.Count()} usuarios en la BD");
+                    
+                    // Si ya hay usuarios, solo actualizar relaciones si es necesario
+                    if (!Usuarios.Any(u => u.GrupoPermisoId != null) &&
+                        GruposPermisos.Any() &&
+                        Permisos.Any())
                     {
-                        // Asignar TODOS los permisos al grupo Administrador
-                        foreach (var permiso in todosLosPermisos)
-                        {
-                            if (!grupoAdmin.Permisos.Contains(permiso))
-                            {
-                                grupoAdmin.AgregarPermiso(permiso);
-                            }
-                        }
+                        System.Diagnostics.Debug.WriteLine("[AppDbContext] Asignando relaciones a usuarios existentes");
+                        AsignarRelacionesIniciales();
+                    }
+                    return;
+                }
 
-                        // Asignar permisos específicos al grupo Operador
-                        var permisosOperador = todosLosPermisos.Where(p =>
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] No hay usuarios, procediendo a crear usuarios iniciales");
+
+                // Si no hay usuarios, crearlos
+                if (!Usuarios.Any() && GruposPermisos.Any() && Permisos.Any())
+                {
+                    CrearUsuariosIniciales();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log del error pero no detener la aplicación
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Error en SeedInitialData: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Stack trace: {ex.StackTrace}");
+            }
+        }
+
+        /// <summary>
+        /// ? Crea los usuarios iniciales admin y operador con contraseñas hasheadas 
+        /// </summary>
+        private void CrearUsuariosIniciales()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] Creando usuarios iniciales");
+
+                // ? Crear usuario admin con hash correcto
+                var adminUser = new Usuario("admin", "admin@sics.com", "admin123");
+                Usuarios.Add(adminUser);
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] Usuario 'admin' creado");
+                
+                // ? Crear usuario operador con hash correcto
+                var operadorUser = new Usuario("operador", "operador@sics.com", "operador123");
+                Usuarios.Add(operadorUser);
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] Usuario 'operador' creado");
+
+                SaveChanges();
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] Usuarios guardados en BD");
+
+                // Asignar grupos después de crear los usuarios
+                AsignarRelacionesIniciales();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Error creando usuarios iniciales: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// ? Asigna grupos y permisos a los usuarios existentes
+        /// </summary>
+        private void AsignarRelacionesIniciales()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("[AppDbContext] Asignando relaciones iniciales");
+
+                // Cargar datos necesarios
+                var adminUser = Usuarios.Include(u => u.Grupo).FirstOrDefault(u => u.Username == "admin");
+                var operadorUser = Usuarios.Include(u => u.Grupo).FirstOrDefault(u => u.Username == "operador");
+                var grupoAdmin = GruposPermisos.Include(g => g.Permisos).FirstOrDefault(g => g.Nombre == "Administrador");
+                var grupoOperador = GruposPermisos.Include(g => g.Permisos).FirstOrDefault(g => g.Nombre == "Operador");
+                var todosLosPermisos = Permisos.ToList();
+
+                if (grupoAdmin == null || grupoOperador == null || !todosLosPermisos.Any())
+                {
+                    System.Diagnostics.Debug.WriteLine("[AppDbContext] No se encontraron grupos o permisos necesarios");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Grupos encontrados: {grupoAdmin.Nombre}, {grupoOperador.Nombre}");
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Total de permisos: {todosLosPermisos.Count}");
+
+                // Asignar TODOS los permisos al grupo Administrador
+                foreach (var permiso in todosLosPermisos)
+                {
+                    if (!grupoAdmin.Permisos.Contains(permiso))
+                    {
+                        grupoAdmin.AgregarPermiso(permiso);
+                    }
+                }
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Permisos asignados al grupo Administrador: {grupoAdmin.Permisos.Count}");
+
+                // Asignar permisos específicos al grupo Operador
+                var permisosOperador = todosLosPermisos.Where(p =>
                             (p.Categoria == "reservas") || // Todos los permisos de reservas, es quien las lleva a cabo.
                             (p.Categoria == "reservaproducto") || // Todos los permisos de productos en reservas
                             (p.Categoria == "clientes" && p.Nombre == "leer") || // Solo leer clientes
                             (p.Categoria == "productos" && p.Nombre == "leer") || // Solo leer productos
                             (p.Categoria == "productos" && p.Nombre == "actualizar") || // Actualizar stock de productos
                             (p.Categoria == "eventos") // Para asignarle eventos a las reservas, pero debería poder crearlos en el momento si no existe el requerido.
-                        ).ToList();
+                ).ToList();
 
-                        foreach (var permiso in permisosOperador)
-                        {
-                            if (!grupoOperador.Permisos.Contains(permiso))
-                            {
-                                grupoOperador.AgregarPermiso(permiso);
-                            }
-                        }
-
-                        // Asignar usuario admin al grupo Administrador (relación simple)
-                        if (adminUser != null)
-                        {
-                            adminUser.SetGrupo(grupoAdmin);
-                        }
-
-                        // Asignar usuario operador al grupo operador (relación simple)
-                        if (operadorUser != null)
-                        {
-                            operadorUser.SetGrupo(grupoOperador);
-                        }
-
-                        SaveChanges();
+                foreach (var permiso in permisosOperador)
+                {
+                    if (!grupoOperador.Permisos.Contains(permiso))
+                    {
+                        grupoOperador.AgregarPermiso(permiso);
                     }
                 }
+
+                // Asignar usuario admin al grupo Administrador
+                if (adminUser != null && adminUser.GrupoPermisoId == null)
+                {
+                    adminUser.SetGrupo(grupoAdmin);
+                }
+
+                // Asignar usuario operador al grupo operador
+                if (operadorUser != null && operadorUser.GrupoPermisoId == null)
+                {
+                    operadorUser.SetGrupo(grupoOperador);
+                }
+
+                SaveChanges();
             }
-            catch
+            catch (Exception ex)
             {
-                // se ignoran errores en la seed
+                System.Diagnostics.Debug.WriteLine($"[AppDbContext] Error asignando relaciones iniciales: {ex.Message}");
             }
         }
-
     }
-} 
+}

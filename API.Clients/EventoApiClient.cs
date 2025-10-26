@@ -1,6 +1,7 @@
 using DTOs.Eventos;
 using System.Text;
 using System.Text.Json;
+using System.Net.Http.Headers;
 
 namespace API.Clients
 {
@@ -18,8 +19,23 @@ namespace API.Clients
             };
         }
 
+        private async Task AddAuthTokenAsync()
+        {
+            var authService = AuthServiceProvider.Instance;
+            await authService.CheckTokenExpirationAsync();
+            
+            var token = await authService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = 
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
+        }
+
         public async Task<EventoDTO?> GetAsync(int id)
         {
+            await AddAuthTokenAsync();
+            
             var response = await _httpClient.GetAsync($"api/eventos/{id}");
             await HandleUnauthorizedResponseAsync(response);
             
@@ -34,6 +50,8 @@ namespace API.Clients
 
         public async Task<IEnumerable<EventoDTO>> GetAllAsync()
         {
+            await AddAuthTokenAsync();
+            
             var response = await _httpClient.GetAsync("api/eventos");
             await HandleUnauthorizedResponseAsync(response);
             response.EnsureSuccessStatusCode();
@@ -45,6 +63,7 @@ namespace API.Clients
         public async Task<EventoDTO> CreateAsync(CreateEventoRequest request)
         {
             await EnsureAuthenticatedAsync();
+            await AddAuthTokenAsync();
             
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -60,6 +79,7 @@ namespace API.Clients
         public async Task<bool> UpdateAsync(EventoDTO request)
         {
             await EnsureAuthenticatedAsync();
+            await AddAuthTokenAsync();
             
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -72,6 +92,7 @@ namespace API.Clients
         public async Task<bool> DeleteAsync(int id)
         {
             await EnsureAuthenticatedAsync();
+            await AddAuthTokenAsync();
             
             var response = await _httpClient.DeleteAsync($"api/eventos/{id}");
             await HandleUnauthorizedResponseAsync(response);
@@ -80,6 +101,8 @@ namespace API.Clients
 
         public async Task<IEnumerable<EventoDTO>> GetByFechaRangeAsync(DateTime fechaInicio, DateTime fechaFin)
         {
+            await AddAuthTokenAsync();
+            
             var response = await _httpClient.GetAsync($"api/eventos/rango?fechaInicio={fechaInicio:yyyy-MM-dd}&fechaFin={fechaFin:yyyy-MM-dd}");
             await HandleUnauthorizedResponseAsync(response);
             
