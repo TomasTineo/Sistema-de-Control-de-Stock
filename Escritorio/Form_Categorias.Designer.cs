@@ -30,39 +30,25 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-            productsInMemoryBindingSource = new BindingSource(components);
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            categoriasInMemoryBindingSource = new BindingSource(components);
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            txt_Description = new TextBox();
             btn_Borrar = new Button();
             txt_Name = new TextBox();
-            txt_Price = new TextBox();
             GrdVw_Categoria = new DataGridView();
-            Product_ID = new DataGridViewTextBoxColumn();
-            Product_Name = new DataGridViewTextBoxColumn();
-            Product_Description = new DataGridViewTextBoxColumn();
-            Product_Price = new DataGridViewTextBoxColumn();
-            Product_Stock = new DataGridViewTextBoxColumn();
-            txt_Stock = new TextBox();
+            Categoria_ID = new DataGridViewTextBoxColumn();
+            Categoria_Name = new DataGridViewTextBoxColumn();
             btn_agregar = new Button();
-            txt_ID = new TextBox();
             btn_Editar = new Button();
-            ((System.ComponentModel.ISupportInitialize)productsInMemoryBindingSource).BeginInit();
+            txt_ID = new TextBox();
+            ((System.ComponentModel.ISupportInitialize)categoriasInMemoryBindingSource).BeginInit();
             ((System.ComponentModel.ISupportInitialize)GrdVw_Categoria).BeginInit();
             SuspendLayout();
             // 
-            // productsInMemoryBindingSource
+            // categoriasInMemoryBindingSource
             // 
-            productsInMemoryBindingSource.DataSource = typeof(Data.ProductsInMemory);
-            productsInMemoryBindingSource.CurrentChanged += productsInMemoryBindingSource_CurrentChanged;
-            // 
-            // txt_Description
-            // 
-            txt_Description.Location = new Point(366, 331);
-            txt_Description.Name = "txt_Description";
-            txt_Description.Size = new Size(187, 23);
-            txt_Description.TabIndex = 4;
+            categoriasInMemoryBindingSource.DataSource = typeof(Data.ProductsInMemory);
+            categoriasInMemoryBindingSource.CurrentChanged += productsInMemoryBindingSource_CurrentChanged;
             // 
             // btn_Borrar
             // 
@@ -77,84 +63,42 @@
             // 
             // txt_Name
             // 
-            txt_Name.Location = new Point(191, 331);
+            txt_Name.Location = new Point(187, 346);
             txt_Name.Name = "txt_Name";
             txt_Name.Size = new Size(169, 23);
             txt_Name.TabIndex = 9;
-            txt_Name.TextChanged += txt_Name_TextChanged;
-            // 
-            // txt_Price
-            // 
-            txt_Price.Location = new Point(559, 331);
-            txt_Price.Name = "txt_Price";
-            txt_Price.Size = new Size(169, 23);
-            txt_Price.TabIndex = 10;
             // 
             // GrdVw_Categoria
             // 
             GrdVw_Categoria.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             GrdVw_Categoria.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            GrdVw_Categoria.Columns.AddRange(new DataGridViewColumn[] { Product_ID, Product_Name, Product_Description, Product_Price, Product_Stock });
+            GrdVw_Categoria.Columns.AddRange(new DataGridViewColumn[] { Categoria_ID, Categoria_Name });
             GrdVw_Categoria.Dock = DockStyle.Top;
             GrdVw_Categoria.Location = new Point(0, 0);
             GrdVw_Categoria.Name = "GrdVw_Categoria";
             GrdVw_Categoria.Size = new Size(922, 241);
             GrdVw_Categoria.TabIndex = 0;
             GrdVw_Categoria.CellContentClick += dataGridView1_CellContentClick;
-            GrdVw_Categoria.CellDoubleClick += GrdVw_Product_CellDoubleClick;
+            GrdVw_Categoria.CellDoubleClick += GrdVw_Categoria_CellDoubleClick;
             // 
-            // Product_ID
+            // Categoria_ID
             // 
-            Product_ID.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle3.Format = "N0";
-            dataGridViewCellStyle3.NullValue = "0";
-            Product_ID.DefaultCellStyle = dataGridViewCellStyle3;
-            Product_ID.HeaderText = "ID";
-            Product_ID.Name = "Product_ID";
-            Product_ID.ReadOnly = true;
-            Product_ID.Resizable = DataGridViewTriState.True;
+            Categoria_ID.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dataGridViewCellStyle1.Format = "N0";
+            dataGridViewCellStyle1.NullValue = "0";
+            Categoria_ID.DefaultCellStyle = dataGridViewCellStyle1;
+            Categoria_ID.HeaderText = "ID";
+            Categoria_ID.Name = "Categoria_ID";
+            Categoria_ID.ReadOnly = true;
+            Categoria_ID.Resizable = DataGridViewTriState.True;
             // 
-            // Product_Name
+            // Categoria_Name
             // 
-            Product_Name.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            Product_Name.FillWeight = 61.4562263F;
-            Product_Name.HeaderText = "Nombre";
-            Product_Name.Name = "Product_Name";
-            Product_Name.ReadOnly = true;
-            // 
-            // Product_Description
-            // 
-            Product_Description.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            Product_Description.FillWeight = 61.8242836F;
-            Product_Description.HeaderText = "Descripción";
-            Product_Description.Name = "Product_Description";
-            Product_Description.ReadOnly = true;
-            // 
-            // Product_Price
-            // 
-            Product_Price.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            Product_Price.FillWeight = 61.4562645F;
-            Product_Price.HeaderText = "Precio";
-            Product_Price.Name = "Product_Price";
-            Product_Price.ReadOnly = true;
-            // 
-            // Product_Stock
-            // 
-            Product_Stock.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle4.Format = "N0";
-            dataGridViewCellStyle4.NullValue = "0";
-            Product_Stock.DefaultCellStyle = dataGridViewCellStyle4;
-            Product_Stock.FillWeight = 61.45614F;
-            Product_Stock.HeaderText = "Stock";
-            Product_Stock.Name = "Product_Stock";
-            Product_Stock.ReadOnly = true;
-            // 
-            // txt_Stock
-            // 
-            txt_Stock.Location = new Point(738, 331);
-            txt_Stock.Name = "txt_Stock";
-            txt_Stock.Size = new Size(169, 23);
-            txt_Stock.TabIndex = 6;
+            Categoria_Name.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            Categoria_Name.FillWeight = 61.4562263F;
+            Categoria_Name.HeaderText = "Nombre";
+            Categoria_Name.Name = "Categoria_Name";
+            Categoria_Name.ReadOnly = true;
             // 
             // btn_agregar
             // 
@@ -168,13 +112,6 @@
             btn_agregar.UseVisualStyleBackColor = false;
             btn_agregar.Click += button1_Click;
             // 
-            // txt_ID
-            // 
-            txt_ID.Location = new Point(16, 331);
-            txt_ID.Name = "txt_ID";
-            txt_ID.Size = new Size(169, 23);
-            txt_ID.TabIndex = 11;
-            // 
             // btn_Editar
             // 
             btn_Editar.Dock = DockStyle.Bottom;
@@ -186,24 +123,28 @@
             btn_Editar.UseVisualStyleBackColor = true;
             btn_Editar.Click += btnEditar_Click;
             // 
+            // txt_ID
+            // 
+            txt_ID.Location = new Point(12, 346);
+            txt_ID.Name = "txt_ID";
+            txt_ID.Size = new Size(169, 23);
+            txt_ID.TabIndex = 9;
+            // 
             // Form_Categorias
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(922, 486);
             Controls.Add(btn_Editar);
-            Controls.Add(txt_ID);
-            Controls.Add(txt_Stock);
             Controls.Add(btn_agregar);
             Controls.Add(btn_Borrar);
-            Controls.Add(txt_Description);
+            Controls.Add(txt_ID);
             Controls.Add(txt_Name);
-            Controls.Add(txt_Price);
             Controls.Add(GrdVw_Categoria);
             Name = "Form_Categorias";
             Text = "Productos";
             Load += FormProducts_Load;
-            ((System.ComponentModel.ISupportInitialize)productsInMemoryBindingSource).EndInit();
+            ((System.ComponentModel.ISupportInitialize)categoriasInMemoryBindingSource).EndInit();
             ((System.ComponentModel.ISupportInitialize)GrdVw_Categoria).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -211,20 +152,15 @@
 
         #endregion
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private TextBox txt_Description;
-        private BindingSource productsInMemoryBindingSource;
+        private BindingSource categoriasInMemoryBindingSource;
         private Button btn_Borrar;
         private TextBox txt_Name;
-        private TextBox txt_Price;
         private DataGridView GrdVw_Categoria;
-        private DataGridViewTextBoxColumn Product_ID;
-        private DataGridViewTextBoxColumn Product_Name;
-        private DataGridViewTextBoxColumn Product_Description;
-        private DataGridViewTextBoxColumn Product_Price;
-        private DataGridViewTextBoxColumn Product_Stock;
-        private TextBox txt_Stock;
+        private DataGridViewTextBoxColumn Categoria_ID;
+        private DataGridViewTextBoxColumn Categoria_Name;
+     
         private Button btn_agregar;
-        private TextBox txt_ID;
         private Button btn_Editar;
+        private TextBox txt_ID;
     }
 }

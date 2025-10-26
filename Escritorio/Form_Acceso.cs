@@ -19,13 +19,11 @@ namespace Escritorio
 
         private void btn_login_click(object sender, EventArgs e)
         {
-            /*
+            
             var form_login = Program.ServiceProvider.GetRequiredService<Form_Login>();
             form_login.Show();
-            */
+            
 
-            var form_Main = Program.ServiceProvider.GetRequiredService<Form_Main>();
-            form_Main.Show();
         }               
 
         private void Form_Acceso_Load(object sender, EventArgs e)

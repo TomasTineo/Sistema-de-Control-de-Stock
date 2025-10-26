@@ -52,8 +52,8 @@ namespace Escritorio
                                   "Login exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                     // Crear y mostrar el formulario de productos
-                    var formProducts = Program.ServiceProvider.GetRequiredService<FormProducts>();
-                    formProducts.Show();
+                    var formMain = Program.ServiceProvider.GetRequiredService<Form_Main>();
+                    formMain.Show();
                     
                     // Ocultar el formulario de login
                     this.Hide();

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using API.Clients;
+using Domain.Model;
+using DTOs.Categorias;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Microsoft.Extensions.DependencyInjection;
-using API.Clients;
-using DTOs.Categorias;
 
 namespace Escritorio
 {
@@ -25,9 +26,7 @@ namespace Escritorio
             // TextBox placeholders
             txt_ID.PlaceholderText = "Identificación";
             txt_Name.PlaceholderText = "Nombre";
-            txt_Description.PlaceholderText = "Descripción";
-            txt_Price.PlaceholderText = "Precio";
-            txt_Stock.PlaceholderText = "Stock actual";
+           
 
             // Configurar columnas del DataGridView
             ConfigurarDataGridView();
@@ -51,22 +50,6 @@ namespace Escritorio
             colName.DataPropertyName = "Nombre";
             GrdVw_Categoria.Columns.Add(colName);
 
-            var colDescription = new DataGridViewTextBoxColumn();
-            colDescription.HeaderText = "Descripción";
-            colDescription.DataPropertyName = "Descripcion";
-            GrdVw_Categoria.Columns.Add(colDescription);
-
-            var colPrice = new DataGridViewTextBoxColumn();
-            colPrice.HeaderText = "Precio por unidad";
-            colPrice.DataPropertyName = "Precio";
-            colPrice.DefaultCellStyle.Format = "C2"; // Formato de moneda
-            GrdVw_Categoria.Columns.Add(colPrice);
-
-            var colStock = new DataGridViewTextBoxColumn();
-            colStock.HeaderText = "Stock actual";
-            colStock.DataPropertyName = "Stock";
-            colStock.DefaultCellStyle.Format = "N0"; // Formato numérico sin decimales
-            GrdVw_Categoria.Columns.Add(colStock);
 
             GrdVw_Categoria.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
@@ -94,27 +77,10 @@ namespace Escritorio
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txt_Name.Text) ||
-                string.IsNullOrWhiteSpace(txt_Description.Text) || 
-                string.IsNullOrWhiteSpace(txt_Price.Text) ||
-                string.IsNullOrWhiteSpace(txt_Stock.Text))
+            if (string.IsNullOrWhiteSpace(txt_Name.Text))
             {
                 MessageBox.Show("Por favor, complete todos los campos (excepto ID).", 
                               "Campos requeridos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (!decimal.TryParse(txt_Price.Text, out decimal precio) || precio < 0)
-            {
-                MessageBox.Show("El precio debe ser un valor numérico positivo.", 
-                              "Precio inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (!int.TryParse(txt_Stock.Text, out int stock) || stock < 0)
-            {
-                MessageBox.Show("El stock debe ser un valor numérico positivo.", 
-                              "Stock inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -151,11 +117,8 @@ namespace Escritorio
 
         private void LimpiarCampos()
         {
-            txt_ID.Clear();
+
             txt_Name.Clear();
-            txt_Description.Clear();
-            txt_Price.Clear();
-            txt_Stock.Clear();
         }
 
         private void GrdVw_Categoria_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -165,9 +128,7 @@ namespace Escritorio
                 var categoria = (CategoriaDTO)GrdVw_Categoria.Rows[e.RowIndex].DataBoundItem;
                 txt_ID.Text = categoria.Id.ToString();
                 txt_Name.Text = categoria.Nombre;
-              //  txt_Description.Text = categoria.Descripcion;
-             //   txt_Price.Text = categoria.Precio.ToString();
-              //  txt_Stock.Text = categoria.Stock.ToString();
+
             }
         }
 
@@ -264,13 +225,13 @@ namespace Escritorio
             }
         }
 
-        // Eventos existentes que no necesitan cambios
+         //Eventos existentes que no necesitan cambios
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
         private void textBox1_TextChanged(object sender, EventArgs e) { }
         private void textBox1_TextChanged_1(object sender, EventArgs e) { }
         private void toolStripContainer1_ContentPanel_Load(object sender, EventArgs e) { }
         private void productsInMemoryBindingSource_CurrentChanged(object sender, EventArgs e) { }
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { } 
 
     }
 }

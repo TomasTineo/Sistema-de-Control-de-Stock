@@ -97,6 +97,7 @@ namespace API.Clients
             var response = await _httpClient.DeleteAsync($"api/categorias/{id}");
             await HandleUnauthorizedResponseAsync(response);
             return response.IsSuccessStatusCode;
+            
         }
 
         public async Task<bool> ExisteNombreAsync(string nombre)

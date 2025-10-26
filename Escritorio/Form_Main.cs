@@ -15,10 +15,19 @@ namespace Escritorio
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonProducts_Click(object sender, EventArgs e)
         {
-            var form_registro = Program.ServiceProvider.GetRequiredService<FormProducts>();
-            form_registro.Show();
+            var formProducts = Program.ServiceProvider.GetRequiredService<FormProducts>();
+            formProducts.Show();
         }
+        private void buttonCategorias_Click(object sender, EventArgs e)
+        {
+            var formCategorias = Program.ServiceProvider.GetRequiredService<Form_Categorias>();
+            formCategorias.Show();
+        }
+        
+
+
+
     }
 }

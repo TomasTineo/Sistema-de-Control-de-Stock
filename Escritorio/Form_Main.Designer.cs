@@ -42,7 +42,7 @@
             Productos_btn.TabIndex = 0;
             Productos_btn.Text = "Productos";
             Productos_btn.UseVisualStyleBackColor = true;
-            Productos_btn.Click += button1_Click;
+            Productos_btn.Click += buttonProducts_Click;
             // 
             // Eventos_btn
             // 
@@ -52,7 +52,7 @@
             Eventos_btn.TabIndex = 0;
             Eventos_btn.Text = "Eventos";
             Eventos_btn.UseVisualStyleBackColor = true;
-            Eventos_btn.Click += button1_Click;
+            Eventos_btn.Click += buttonCategorias_Click;
             // 
             // Reservas_btn
             // 
@@ -62,7 +62,7 @@
             Reservas_btn.TabIndex = 0;
             Reservas_btn.Text = "Reservas";
             Reservas_btn.UseVisualStyleBackColor = true;
-            Reservas_btn.Click += button1_Click;
+            Reservas_btn.Click += buttonProducts_Click;
             // 
             // Categorias_btn
             // 
@@ -72,7 +72,7 @@
             Categorias_btn.TabIndex = 0;
             Categorias_btn.Text = "Categorias";
             Categorias_btn.UseVisualStyleBackColor = true;
-            Categorias_btn.Click += button1_Click;
+            Categorias_btn.Click += buttonCategorias_Click;
             // 
             // Form_Main
             // 
