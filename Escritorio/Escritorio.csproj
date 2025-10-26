@@ -29,6 +29,7 @@
     <Compile Update="formBase.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Form_Categorias.cs" />
     <Compile Update="formRegister.cs">
       <SubType>Form</SubType>
     </Compile>
