@@ -38,16 +38,6 @@ namespace API.Clients
                     System.Diagnostics.Debug.WriteLine($"[DEBUG] URL desde variable de entorno: {envUrl}");
                     return envUrl;
                 }
-
-                // 2. Detectar si estamos en Android por el runtime
-                string runtimeInfo = System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] Runtime: {runtimeInfo}");
-
-                if (runtimeInfo.StartsWith("android"))
-                {
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Detectado Android - usando IP de emulador");
-                    return "http://10.0.2.2:5183/";
-                }
             }
             catch (Exception ex)
             {
@@ -55,7 +45,7 @@ namespace API.Clients
             }
 
             // URL por defecto para Windows/otras plataformas
-            string defaultUrl = "http://localhost:5183/";
+            string defaultUrl = "http://localhost:5239/";
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Usando URL por defecto: {defaultUrl}");
             return defaultUrl;
         }
