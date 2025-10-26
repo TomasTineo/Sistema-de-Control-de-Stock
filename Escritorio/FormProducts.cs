@@ -81,14 +81,35 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Sesión Expirada", 
+
+                Console.WriteLine("Error de auth");
+                MessageBox.Show(ex.Message, "No puede ingresar por falta de autorización.", 
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show($"No se puede conectar con el servidor:\n{ex.Message}",
+                              "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (TaskCanceledException)
+            {
+                MessageBox.Show("La petición ha excedido el tiempo de espera.",
+                              "Timeout", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", 
-                              "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine($"Tipo de excepción: {ex.GetType().Name}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+
+                MessageBox.Show(
+                    $"Error al cargar productos:\n\n" +
+                    $"Tipo: {ex.GetType().Name}\n" +
+                    $"Mensaje: {ex.Message}\n\n" +
+                    $"Ver consola para más detalles.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 

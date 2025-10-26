@@ -110,7 +110,7 @@
             btn_Refrescar.TabIndex = 2;
             btn_Refrescar.Text = "🔄 Refrescar";
             btn_Refrescar.UseVisualStyleBackColor = false;
-            btn_Refrescar.Click += btn_Refrescar_Click;
+            
             // 
             // GrdVw_Product
             // 
@@ -272,7 +272,7 @@
             btn_Limpiar.TabIndex = 10;
             btn_Limpiar.Text = "🗑️ Limpiar Campos";
             btn_Limpiar.UseVisualStyleBackColor = false;
-            btn_Limpiar.Click += btn_Limpiar_Click;
+            
             // 
             // btn_agregar
             // 
@@ -288,7 +288,7 @@
             btn_agregar.TabIndex = 7;
             btn_agregar.Text = "➕ Agregar Producto";
             btn_agregar.UseVisualStyleBackColor = false;
-            btn_agregar.Click += btn_agregar_Click;
+            
             // 
             // btn_Editar
             // 
@@ -304,7 +304,7 @@
             btn_Editar.TabIndex = 8;
             btn_Editar.Text = "✏️ Editar Producto";
             btn_Editar.UseVisualStyleBackColor = false;
-            btn_Editar.Click += btn_Editar_Click;
+            
             // 
             // btn_Borrar
             // 
@@ -320,7 +320,7 @@
             btn_Borrar.TabIndex = 9;
             btn_Borrar.Text = "❌ Eliminar Producto";
             btn_Borrar.UseVisualStyleBackColor = false;
-            btn_Borrar.Click += btn_Borrar_Click;
+            
             // 
             // FormProducts
             // 

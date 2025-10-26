@@ -151,7 +151,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UsuariosEliminar", policy => policy.RequireClaim("permission", "usuarios.eliminar"));
 
     // Políticas para Productos
-    options.AddPolicy(" ProductosLeer", policy => policy.RequireClaim("permission", "productos.leer"));
+    options.AddPolicy("ProductosLeer", policy => policy.RequireClaim("permission", "productos.leer"));
     options.AddPolicy("ProductosAgregar", policy => policy.RequireClaim("permission", "productos.agregar"));
     options.AddPolicy("ProductosActualizar", policy => policy.RequireClaim("permission", "productos.actualizar"));
     options.AddPolicy("ProductosEliminar", policy => policy.RequireClaim("permission", "productos.eliminar"));
