@@ -26,6 +26,7 @@ builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddScoped<IReportesRepository, ReporteRepository>();
 
+
 // Dependency Injection - Application Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -34,6 +35,9 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IReportesService, ReporteService>();
+
+// Reportes
 builder.Services.AddScoped<IReportesService, ReporteService>();
 
 
