@@ -1,7 +1,10 @@
-﻿using API.Clients;
-using DTOs.Eventos;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
-
+using API.Clients;
+using DTOs.Eventos;
 
 namespace Escritorio
 {
@@ -13,23 +16,21 @@ namespace Escritorio
         public Form_Eventos()
         {
             InitializeComponent();
-          
+            // Obtener el servicio desde el contenedor DI
             _eventoApiClient = Program.ServiceProvider.GetRequiredService<EventoApiClient>();
         }
 
-        private async void FormEventos_load(object sender, EventArgs e)
+        private async void Form_Eventos_Load(object sender, EventArgs e)
         {
             // TextBox placeholders
             txt_ID.PlaceholderText = "Identificación";
             txt_Name.PlaceholderText = "Nombre";
-            
-           
 
             // Configurar columnas del DataGridView
             ConfigurarDataGridView();
 
-            // Cargar productos desde la API
-            await cargarEventoAsync();
+            // Cargar eventos desde la API
+            await CargarEventosAsync();
         }
 
         private void ConfigurarDataGridView()
@@ -37,22 +38,20 @@ namespace Escritorio
             GrdVw_Evento.AutoGenerateColumns = false;
             GrdVw_Evento.Columns.Clear();
 
-            Evento_ID.HeaderText = "ID";
-            Evento_ID.DataPropertyName = "Id";
-            GrdVw_Evento.Columns.Add(Evento_ID);
+            var colId = new DataGridViewTextBoxColumn();
+            colId.HeaderText = "ID";
+            colId.DataPropertyName = "Id";
+            GrdVw_Evento.Columns.Add(colId);
 
-            Evento_Name.HeaderText = "Nombre";
-            Evento_Name.DataPropertyName = "Nombre";
-            GrdVw_Evento.Columns.Add(Evento_Name);
-
-            Evento_Fecha.HeaderText = "Fecha";
-            Evento_Fecha.DataPropertyName = "Fecha"; // **ENLACE DE DATOS**
-            GrdVw_Evento.Columns.Add(Evento_Fecha);
+            var colName = new DataGridViewTextBoxColumn();
+            colName.HeaderText = "NombreEvento";
+            colName.DataPropertyName = "NombreEvento";
+            GrdVw_Evento.Columns.Add(colName);
 
             GrdVw_Evento.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
-        private async Task cargarEventoAsync()
+        private async Task CargarEventosAsync()
         {
             try
             {
@@ -62,60 +61,85 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Sesión Expirada", 
+
+                Console.WriteLine("Error de auth");
+                MessageBox.Show(ex.Message, "No puede ingresar por falta de autorización.",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show($"No se puede conectar con el servidor:\n{ex.Message}",
+                              "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (TaskCanceledException)
+            {
+                MessageBox.Show("La petición ha excedido el tiempo de espera.",
+                              "Timeout", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", 
-                              "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine($"Tipo de excepción: {ex.GetType().Name}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+
+                MessageBox.Show(
+                    $"Error al cargar eventos:\n\n" +
+                    $"Tipo: {ex.GetType().Name}\n" +
+                    $"Mensaje: {ex.Message}\n\n" +
+                    $"Ver consola para más detalles.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private async void btn_agregar_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txt_Name.Text))
             {
-                MessageBox.Show("Por favor, complete todos los campos (excepto ID).", 
+                MessageBox.Show("Por favor, complete todos los campos (excepto ID).",
                               "Campos requeridos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+
 
             try
             {
                 var createRequest = new CreateEventoRequest
                 {
-                    NombreEvento = txt_Name.Text
+                    NombreEvento = txt_Name.Text,
+                    FechaEvento = DateTime.Now,                               // TIENE QUE IR LA FECHA INGRESADA POR EL CALENDARIO
+
                 };
 
                 await _eventoApiClient.CreateAsync(createRequest);
 
-                MessageBox.Show("Evento creada exitosamente.", "Éxito", 
+                MessageBox.Show("Eventoo creado exitosamente.", "Éxito",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Limpiar campos
                 LimpiarCampos();
 
-                // Recargar Eventos
-                await cargarEventoAsync();
+                // Recargar eventos
+                await CargarEventosAsync();
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Sesión Expirada", 
+                MessageBox.Show(ex.Message, "Sesión Expirada",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al crear evento: {ex.Message}", 
+                MessageBox.Show($"Error al crear evento: {ex.Message}",
                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void LimpiarCampos()
         {
-
+            txt_ID.Clear();
             txt_Name.Clear();
         }
 
@@ -126,8 +150,6 @@ namespace Escritorio
                 var evento = (EventoDTO)GrdVw_Evento.Rows[e.RowIndex].DataBoundItem;
                 txt_ID.Text = evento.Id.ToString();
                 txt_Name.Text = evento.NombreEvento;
-
-
             }
         }
 
@@ -135,7 +157,7 @@ namespace Escritorio
         {
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
-                MessageBox.Show("Por favor, seleccione una  válido para editar.", 
+                MessageBox.Show("Por favor, seleccione un evento válido para editar.",
                               "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -145,8 +167,7 @@ namespace Escritorio
                 var updateRequest = new EventoDTO
                 {
                     Id = id,
-                    NombreEvento = txt_Name.Text,
-                    FechaEvento = DateTime.Now
+                    NombreEvento = txt_Name.Text
 
                 };
 
@@ -154,27 +175,27 @@ namespace Escritorio
 
                 if (resultado)
                 {
-                    MessageBox.Show("Evento actualizada exitosamente.", "Éxito", 
+                    MessageBox.Show("Eventoo actualizado exitosamente.", "Éxito",
                                   MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    
+
                     LimpiarCampos();
-                    await cargarEventoAsync();
+                    await CargarEventosAsync();
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo actualizar la evento.", "Error", 
+                    MessageBox.Show("No se pudo actualizar el evento.", "Error",
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Sesión Expirada", 
+                MessageBox.Show(ex.Message, "Sesión Expirada",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al actualizar evento: {ex.Message}", 
+                MessageBox.Show($"Error al actualizar evento: {ex.Message}",
                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -183,12 +204,12 @@ namespace Escritorio
         {
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
-                MessageBox.Show("Por favor, seleccione una evento válido para eliminar.", 
+                MessageBox.Show("Por favor, seleccione un evento válido para eliminar.",
                               "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var result = MessageBox.Show("¿Está seguro que desea eliminar esta evento?", 
+            var result = MessageBox.Show("¿Está seguro que desea eliminar este evento?",
                                        "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
@@ -199,39 +220,41 @@ namespace Escritorio
 
                     if (resultado)
                     {
-                        MessageBox.Show("Evento eliminada exitosamente.", "Éxito", 
+                        MessageBox.Show("Eventoo eliminado exitosamente.", "Éxito",
                                       MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        
+
                         LimpiarCampos();
-                        await cargarEventoAsync();
+                        await CargarEventosAsync();
                     }
                     else
                     {
-                        MessageBox.Show("No se pudo eliminar la evento.", "Error", 
+                        MessageBox.Show("No se pudo eliminar el evento.", "Error",
                                       MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    MessageBox.Show(ex.Message, "Sesión Expirada", 
+                    MessageBox.Show(ex.Message, "Sesión Expirada",
                                   MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     this.Close();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error al eliminar evento: {ex.Message}", 
+                    MessageBox.Show($"Error al eliminar evento: {ex.Message}",
                                   "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-         //Eventos existentes que no necesitan cambios
+        // Eventos existentes que no necesitan cambios
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
         private void textBox1_TextChanged(object sender, EventArgs e) { }
         private void textBox1_TextChanged_1(object sender, EventArgs e) { }
         private void toolStripContainer1_ContentPanel_Load(object sender, EventArgs e) { }
         private void eventosInMemoryBindingSource_CurrentChanged(object sender, EventArgs e) { }
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { } 
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
+        private void txt_Price_TextChanged(object sender, EventArgs e) { }
+        private void txt_Name_TextChanged(object sender, EventArgs e) { }
 
     }
 }
