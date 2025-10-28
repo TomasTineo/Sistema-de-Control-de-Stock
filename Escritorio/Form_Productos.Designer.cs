@@ -1,6 +1,6 @@
 ﻿namespace Escritorio
 {
-    partial class FormProducts
+    partial class Form_Productos
     {
         /// <summary>
         /// Required designer variable.
@@ -75,7 +75,7 @@
             panel_Superior.Location = new Point(0, 0);
             panel_Superior.Name = "panel_Superior";
             panel_Superior.Padding = new Padding(10);
-            panel_Superior.Size = new Size(1100, 70);
+            panel_Superior.Size = new Size(1109, 70);
             panel_Superior.TabIndex = 0;
             // 
             // lbl_Titulo
@@ -93,7 +93,7 @@
             // 
             txt_Buscar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             txt_Buscar.Font = new Font("Segoe UI", 10F);
-            txt_Buscar.Location = new Point(750, 20);
+            txt_Buscar.Location = new Point(759, 20);
             txt_Buscar.Name = "txt_Buscar";
             txt_Buscar.Size = new Size(250, 25);
             txt_Buscar.TabIndex = 1;
@@ -104,13 +104,14 @@
             btn_Refrescar.BackColor = Color.FromArgb(52, 152, 219);
             btn_Refrescar.FlatStyle = FlatStyle.Flat;
             btn_Refrescar.ForeColor = Color.White;
-            btn_Refrescar.Location = new Point(1010, 17);
+            btn_Refrescar.Location = new Point(1019, 17);
             btn_Refrescar.Name = "btn_Refrescar";
             btn_Refrescar.Size = new Size(80, 30);
             btn_Refrescar.TabIndex = 2;
             btn_Refrescar.Text = "🔄 Refrescar";
             btn_Refrescar.UseVisualStyleBackColor = false;
-            
+            btn_Refrescar.Click += btnRefrescarGrilla_Click;
+
             // 
             // GrdVw_Product
             // 
@@ -125,7 +126,7 @@
             GrdVw_Product.Name = "GrdVw_Product";
             GrdVw_Product.ReadOnly = true;
             GrdVw_Product.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            GrdVw_Product.Size = new Size(700, 450);
+            GrdVw_Product.Size = new Size(709, 441);
             GrdVw_Product.TabIndex = 3;
             GrdVw_Product.CellContentClick += dataGridView1_CellContentClick;
             GrdVw_Product.CellDoubleClick += GrdVw_Product_CellDoubleClick;
@@ -135,10 +136,10 @@
             panel_Inferior.BackColor = Color.FromArgb(236, 240, 241);
             panel_Inferior.Controls.Add(lbl_TotalProductos);
             panel_Inferior.Dock = DockStyle.Bottom;
-            panel_Inferior.Location = new Point(0, 520);
+            panel_Inferior.Location = new Point(0, 511);
             panel_Inferior.Name = "panel_Inferior";
             panel_Inferior.Padding = new Padding(10);
-            panel_Inferior.Size = new Size(700, 40);
+            panel_Inferior.Size = new Size(709, 40);
             panel_Inferior.TabIndex = 4;
             // 
             // lbl_TotalProductos
@@ -165,10 +166,10 @@
             panel_Formulario.Controls.Add(cmb_Categoria);
             panel_Formulario.Controls.Add(panel_Botones);
             panel_Formulario.Dock = DockStyle.Right;
-            panel_Formulario.Location = new Point(700, 70);
+            panel_Formulario.Location = new Point(709, 70);
             panel_Formulario.Name = "panel_Formulario";
             panel_Formulario.Padding = new Padding(15);
-            panel_Formulario.Size = new Size(400, 490);
+            panel_Formulario.Size = new Size(400, 481);
             panel_Formulario.TabIndex = 5;
             // 
             // lbl_FormularioTitulo
@@ -253,7 +254,7 @@
             panel_Botones.Controls.Add(btn_Editar);
             panel_Botones.Controls.Add(btn_Borrar);
             panel_Botones.Dock = DockStyle.Bottom;
-            panel_Botones.Location = new Point(15, 300);
+            panel_Botones.Location = new Point(15, 291);
             panel_Botones.Name = "panel_Botones";
             panel_Botones.Size = new Size(368, 173);
             panel_Botones.TabIndex = 7;
@@ -272,7 +273,8 @@
             btn_Limpiar.TabIndex = 10;
             btn_Limpiar.Text = "🗑️ Limpiar Campos";
             btn_Limpiar.UseVisualStyleBackColor = false;
-            
+            btn_Limpiar.Click += btnLimpiarCampos_Click;
+
             // 
             // btn_agregar
             // 
@@ -288,7 +290,7 @@
             btn_agregar.TabIndex = 7;
             btn_agregar.Text = "➕ Agregar Producto";
             btn_agregar.UseVisualStyleBackColor = false;
-            
+            btn_agregar.Click += btnAgregar_Click;
             // 
             // btn_Editar
             // 
@@ -304,7 +306,7 @@
             btn_Editar.TabIndex = 8;
             btn_Editar.Text = "✏️ Editar Producto";
             btn_Editar.UseVisualStyleBackColor = false;
-            
+            btn_Editar.Click += btnEditar_Click;
             // 
             // btn_Borrar
             // 
@@ -320,13 +322,13 @@
             btn_Borrar.TabIndex = 9;
             btn_Borrar.Text = "❌ Eliminar Producto";
             btn_Borrar.UseVisualStyleBackColor = false;
-            
+            btn_Borrar.Click += btnEliminar_Click;
             // 
             // FormProducts
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1100, 560);
+            ClientSize = new Size(1109, 551);
             Controls.Add(GrdVw_Product);
             Controls.Add(panel_Inferior);
             Controls.Add(panel_Formulario);

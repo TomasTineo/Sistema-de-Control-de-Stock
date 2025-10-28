@@ -1,5 +1,4 @@
 ﻿using API.Clients;
-using Domain.Model;
 using DTOs.Categorias;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -25,13 +24,16 @@ namespace Escritorio
         {
             // TextBox placeholders
             txt_ID.PlaceholderText = "Identificación";
-            txt_Name.PlaceholderText = "Nombre";
-           
+            txt_Name.PlaceholderText = "Nombre de la Categoría";
+            txt_Buscar.PlaceholderText = "🔍 Buscar categoría por nombre...";
+
+            // Evento de búsqueda
+            txt_Buscar.TextChanged += txt_Buscar_TextChanged;
 
             // Configurar columnas del DataGridView
             ConfigurarDataGridView();
 
-            // Cargar productos desde la API
+            // Cargar categorias desde la API
             await cargarCategoriaAsync();
         }
 
@@ -43,13 +45,13 @@ namespace Escritorio
             var colId = new DataGridViewTextBoxColumn();
             colId.HeaderText = "ID";
             colId.DataPropertyName = "Id";
+            colId.Width = 50;
             GrdVw_Categoria.Columns.Add(colId);
 
             var colName = new DataGridViewTextBoxColumn();
             colName.HeaderText = "Nombre";
             colName.DataPropertyName = "Nombre";
             GrdVw_Categoria.Columns.Add(colName);
-
 
             GrdVw_Categoria.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
@@ -61,6 +63,7 @@ namespace Escritorio
                 _categorias = (await _categoriaApiClient.GetAllAsync()).ToList();
                 GrdVw_Categoria.DataSource = null;
                 GrdVw_Categoria.DataSource = _categorias;
+                lbl_TotalCategorias.Text = $"Total: {_categorias.Count} categoría(s)";
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -70,8 +73,36 @@ namespace Escritorio
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", 
+                MessageBox.Show($"Error al cargar categorías: {ex.Message}", 
                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Búsqueda en tiempo real
+        private void txt_Buscar_TextChanged(object sender, EventArgs e)
+        {
+            FiltrarCategorias();
+        }
+
+        private void FiltrarCategorias()
+        {
+            string filtro = txt_Buscar.Text.ToLower().Trim();
+
+            if (string.IsNullOrWhiteSpace(filtro))
+            {
+                GrdVw_Categoria.DataSource = null;
+                GrdVw_Categoria.DataSource = _categorias;
+                lbl_TotalCategorias.Text = $"Total: {_categorias.Count} categoría(s)";
+            }
+            else
+            {
+                var categoriasFiltradas = _categorias.Where(c =>
+                    c.Nombre.ToLower().Contains(filtro)
+                ).ToList();
+
+                GrdVw_Categoria.DataSource = null;
+                GrdVw_Categoria.DataSource = categoriasFiltradas;
+                lbl_TotalCategorias.Text = $"Mostrando: {categoriasFiltradas.Count} de {_categorias.Count} categoría(s)";
             }
         }
 
@@ -79,8 +110,8 @@ namespace Escritorio
         {
             if (string.IsNullOrWhiteSpace(txt_Name.Text))
             {
-                MessageBox.Show("Por favor, complete todos los campos (excepto ID).", 
-                              "Campos requeridos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Por favor, ingrese el nombre de la categoría.", 
+                              "Campo requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -93,13 +124,10 @@ namespace Escritorio
 
                 await _categoriaApiClient.CreateAsync(createRequest);
 
-                MessageBox.Show("Categoria creada exitosamente.", "Éxito", 
+                MessageBox.Show("Categoría creada exitosamente.", "Éxito", 
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Limpiar campos
                 LimpiarCampos();
-
-                // Recargar Categorias
                 await cargarCategoriaAsync();
             }
             catch (UnauthorizedAccessException ex)
@@ -110,15 +138,9 @@ namespace Escritorio
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al crear categoria: {ex.Message}", 
+                MessageBox.Show($"Error al crear categoría: {ex.Message}", 
                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void LimpiarCampos()
-        {
-
-            txt_Name.Clear();
         }
 
         private void GrdVw_Categoria_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -128,7 +150,6 @@ namespace Escritorio
                 var categoria = (CategoriaDTO)GrdVw_Categoria.Rows[e.RowIndex].DataBoundItem;
                 txt_ID.Text = categoria.Id.ToString();
                 txt_Name.Text = categoria.Nombre;
-
             }
         }
 
@@ -136,7 +157,7 @@ namespace Escritorio
         {
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
-                MessageBox.Show("Por favor, seleccione una  válido para editar.", 
+                MessageBox.Show("Por favor, seleccione una categoría válida para editar.", 
                               "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -146,15 +167,14 @@ namespace Escritorio
                 var updateRequest = new CategoriaDTO
                 {
                     Id = id,
-                    Nombre = txt_Name.Text,
-                    
+                    Nombre = txt_Name.Text
                 };
 
                 bool resultado = await _categoriaApiClient.UpdateAsync(updateRequest);
 
                 if (resultado)
                 {
-                    MessageBox.Show("Categoria actualizada exitosamente.", "Éxito", 
+                    MessageBox.Show("Categoría actualizada exitosamente.", "Éxito", 
                                   MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                     LimpiarCampos();
@@ -162,7 +182,7 @@ namespace Escritorio
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo actualizar la categoria.", "Error", 
+                    MessageBox.Show("No se pudo actualizar la categoría.", "Error", 
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -174,7 +194,7 @@ namespace Escritorio
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al actualizar categoria: {ex.Message}", 
+                MessageBox.Show($"Error al actualizar categoría: {ex.Message}", 
                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -183,12 +203,12 @@ namespace Escritorio
         {
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
-                MessageBox.Show("Por favor, seleccione una categoria válido para eliminar.", 
+                MessageBox.Show("Por favor, seleccione una categoría válida para eliminar.", 
                               "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var result = MessageBox.Show("¿Está seguro que desea eliminar esta categoria?", 
+            var result = MessageBox.Show("¿Está seguro que desea eliminar esta categoría?", 
                                        "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
@@ -199,7 +219,7 @@ namespace Escritorio
 
                     if (resultado)
                     {
-                        MessageBox.Show("Categoria eliminada exitosamente.", "Éxito", 
+                        MessageBox.Show("Categoría eliminada exitosamente.", "Éxito", 
                                       MessageBoxButtons.OK, MessageBoxIcon.Information);
                         
                         LimpiarCampos();
@@ -207,7 +227,7 @@ namespace Escritorio
                     }
                     else
                     {
-                        MessageBox.Show("No se pudo eliminar la categoria.", "Error", 
+                        MessageBox.Show("No se pudo eliminar la categoría.", "Error", 
                                       MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -219,19 +239,36 @@ namespace Escritorio
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error al eliminar categoria: {ex.Message}", 
+                    MessageBox.Show($"Error al eliminar categoría: {ex.Message}", 
                                   "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-         //Eventos existentes que no necesitan cambios
+        private async void btnRefrescar_Click(object sender, EventArgs e)
+        {
+            await cargarCategoriaAsync();
+            txt_Buscar.Clear();
+        }
+
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            LimpiarCampos();
+        }
+
+        private void LimpiarCampos()
+        {
+            txt_ID.Clear();
+            txt_Name.Clear();
+            txt_Name.Focus();
+        }
+
+        // Eventos existentes que no necesitan cambios
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
         private void textBox1_TextChanged(object sender, EventArgs e) { }
         private void textBox1_TextChanged_1(object sender, EventArgs e) { }
         private void toolStripContainer1_ContentPanel_Load(object sender, EventArgs e) { }
-        private void productsInMemoryBindingSource_CurrentChanged(object sender, EventArgs e) { }
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { } 
-
+        private void productsInMemoryBindingSource_CurrentChanged(object sender, EventArgs e) { } 
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
     }
 }

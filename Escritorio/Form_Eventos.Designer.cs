@@ -42,6 +42,8 @@
             lbl_FormularioTitulo = new Label();
             txt_ID = new TextBox();
             txt_Name = new TextBox();
+            lbl_FechaEvento = new Label();              
+            dtp_FechaEvento = new DateTimePicker();     
             panel_Botones = new Panel();
             btn_Limpiar = new Button();
             btn_agregar = new Button();
@@ -77,7 +79,7 @@
             lbl_Titulo.Name = "lbl_Titulo";
             lbl_Titulo.Size = new Size(211, 30);
             lbl_Titulo.TabIndex = 0;
-            lbl_Titulo.Text = "Gestion de Eventos";
+            lbl_Titulo.Text = "Gestión de Eventos";
             // 
             // txt_Buscar
             // 
@@ -100,6 +102,7 @@
             btn_Refrescar.TabIndex = 2;
             btn_Refrescar.Text = "🔄 Refrescar";
             btn_Refrescar.UseVisualStyleBackColor = false;
+            btn_Refrescar.Click += btnRefrescar_Click;  
             // 
             // GrdVw_Evento
             // 
@@ -136,9 +139,9 @@
             lbl_TotalEventoos.Font = new Font("Segoe UI", 9F);
             lbl_TotalEventoos.Location = new Point(13, 12);
             lbl_TotalEventoos.Name = "lbl_TotalEventoos";
-            lbl_TotalEventoos.Size = new Size(110, 15);
+            lbl_TotalEventoos.Size = new Size(102, 15);
             lbl_TotalEventoos.TabIndex = 0;
-            lbl_TotalEventoos.Text = "Total: 0 producto(s)";
+            lbl_TotalEventoos.Text = "Total: 0 evento(s)";
             // 
             // panel_Formulario
             // 
@@ -147,6 +150,8 @@
             panel_Formulario.Controls.Add(lbl_FormularioTitulo);
             panel_Formulario.Controls.Add(txt_ID);
             panel_Formulario.Controls.Add(txt_Name);
+            panel_Formulario.Controls.Add(lbl_FechaEvento);
+            panel_Formulario.Controls.Add(dtp_FechaEvento);      
             panel_Formulario.Controls.Add(panel_Botones);
             panel_Formulario.Dock = DockStyle.Right;
             panel_Formulario.Location = new Point(700, 70);
@@ -184,6 +189,25 @@
             txt_Name.TabIndex = 2;
             txt_Name.TextChanged += txt_Name_TextChanged;
             // 
+            // lbl_FechaEvento                           
+            // 
+            lbl_FechaEvento.AutoSize = true;
+            lbl_FechaEvento.Font = new Font("Segoe UI", 9F);
+            lbl_FechaEvento.Location = new Point(18, 120);
+            lbl_FechaEvento.Name = "lbl_FechaEvento";
+            lbl_FechaEvento.Size = new Size(103, 15);
+            lbl_FechaEvento.TabIndex = 3;
+            lbl_FechaEvento.Text = "Fecha del Evento:";
+            // 
+            // dtp_FechaEvento                          
+            // 
+            dtp_FechaEvento.Font = new Font("Segoe UI", 10F);
+            dtp_FechaEvento.Format = DateTimePickerFormat.Short;
+            dtp_FechaEvento.Location = new Point(18, 140);
+            dtp_FechaEvento.Name = "dtp_FechaEvento";
+            dtp_FechaEvento.Size = new Size(360, 25);
+            dtp_FechaEvento.TabIndex = 4;
+            // 
             // panel_Botones
             // 
             panel_Botones.Controls.Add(btn_Limpiar);
@@ -210,6 +234,7 @@
             btn_Limpiar.TabIndex = 10;
             btn_Limpiar.Text = "🗑️ Limpiar Campos";
             btn_Limpiar.UseVisualStyleBackColor = false;
+            btn_Limpiar.Click += btnLimpiar_Click;      
             // 
             // btn_agregar
             // 
@@ -223,7 +248,7 @@
             btn_agregar.Name = "btn_agregar";
             btn_agregar.Size = new Size(368, 40);
             btn_agregar.TabIndex = 7;
-            btn_agregar.Text = "➕ Agregar Eventoo";
+            btn_agregar.Text = "➕ Agregar Evento";
             btn_agregar.UseVisualStyleBackColor = false;
             btn_agregar.Click += btn_agregar_Click;
             // 
@@ -239,8 +264,9 @@
             btn_Editar.Name = "btn_Editar";
             btn_Editar.Size = new Size(368, 40);
             btn_Editar.TabIndex = 8;
-            btn_Editar.Text = "✏️ Editar Eventoo";
+            btn_Editar.Text = "✏️ Editar Evento";
             btn_Editar.UseVisualStyleBackColor = false;
+            btn_Editar.Click += btnEditar_Click;        
             // 
             // btn_Borrar
             // 
@@ -254,8 +280,9 @@
             btn_Borrar.Name = "btn_Borrar";
             btn_Borrar.Size = new Size(368, 40);
             btn_Borrar.TabIndex = 9;
-            btn_Borrar.Text = "❌ Eliminar Eventoo";
+            btn_Borrar.Text = "❌ Eliminar Evento";
             btn_Borrar.UseVisualStyleBackColor = false;
+            btn_Borrar.Click += btnEliminar_Click;      
             // 
             // Form_Eventos
             // 
@@ -269,7 +296,7 @@
             MinimumSize = new Size(1100, 560);
             Name = "Form_Eventos";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Sistema de Control de Stock - Eventoos";
+            Text = "Sistema de Control de Stock - Eventos";
             Load += Form_Eventos_Load;
             ((System.ComponentModel.ISupportInitialize)eventosInMemoryBindingSource).EndInit();
             panel_Superior.ResumeLayout(false);
@@ -306,6 +333,8 @@
         private Label lbl_FormularioTitulo;
         private TextBox txt_ID;
         private TextBox txt_Name;
+        private Label lbl_FechaEvento;              
+        private DateTimePicker dtp_FechaEvento;     
         
         // Panel Botones
         private Panel panel_Botones;

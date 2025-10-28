@@ -63,7 +63,7 @@ namespace Escritorio
             services.AddTransient<Form_Acceso>();
             services.AddTransient<Form_Login>();
             services.AddTransient<Form_Registro>();
-            services.AddTransient<FormProducts>();
+            services.AddTransient<Form_Productos>();
             services.AddTransient<Form_Main>();
             services.AddTransient<Form_Categorias>();
             services.AddTransient<Form_Eventos>();

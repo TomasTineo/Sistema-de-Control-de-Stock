@@ -1,10 +1,10 @@
-﻿using System;
+﻿using API.Clients;
+using DTOs.Eventos;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Microsoft.Extensions.DependencyInjection;
-using API.Clients;
-using DTOs.Eventos;
 
 namespace Escritorio
 {
@@ -22,15 +22,46 @@ namespace Escritorio
 
         private async void Form_Eventos_Load(object sender, EventArgs e)
         {
-            // TextBox placeholders
             txt_ID.PlaceholderText = "Identificación";
-            txt_Name.PlaceholderText = "Nombre";
+            txt_Name.PlaceholderText = "Nombre del Evento";
+            txt_Buscar.PlaceholderText = "🔍 Buscar evento por nombre...";  
+            
+            // Evento de búsqueda
+            txt_Buscar.TextChanged += txt_Buscar_TextChanged;
+            
+            dtp_FechaEvento.Format = DateTimePickerFormat.Short;
+            dtp_FechaEvento.Value = DateTime.Now;
 
-            // Configurar columnas del DataGridView
             ConfigurarDataGridView();
-
-            // Cargar eventos desde la API
             await CargarEventosAsync();
+        }
+
+        //  Método de búsqueda
+        private void txt_Buscar_TextChanged(object sender, EventArgs e)
+        {
+            FiltrarEventos();
+        }
+
+        private void FiltrarEventos()
+        {
+            string filtro = txt_Buscar.Text.ToLower().Trim();
+
+            if (string.IsNullOrWhiteSpace(filtro))
+            {
+                GrdVw_Evento.DataSource = null;
+                GrdVw_Evento.DataSource = _eventos;
+                lbl_TotalEventoos.Text = $"Total: {_eventos.Count} evento(s)";
+            }
+            else
+            {
+                var eventosFiltrados = _eventos.Where(e =>
+                    e.NombreEvento.ToLower().Contains(filtro)
+                ).ToList();
+
+                GrdVw_Evento.DataSource = null;
+                GrdVw_Evento.DataSource = eventosFiltrados;
+                lbl_TotalEventoos.Text = $"Mostrando: {eventosFiltrados.Count} de {_eventos.Count} evento(s)";
+            }
         }
 
         private void ConfigurarDataGridView()
@@ -41,12 +72,21 @@ namespace Escritorio
             var colId = new DataGridViewTextBoxColumn();
             colId.HeaderText = "ID";
             colId.DataPropertyName = "Id";
+            colId.Width = 50;
             GrdVw_Evento.Columns.Add(colId);
 
             var colName = new DataGridViewTextBoxColumn();
-            colName.HeaderText = "NombreEvento";
+            colName.HeaderText = "Nombre del Evento";
             colName.DataPropertyName = "NombreEvento";
             GrdVw_Evento.Columns.Add(colName);
+
+            // Columna de fecha
+            var colFecha = new DataGridViewTextBoxColumn();
+            colFecha.HeaderText = "Fecha";
+            colFecha.DataPropertyName = "FechaEvento";
+            colFecha.DefaultCellStyle.Format = "dd/MM/yyyy";
+            colFecha.Width = 100;
+            GrdVw_Evento.Columns.Add(colFecha);
 
             GrdVw_Evento.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
@@ -58,11 +98,12 @@ namespace Escritorio
                 _eventos = (await _eventoApiClient.GetAllAsync()).ToList();
                 GrdVw_Evento.DataSource = null;
                 GrdVw_Evento.DataSource = _eventos;
+                
+                // Actualizar total
+                lbl_TotalEventoos.Text = $"Total: {_eventos.Count} evento(s)";
             }
             catch (UnauthorizedAccessException ex)
             {
-
-                Console.WriteLine("Error de auth");
                 MessageBox.Show(ex.Message, "No puede ingresar por falta de autorización.",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
@@ -79,17 +120,8 @@ namespace Escritorio
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Tipo de excepción: {ex.GetType().Name}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-
-                MessageBox.Show(
-                    $"Error al cargar eventos:\n\n" +
-                    $"Tipo: {ex.GetType().Name}\n" +
-                    $"Mensaje: {ex.Message}\n\n" +
-                    $"Ver consola para más detalles.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar eventos: {ex.Message}",
+                              "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -97,31 +129,25 @@ namespace Escritorio
         {
             if (string.IsNullOrWhiteSpace(txt_Name.Text))
             {
-                MessageBox.Show("Por favor, complete todos los campos (excepto ID).",
-                              "Campos requeridos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Por favor, ingrese el nombre del evento.",
+                              "Campo requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-
 
             try
             {
                 var createRequest = new CreateEventoRequest
                 {
                     NombreEvento = txt_Name.Text,
-                    FechaEvento = DateTime.Now,                               // TIENE QUE IR LA FECHA INGRESADA POR EL CALENDARIO
-
+                    FechaEvento = dtp_FechaEvento.Value  // USAR LA FECHA SELECCIONADA
                 };
 
                 await _eventoApiClient.CreateAsync(createRequest);
 
-                MessageBox.Show("Eventoo creado exitosamente.", "Éxito",
+                MessageBox.Show("Evento creado exitosamente.", "Éxito",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Limpiar campos
                 LimpiarCampos();
-
-                // Recargar eventos
                 await CargarEventosAsync();
             }
             catch (UnauthorizedAccessException ex)
@@ -137,12 +163,6 @@ namespace Escritorio
             }
         }
 
-        private void LimpiarCampos()
-        {
-            txt_ID.Clear();
-            txt_Name.Clear();
-        }
-
         private void GrdVw_Evento_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -150,6 +170,7 @@ namespace Escritorio
                 var evento = (EventoDTO)GrdVw_Evento.Rows[e.RowIndex].DataBoundItem;
                 txt_ID.Text = evento.Id.ToString();
                 txt_Name.Text = evento.NombreEvento;
+                dtp_FechaEvento.Value = evento.FechaEvento;  // CARGAR LA FECHA
             }
         }
 
@@ -167,15 +188,15 @@ namespace Escritorio
                 var updateRequest = new EventoDTO
                 {
                     Id = id,
-                    NombreEvento = txt_Name.Text
-
+                    NombreEvento = txt_Name.Text,
+                    FechaEvento = dtp_FechaEvento.Value  // USAR LA FECHA SELECCIONADA
                 };
 
                 bool resultado = await _eventoApiClient.UpdateAsync(updateRequest);
 
                 if (resultado)
                 {
-                    MessageBox.Show("Eventoo actualizado exitosamente.", "Éxito",
+                    MessageBox.Show("Evento actualizado exitosamente.", "Éxito",
                                   MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     LimpiarCampos();
@@ -220,7 +241,7 @@ namespace Escritorio
 
                     if (resultado)
                     {
-                        MessageBox.Show("Eventoo eliminado exitosamente.", "Éxito",
+                        MessageBox.Show("Evento eliminado exitosamente.", "Éxito",
                                       MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         LimpiarCampos();
@@ -246,15 +267,28 @@ namespace Escritorio
             }
         }
 
+        private async void btnRefrescar_Click(object sender, EventArgs e)
+        {
+            await CargarEventosAsync();
+            txt_Buscar.Clear();
+        }
+
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            LimpiarCampos();
+        }
+
+        private void LimpiarCampos()
+        {
+            txt_ID.Clear();
+            txt_Name.Clear();
+            txt_Buscar.Clear();  // Limpiar campo de búsqueda
+            dtp_FechaEvento.Value = DateTime.Now;  // RESETEAR A HOY
+            txt_Name.Focus();
+        }
+
         // Eventos existentes que no necesitan cambios
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
-        private void textBox1_TextChanged(object sender, EventArgs e) { }
-        private void textBox1_TextChanged_1(object sender, EventArgs e) { }
-        private void toolStripContainer1_ContentPanel_Load(object sender, EventArgs e) { }
-        private void eventosInMemoryBindingSource_CurrentChanged(object sender, EventArgs e) { }
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
-        private void txt_Price_TextChanged(object sender, EventArgs e) { }
         private void txt_Name_TextChanged(object sender, EventArgs e) { }
-
     }
 }
