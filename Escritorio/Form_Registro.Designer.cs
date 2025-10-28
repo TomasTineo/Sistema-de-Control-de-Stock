@@ -1,4 +1,6 @@
-﻿namespace Escritorio
+﻿
+
+namespace Escritorio
 {
     partial class Form_Registro
     {
@@ -141,7 +143,6 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = Properties.Resources.background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(715, 445);
             Controls.Add(label5);
