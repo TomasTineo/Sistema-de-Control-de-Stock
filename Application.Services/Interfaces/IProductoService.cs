@@ -1,3 +1,4 @@
+using Domain.Model;
 using DTOs.Productos;
 
 namespace Application.Services.Interfaces

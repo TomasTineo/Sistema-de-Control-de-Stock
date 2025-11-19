@@ -1,7 +1,66 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using Domain.Model
+@inject IHttpClientFactory HttpClientFactory
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Inicio - Productos</PageTitle>
 
-<h1>Hola mundo!</h1>
+<h1>Inventario de Productos</h1>
 
-Welcome to your new app.
+@if (productos == null)
+{
+    <p><em>Cargando productos...</em></p>
+}
+else if (productos.Length == 0)
+{
+    <p>No se encontraron productos en el inventario.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var producto in productos)
+            {
+                <tr>
+                    <td>@producto.Id</td>
+                    <td>@producto.Nombre</td>
+                    <td>@producto.Precio.ToString("C")</td> @* Formato de moneda *@
+                    <td>@producto.Stock</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Producto[]? productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // 1. Obtener el cliente HTTP configurado
+            var httpClient = HttpClientFactory.CreateClient("WebAPI");
+
+            // 2. Realizar la petición GET al endpoint de productos
+            // ⚠️ Asegúrate de que tu endpoint sea correcto (ej: api/productos)
+            productos = await httpClient.GetFromJsonAsync<Producto[]>("api/productos");
+
+        }
+        catch (HttpRequestException ex)
+        {
+            // Manejo básico de errores de red o API.
+            // Es bueno loggear el error o mostrar un mensaje al usuario.
+            Console.WriteLine($"Error al obtener productos: {ex.Message}");
+            productos = Array.Empty<Producto>(); // Asignar un array vacío para mostrar el mensaje de "no hay productos"
+        }
+    }
+}

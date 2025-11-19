@@ -1,0 +1,93 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+
+@using Domain.Model // 💡 Asegúrate de que este sea el namespace de tu LoginModel 
+@inject ApiService AuthService // 💡 El servicio que llama al endpoint y maneja el token
+@inject NavigationManager Navigation // Para redirigir
+
+<PageTitle>Iniciar Sesión</PageTitle>
+
+<h3>Iniciar Sesión</h3>
+
+<div class="row">
+    <div class="col-md-6">
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <InputText id="email" @bind-Value="loginModel.Email" class="form-control" placeholder="usuario@ejemplo.com" />
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <InputText id="password" @bind-Value="loginModel.Password" type="password" class="form-control" placeholder="********" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+
+            <button type="submit" class="btn btn-primary" disabled="@isBusy">
+                @if (isBusy)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                Iniciar Sesión
+            </button>
+
+        </EditForm>
+    </div>
+</div>
+
+@code {
+
+    // 3. Variables de estado del componente
+    private LoginModel loginModel = new LoginModel();
+    private string? errorMessage;
+    private bool isBusy = false; // Para deshabilitar el botón durante la petición
+
+    // 4. Método que se ejecuta al enviar el formulario (si la validación es exitosa)
+    private async Task HandleLogin()
+    {
+        isBusy = true;
+        errorMessage = null;
+
+        try
+        {
+            // La llamada real al endpoint se realiza en el servicio AuthService (ApiService)
+            var tokenResponse = await AuthService.LoginAsync(loginModel);
+
+            // Si la llamada fue exitosa y se obtuvo el token:
+            if (!string.IsNullOrEmpty(tokenResponse?.Token))
+            {
+                // El servicio ya debió haber guardado el token y notificado el estado de autenticación.
+
+                // Redirigir al usuario a la página de inicio o donde corresponda
+                Navigation.NavigateTo("/", true);
+            }
+            else
+            {
+                // Esto maneja el caso donde el servicio retorna null o sin token (p. ej. error 401)
+                errorMessage = "Credenciales inválidas. Verifica tu correo y contraseña.";
+            }
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "No se pudo conectar con el servidor. Verifica que la API esté activa.";
+        }
+        catch (Exception ex)
+        {
+            // Mostrar cualquier otro error no manejado
+            errorMessage = $"Ocurrió un error inesperado: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}
