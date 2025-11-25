@@ -17,6 +17,9 @@ namespace Escritorio
         private readonly UsuarioApiClient _usuarioApiClient;
         private readonly IAuthService _authService;
 
+        // Evento para notificar cuando el login es exitoso
+        public event EventHandler? LoginExitoso;
+
         public Form_Login()
         {
             InitializeComponent();
@@ -55,8 +58,11 @@ namespace Escritorio
                     var formMain = Program.ServiceProvider.GetRequiredService<Form_Main>();
                     formMain.Show();
                     
-                    // Ocultar el formulario de login
-                    this.Hide();
+                    // Notificar que el login fue exitoso
+                    LoginExitoso?.Invoke(this, EventArgs.Empty);
+                    
+                    // Cerrar el formulario de login
+                    this.Close();
                 }
                 else
                 {

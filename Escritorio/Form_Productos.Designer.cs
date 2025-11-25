@@ -60,14 +60,8 @@
             panel_Botones.SuspendLayout();
             SuspendLayout();
             // 
-            // productsInMemoryBindingSource
-            // 
-            productsInMemoryBindingSource.DataSource = typeof(Data.ProductsInMemory);
-            productsInMemoryBindingSource.CurrentChanged += productsInMemoryBindingSource_CurrentChanged;
-            // 
             // panel_Superior
             // 
-            panel_Superior.BackColor = Color.FromArgb(41, 128, 185);
             panel_Superior.Controls.Add(lbl_Titulo);
             panel_Superior.Controls.Add(txt_Buscar);
             panel_Superior.Controls.Add(btn_Refrescar);
@@ -81,44 +75,38 @@
             // lbl_Titulo
             // 
             lbl_Titulo.AutoSize = true;
-            lbl_Titulo.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            lbl_Titulo.ForeColor = Color.White;
+            lbl_Titulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lbl_Titulo.Location = new Point(13, 13);
             lbl_Titulo.Name = "lbl_Titulo";
-            lbl_Titulo.Size = new Size(236, 30);
+            lbl_Titulo.Size = new Size(168, 21);
             lbl_Titulo.TabIndex = 0;
             lbl_Titulo.Text = "Gestión de Productos";
             // 
             // txt_Buscar
             // 
             txt_Buscar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            txt_Buscar.Font = new Font("Segoe UI", 10F);
             txt_Buscar.Location = new Point(759, 20);
             txt_Buscar.Name = "txt_Buscar";
-            txt_Buscar.Size = new Size(250, 25);
+            txt_Buscar.PlaceholderText = "Buscar producto...";
+            txt_Buscar.Size = new Size(250, 23);
             txt_Buscar.TabIndex = 1;
             // 
             // btn_Refrescar
             // 
             btn_Refrescar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btn_Refrescar.BackColor = Color.FromArgb(52, 152, 219);
-            btn_Refrescar.FlatStyle = FlatStyle.Flat;
-            btn_Refrescar.ForeColor = Color.White;
             btn_Refrescar.Location = new Point(1019, 17);
             btn_Refrescar.Name = "btn_Refrescar";
             btn_Refrescar.Size = new Size(80, 30);
             btn_Refrescar.TabIndex = 2;
-            btn_Refrescar.Text = "🔄 Refrescar";
-            btn_Refrescar.UseVisualStyleBackColor = false;
+            btn_Refrescar.Text = "Refrescar";
+            btn_Refrescar.UseVisualStyleBackColor = true;
             btn_Refrescar.Click += btnRefrescarGrilla_Click;
-
             // 
             // GrdVw_Product
             // 
             GrdVw_Product.AllowUserToAddRows = false;
             GrdVw_Product.AllowUserToDeleteRows = false;
             GrdVw_Product.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            GrdVw_Product.BackgroundColor = Color.White;
             GrdVw_Product.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             GrdVw_Product.Dock = DockStyle.Fill;
             GrdVw_Product.Location = new Point(0, 70);
@@ -133,7 +121,6 @@
             // 
             // panel_Inferior
             // 
-            panel_Inferior.BackColor = Color.FromArgb(236, 240, 241);
             panel_Inferior.Controls.Add(lbl_TotalProductos);
             panel_Inferior.Dock = DockStyle.Bottom;
             panel_Inferior.Location = new Point(0, 511);
@@ -145,7 +132,6 @@
             // lbl_TotalProductos
             // 
             lbl_TotalProductos.AutoSize = true;
-            lbl_TotalProductos.Font = new Font("Segoe UI", 9F);
             lbl_TotalProductos.Location = new Point(13, 12);
             lbl_TotalProductos.Name = "lbl_TotalProductos";
             lbl_TotalProductos.Size = new Size(109, 15);
@@ -154,7 +140,6 @@
             // 
             // panel_Formulario
             // 
-            panel_Formulario.BackColor = Color.White;
             panel_Formulario.BorderStyle = BorderStyle.FixedSingle;
             panel_Formulario.Controls.Add(lbl_FormularioTitulo);
             panel_Formulario.Controls.Add(txt_ID);
@@ -175,35 +160,30 @@
             // lbl_FormularioTitulo
             // 
             lbl_FormularioTitulo.AutoSize = true;
-            lbl_FormularioTitulo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lbl_FormularioTitulo.Location = new Point(18, 15);
             lbl_FormularioTitulo.Name = "lbl_FormularioTitulo";
-            lbl_FormularioTitulo.Size = new Size(156, 21);
+            lbl_FormularioTitulo.Size = new Size(108, 15);
             lbl_FormularioTitulo.TabIndex = 0;
             lbl_FormularioTitulo.Text = "Datos del Producto";
             // 
             // txt_ID
             // 
-            txt_ID.BackColor = Color.FromArgb(236, 240, 241);
-            txt_ID.Font = new Font("Segoe UI", 10F);
             txt_ID.Location = new Point(18, 50);
             txt_ID.Name = "txt_ID";
             txt_ID.ReadOnly = true;
-            txt_ID.Size = new Size(360, 25);
+            txt_ID.Size = new Size(360, 23);
             txt_ID.TabIndex = 1;
             // 
             // txt_Name
             // 
-            txt_Name.Font = new Font("Segoe UI", 10F);
             txt_Name.Location = new Point(18, 85);
             txt_Name.Name = "txt_Name";
-            txt_Name.Size = new Size(360, 25);
+            txt_Name.Size = new Size(360, 23);
             txt_Name.TabIndex = 2;
             txt_Name.TextChanged += txt_Name_TextChanged;
             // 
             // txt_Description
             // 
-            txt_Description.Font = new Font("Segoe UI", 10F);
             txt_Description.Location = new Point(18, 120);
             txt_Description.Multiline = true;
             txt_Description.Name = "txt_Description";
@@ -212,25 +192,22 @@
             // 
             // txt_Price
             // 
-            txt_Price.Font = new Font("Segoe UI", 10F);
             txt_Price.Location = new Point(18, 190);
             txt_Price.Name = "txt_Price";
-            txt_Price.Size = new Size(170, 25);
+            txt_Price.Size = new Size(170, 23);
             txt_Price.TabIndex = 4;
             txt_Price.TextChanged += txt_Price_TextChanged;
             // 
             // txt_Stock
             // 
-            txt_Stock.Font = new Font("Segoe UI", 10F);
             txt_Stock.Location = new Point(208, 190);
             txt_Stock.Name = "txt_Stock";
-            txt_Stock.Size = new Size(170, 25);
+            txt_Stock.Size = new Size(170, 23);
             txt_Stock.TabIndex = 5;
             // 
             // lbl_Categoria
             // 
             lbl_Categoria.AutoSize = true;
-            lbl_Categoria.Font = new Font("Segoe UI", 9F);
             lbl_Categoria.Location = new Point(18, 225);
             lbl_Categoria.Name = "lbl_Categoria";
             lbl_Categoria.Size = new Size(61, 15);
@@ -240,11 +217,10 @@
             // cmb_Categoria
             // 
             cmb_Categoria.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmb_Categoria.Font = new Font("Segoe UI", 10F);
             cmb_Categoria.FormattingEnabled = true;
             cmb_Categoria.Location = new Point(18, 245);
             cmb_Categoria.Name = "cmb_Categoria";
-            cmb_Categoria.Size = new Size(360, 25);
+            cmb_Categoria.Size = new Size(360, 23);
             cmb_Categoria.TabIndex = 6;
             // 
             // panel_Botones
@@ -261,70 +237,53 @@
             // 
             // btn_Limpiar
             // 
-            btn_Limpiar.BackColor = Color.FromArgb(149, 165, 166);
             btn_Limpiar.Dock = DockStyle.Top;
-            btn_Limpiar.FlatStyle = FlatStyle.Flat;
-            btn_Limpiar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btn_Limpiar.ForeColor = Color.White;
             btn_Limpiar.Location = new Point(0, 120);
             btn_Limpiar.Margin = new Padding(0, 0, 0, 5);
             btn_Limpiar.Name = "btn_Limpiar";
             btn_Limpiar.Size = new Size(368, 40);
             btn_Limpiar.TabIndex = 10;
-            btn_Limpiar.Text = "🗑️ Limpiar Campos";
-            btn_Limpiar.UseVisualStyleBackColor = false;
+            btn_Limpiar.Text = "Limpiar Campos";
+            btn_Limpiar.UseVisualStyleBackColor = true;
             btn_Limpiar.Click += btnLimpiarCampos_Click;
-
             // 
             // btn_agregar
             // 
-            btn_agregar.BackColor = Color.FromArgb(39, 174, 96);
             btn_agregar.Dock = DockStyle.Top;
-            btn_agregar.FlatStyle = FlatStyle.Flat;
-            btn_agregar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btn_agregar.ForeColor = Color.White;
             btn_agregar.Location = new Point(0, 80);
             btn_agregar.Margin = new Padding(0, 5, 0, 5);
             btn_agregar.Name = "btn_agregar";
             btn_agregar.Size = new Size(368, 40);
             btn_agregar.TabIndex = 7;
-            btn_agregar.Text = "➕ Agregar Producto";
-            btn_agregar.UseVisualStyleBackColor = false;
+            btn_agregar.Text = "Agregar Producto";
+            btn_agregar.UseVisualStyleBackColor = true;
             btn_agregar.Click += btnAgregar_Click;
             // 
             // btn_Editar
             // 
-            btn_Editar.BackColor = Color.FromArgb(241, 196, 15);
             btn_Editar.Dock = DockStyle.Top;
-            btn_Editar.FlatStyle = FlatStyle.Flat;
-            btn_Editar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btn_Editar.ForeColor = Color.White;
             btn_Editar.Location = new Point(0, 40);
             btn_Editar.Margin = new Padding(0, 5, 0, 5);
             btn_Editar.Name = "btn_Editar";
             btn_Editar.Size = new Size(368, 40);
             btn_Editar.TabIndex = 8;
-            btn_Editar.Text = "✏️ Editar Producto";
-            btn_Editar.UseVisualStyleBackColor = false;
+            btn_Editar.Text = "Editar Producto";
+            btn_Editar.UseVisualStyleBackColor = true;
             btn_Editar.Click += btnEditar_Click;
             // 
             // btn_Borrar
             // 
-            btn_Borrar.BackColor = Color.FromArgb(231, 76, 60);
             btn_Borrar.Dock = DockStyle.Top;
-            btn_Borrar.FlatStyle = FlatStyle.Flat;
-            btn_Borrar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btn_Borrar.ForeColor = Color.White;
             btn_Borrar.Location = new Point(0, 0);
             btn_Borrar.Margin = new Padding(0, 5, 0, 0);
             btn_Borrar.Name = "btn_Borrar";
             btn_Borrar.Size = new Size(368, 40);
             btn_Borrar.TabIndex = 9;
-            btn_Borrar.Text = "❌ Eliminar Producto";
-            btn_Borrar.UseVisualStyleBackColor = false;
+            btn_Borrar.Text = "Eliminar Producto";
+            btn_Borrar.UseVisualStyleBackColor = true;
             btn_Borrar.Click += btnEliminar_Click;
             // 
-            // FormProducts
+            // Form_Productos
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -334,7 +293,7 @@
             Controls.Add(panel_Formulario);
             Controls.Add(panel_Superior);
             MinimumSize = new Size(1100, 560);
-            Name = "FormProducts";
+            Name = "Form_Productos";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Sistema de Control de Stock - Productos";
             Load += FormProducts_Load;

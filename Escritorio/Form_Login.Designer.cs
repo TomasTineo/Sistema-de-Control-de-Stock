@@ -37,24 +37,27 @@
             // 
             // btn_enviarLogin
             // 
-            btn_enviarLogin.Location = new Point(609, 391);
+            btn_enviarLogin.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btn_enviarLogin.Location = new Point(320, 187);
             btn_enviarLogin.Name = "btn_enviarLogin";
             btn_enviarLogin.Size = new Size(102, 47);
-            btn_enviarLogin.TabIndex = 0;
+            btn_enviarLogin.TabIndex = 2;
             btn_enviarLogin.Text = "Enviar";
             btn_enviarLogin.UseVisualStyleBackColor = true;
             btn_enviarLogin.Click += btn_enviarLogin_Click;
             // 
             // txt_username
             // 
-            txt_username.Location = new Point(346, 181);
+            txt_username.Anchor = AnchorStyles.None;
+            txt_username.Location = new Point(213, 83);
             txt_username.Name = "txt_username";
             txt_username.Size = new Size(100, 23);
-            txt_username.TabIndex = 1;
+            txt_username.TabIndex = 0;
             // 
             // txt_password
             // 
-            txt_password.Location = new Point(346, 210);
+            txt_password.Anchor = AnchorStyles.None;
+            txt_password.Location = new Point(213, 112);
             txt_password.Name = "txt_password";
             txt_password.Size = new Size(100, 23);
             txt_password.TabIndex = 1;
@@ -62,8 +65,9 @@
             // 
             // label1
             // 
+            label1.Anchor = AnchorStyles.None;
             label1.AutoSize = true;
-            label1.Location = new Point(231, 184);
+            label1.Location = new Point(98, 86);
             label1.Name = "label1";
             label1.Size = new Size(109, 15);
             label1.TabIndex = 2;
@@ -71,8 +75,9 @@
             // 
             // label2
             // 
+            label2.Anchor = AnchorStyles.None;
             label2.AutoSize = true;
-            label2.Location = new Point(273, 213);
+            label2.Location = new Point(140, 115);
             label2.Name = "label2";
             label2.Size = new Size(67, 15);
             label2.TabIndex = 2;
@@ -82,15 +87,17 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(723, 450);
+            ClientSize = new Size(434, 246);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(txt_password);
             Controls.Add(txt_username);
             Controls.Add(btn_enviarLogin);
             MaximizeBox = false;
+            MinimumSize = new Size(450, 285);
             Name = "Form_Login";
-            Text = "Form2";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Login";
             ResumeLayout(false);
             PerformLayout();
         }

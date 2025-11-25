@@ -32,7 +32,7 @@ namespace WebAPI.Endpoints
             .Produces<UsuarioDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            // POST /api/usuarios - Requiere permiso de agregar
+            // POST /api/usuarios - Registro público de nuevos usuarios
             usuarios.MapPost("/", async (CreateUsuarioRequest request, IUsuarioService usuarioService) =>
             {
                 try
@@ -46,7 +46,7 @@ namespace WebAPI.Endpoints
                 }
             })
             .WithName("CreateUsuario")
-            .RequireAuthorization("UsuariosAgregar")
+            .AllowAnonymous()
             .Produces<UsuarioDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 

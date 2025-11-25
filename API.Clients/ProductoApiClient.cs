@@ -1,7 +1,6 @@
 using DTOs.Productos;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http.Headers;
 
 namespace API.Clients
 {
@@ -19,25 +18,10 @@ namespace API.Clients
             };
         }
 
-        // Método helper simple para agregar el token
-        private async Task AddAuthTokenAsync()
-        {
-            var authService = AuthServiceProvider.Instance;
-            await authService.CheckTokenExpirationAsync();
-            
-            var token = await authService.GetTokenAsync();
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = 
-                    new AuthenticationHeaderValue("Bearer", token);
-            }
-        }
-
         public async Task<ProductoDTO?> GetAsync(int id)
         {
-            await AddAuthTokenAsync();
-            
-            var response = await _httpClient.GetAsync($"api/productos/{id}");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Get, $"api/productos/{id}");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             
             if (response.IsSuccessStatusCode)
@@ -51,9 +35,8 @@ namespace API.Clients
 
         public async Task<IEnumerable<ProductoDTO>> GetAllAsync()
         {
-            await AddAuthTokenAsync();
-            
-            var response = await _httpClient.GetAsync("api/productos");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Get, "api/productos");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             response.EnsureSuccessStatusCode();
 
@@ -65,12 +48,12 @@ namespace API.Clients
         public async Task<ProductoDTO> CreateAsync(CreateProductoRequest request)
         {
             await EnsureAuthenticatedAsync();
-            await AddAuthTokenAsync();
             
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/productos", content);
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Post, "api/productos", content);
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             response.EnsureSuccessStatusCode();
 
@@ -81,12 +64,12 @@ namespace API.Clients
         public async Task<bool> UpdateAsync(ProductoDTO request)
         {
             await EnsureAuthenticatedAsync();
-            await AddAuthTokenAsync();
             
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"api/productos/{request.Id}", content);
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Put, $"api/productos/{request.Id}", content);
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             return response.IsSuccessStatusCode;
         }
@@ -94,18 +77,17 @@ namespace API.Clients
         public async Task<bool> DeleteAsync(int id)
         {
             await EnsureAuthenticatedAsync();
-            await AddAuthTokenAsync();
             
-            var response = await _httpClient.DeleteAsync($"api/productos/{id}");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Delete, $"api/productos/{id}");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<IEnumerable<ProductoDTO>> GetByCategoriaAsync(int categoriaId)
         {
-            await AddAuthTokenAsync();
-            
-            var response = await _httpClient.GetAsync($"api/productos/categoria/{categoriaId}");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Get, $"api/productos/categoria/{categoriaId}");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             
             if (response.IsSuccessStatusCode)

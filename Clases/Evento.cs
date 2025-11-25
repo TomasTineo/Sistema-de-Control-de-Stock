@@ -13,6 +13,7 @@ namespace Domain.Model
         public string NombreEvento { get; private set; }
         public DateTime FechaEvento { get; private set; }
 
+        public Evento() { }
         
         public Evento(int id, string nombreEvento, DateTime fechaEvento)
         {
@@ -44,16 +45,18 @@ namespace Domain.Model
 
         public void SetFecha(DateTime fecha)
         {
+            var ahora = DateTime.Now; // tomamos la fecha una sola vez para no generar condición de carrera
+            
             if (fecha == default(DateTime))
                 throw new ArgumentException("La fecha del evento no puede estar vacía.", nameof(fecha));
             
             // No permite fechas de mas de 2 años
-            var fechaMaxima = DateTime.Now.AddYears(2);
+            var fechaMaxima = ahora.AddYears(2);
             if (fecha > fechaMaxima)
                 throw new ArgumentException("La fecha del evento no puede ser tan lejana en el futuro.", nameof(fecha));
             
-            // No permite fechas del pasado
-            if (fecha < DateTime.Now.Date)
+            // No permite fechas del pasado en la carga de eventos
+            if (Id == 0 && fecha.Date < ahora.Date)
                 throw new ArgumentException("La fecha del evento no puede ser en el pasado.", nameof(fecha));
             
             FechaEvento = fecha;

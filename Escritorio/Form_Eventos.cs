@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace Escritorio
 {
@@ -18,19 +19,24 @@ namespace Escritorio
             InitializeComponent();
             // Obtener el servicio desde el contenedor DI
             _eventoApiClient = Program.ServiceProvider.GetRequiredService<EventoApiClient>();
+
+
         }
 
         private async void Form_Eventos_Load(object sender, EventArgs e)
         {
             txt_ID.PlaceholderText = "Identificación";
             txt_Name.PlaceholderText = "Nombre del Evento";
-            txt_Buscar.PlaceholderText = "🔍 Buscar evento por nombre...";  
-            
+            txt_Buscar.PlaceholderText = "Buscar evento por nombre...";
+
             // Evento de búsqueda
             txt_Buscar.TextChanged += txt_Buscar_TextChanged;
-            
+           
+
             dtp_FechaEvento.Format = DateTimePickerFormat.Short;
-            dtp_FechaEvento.Value = DateTime.Now;
+            dtp_FechaEvento.MinDate = DateTime.Today;
+            dtp_FechaEvento.MaxDate = DateTime.Today.AddYears(2);
+            dtp_FechaEvento.Value = DateTime.Today;
 
             ConfigurarDataGridView();
             await CargarEventosAsync();
@@ -98,7 +104,7 @@ namespace Escritorio
                 _eventos = (await _eventoApiClient.GetAllAsync()).ToList();
                 GrdVw_Evento.DataSource = null;
                 GrdVw_Evento.DataSource = _eventos;
-                
+
                 // Actualizar total
                 lbl_TotalEventoos.Text = $"Total: {_eventos.Count} evento(s)";
             }
@@ -290,5 +296,12 @@ namespace Escritorio
         // Eventos existentes que no necesitan cambios
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
         private void txt_Name_TextChanged(object sender, EventArgs e) { }
+
+        private void dtp_FechaEvento_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+     
     }
 }

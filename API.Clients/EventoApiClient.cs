@@ -1,7 +1,6 @@
 using DTOs.Eventos;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http.Headers;
 
 namespace API.Clients
 {
@@ -19,24 +18,10 @@ namespace API.Clients
             };
         }
 
-        private async Task AddAuthTokenAsync()
-        {
-            var authService = AuthServiceProvider.Instance;
-            await authService.CheckTokenExpirationAsync();
-            
-            var token = await authService.GetTokenAsync();
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = 
-                    new AuthenticationHeaderValue("Bearer", token);
-            }
-        }
-
         public async Task<EventoDTO?> GetAsync(int id)
         {
-            await AddAuthTokenAsync();
-            
-            var response = await _httpClient.GetAsync($"api/eventos/{id}");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Get, $"api/eventos/{id}");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             
             if (response.IsSuccessStatusCode)
@@ -50,9 +35,8 @@ namespace API.Clients
 
         public async Task<IEnumerable<EventoDTO>> GetAllAsync()
         {
-            await AddAuthTokenAsync();
-            
-            var response = await _httpClient.GetAsync("api/eventos");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Get, "api/eventos");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             response.EnsureSuccessStatusCode();
 
@@ -63,12 +47,12 @@ namespace API.Clients
         public async Task<EventoDTO> CreateAsync(CreateEventoRequest request)
         {
             await EnsureAuthenticatedAsync();
-            await AddAuthTokenAsync();
             
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/eventos", content);
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Post, "api/eventos", content);
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             response.EnsureSuccessStatusCode();
 
@@ -79,12 +63,12 @@ namespace API.Clients
         public async Task<bool> UpdateAsync(EventoDTO request)
         {
             await EnsureAuthenticatedAsync();
-            await AddAuthTokenAsync();
             
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"api/eventos/{request.Id}", content);
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Put, $"api/eventos/{request.Id}", content);
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             return response.IsSuccessStatusCode;
         }
@@ -92,18 +76,19 @@ namespace API.Clients
         public async Task<bool> DeleteAsync(int id)
         {
             await EnsureAuthenticatedAsync();
-            await AddAuthTokenAsync();
             
-            var response = await _httpClient.DeleteAsync($"api/eventos/{id}");
+            var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Delete, $"api/eventos/{id}");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<IEnumerable<EventoDTO>> GetByFechaRangeAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-            await AddAuthTokenAsync();
-            
-            var response = await _httpClient.GetAsync($"api/eventos/rango?fechaInicio={fechaInicio:yyyy-MM-dd}&fechaFin={fechaFin:yyyy-MM-dd}");
+            var requestMessage = await CreateAuthenticatedRequest(
+                HttpMethod.Get, 
+                $"api/eventos/rango?fechaInicio={fechaInicio:yyyy-MM-dd}&fechaFin={fechaFin:yyyy-MM-dd}");
+            var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
             
             if (response.IsSuccessStatusCode)

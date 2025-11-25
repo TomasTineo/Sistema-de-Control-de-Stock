@@ -75,6 +75,7 @@ namespace Data
                 entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.NombreEvento).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.FechaEvento).IsRequired();
+
             });
 
             // Configuración de Categoria

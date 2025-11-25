@@ -11,6 +11,31 @@ namespace Escritorio
         public Form_Main()
         {
             InitializeComponent();
+            
+            // Validación antes de cerrar el formulario
+            this.FormClosing += Form_Main_FormClosing;
+            
+            // Cuando se cierre Form_Main, cerrar la aplicación completa
+            this.FormClosed += (s, e) => Application.Exit();
+        }
+
+        private void Form_Main_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            // Solo mostrar confirmación si el usuario está cerrando manualmente
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                var result = MessageBox.Show(
+                    "¿Está seguro que desea cerrar la aplicación?\n\nSe cerrará la sesión actual.",
+                    "Confirmar cierre",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+
+                if (result == DialogResult.No)
+                {
+                    e.Cancel = true; // Cancelar el cierre
+                }
+            }
         }
 
         private void FormMain_Load(object sender, EventArgs e)
@@ -43,21 +68,5 @@ namespace Escritorio
                           MessageBoxIcon.Information);
         }
 
-        // Efectos hover para los botones
-        private void btn_MouseEnter(object sender, EventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                btn.Font = new Font(btn.Font.FontFamily, btn.Font.Size + 1, btn.Font.Style);
-            }
-        }
-
-        private void btn_MouseLeave(object sender, EventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                btn.Font = new Font(btn.Font.FontFamily, 14F, FontStyle.Bold);
-            }
-        }
     }
 }

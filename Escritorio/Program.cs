@@ -29,9 +29,9 @@ namespace Escritorio
             services.AddSingleton<IConfiguration>(configuration);
 
             // HttpClient Factory con configuración desde appsettings
-            var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001/";
+            var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5239/";
 
-            // Registrar ApiClients con HttpClient (clases concretas, sin interfaces)
+            // Registrar ApiClients con HttpClient (sin AuthHeaderHandler)
             services.AddHttpClient<UsuarioApiClient>(client =>
             {
                 client.BaseAddress = new Uri(apiBaseUrl);
@@ -51,6 +51,12 @@ namespace Escritorio
             });
 
             services.AddHttpClient<EventoApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<AuthApiClient>(client =>
             {
                 client.BaseAddress = new Uri(apiBaseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
@@ -101,13 +107,48 @@ namespace Escritorio
         {
             try
             {
-                using var httpClient = new HttpClient();
-                var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001/";
+                var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5239/";
                 
-                httpClient.BaseAddress = new Uri(apiBaseUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(10);
+                // Intentar HTTPS primero
+                if (await TryConnectToApi(apiBaseUrl))
+                    return true;
+                
+                // Si HTTPS falla, intentar con HTTP
+                if (apiBaseUrl.StartsWith("https://"))
+                {
+                    var httpUrl = apiBaseUrl.Replace("https://", "http://").Replace(":7001/", ":5239/");
+                    
+                    if (await TryConnectToApi(httpUrl))
+                    {
+                        MessageBox.Show($"API encontrada en: {httpUrl}", 
+                                      "Conexión establecida", 
+                                      MessageBoxButtons.OK, 
+                                      MessageBoxIcon.Information);
+                        return true;
+                    }
+                }
 
-                // Intentar primero con HTTPS, luego con HTTP si falla
+                return false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al verificar conexión: {ex.Message}",
+                              "Error de conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        private static async Task<bool> TryConnectToApi(string baseUrl)
+        {
+            try
+            {
+                // Crear un NUEVO HttpClient para cada intento
+                using var httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(baseUrl),
+                    Timeout = TimeSpan.FromSeconds(10)
+                };
+
                 string[] endpoints = { "api/health", "swagger/index.html", "" };
                 
                 foreach (var endpoint in endpoints)
@@ -127,40 +168,10 @@ namespace Escritorio
                     }
                 }
 
-                // Si HTTPS falla, intentar con HTTP
-                if (apiBaseUrl.StartsWith("https://"))
-                {
-                    var httpUrl = apiBaseUrl.Replace("https://", "http://").Replace(":7001/", ":5239/");
-                    httpClient.BaseAddress = new Uri(httpUrl);
-                    
-                    foreach (var endpoint in endpoints)
-                    {
-                        try
-                        {
-                            var response = await httpClient.GetAsync(endpoint);
-                            if (response.IsSuccessStatusCode)
-                            {
-                                // Actualizar la configuración para usar HTTP
-                                MessageBox.Show($"API encontrada en: {httpUrl}", 
-                                              "Conexión establecida", 
-                                              MessageBoxButtons.OK, 
-                                              MessageBoxIcon.Information);
-                                return true;
-                            }
-                        }
-                        catch (HttpRequestException)
-                        {
-                            continue;
-                        }
-                    }
-                }
-
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Error al verificar conexión: {ex.Message}",
-                              "Error de conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }

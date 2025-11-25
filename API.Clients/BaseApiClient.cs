@@ -65,6 +65,34 @@ namespace API.Clients
             }
         }
 
+        protected static async Task<HttpRequestMessage> CreateAuthenticatedRequest(
+            HttpMethod method,
+            string requestUri)
+        {
+            var request = new HttpRequestMessage(method, requestUri);
+
+            var authService = AuthServiceProvider.Instance;
+            await authService.CheckTokenExpirationAsync();
+
+            var token = await authService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
+            return request;
+        }
+
+        protected static async Task<HttpRequestMessage> CreateAuthenticatedRequest(
+            HttpMethod method,
+            string requestUri,
+            HttpContent content)
+        {
+            var request = await CreateAuthenticatedRequest(method, requestUri);
+            request.Content = content;
+            return request;
+        }
+
         protected static async Task EnsureAuthenticatedAsync()
         {
             var authService = AuthServiceProvider.Instance;

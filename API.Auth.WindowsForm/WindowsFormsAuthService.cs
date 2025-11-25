@@ -3,6 +3,8 @@ using DTOs.Auth;
 using API.Clients;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace API.Auth.WindowsForm
 {
@@ -36,16 +38,15 @@ namespace API.Auth.WindowsForm
         {
             try
             {
-                // Crear HttpClient configurado
-                var httpClient = new HttpClient();
-                
                 // Obtener la URL base desde configuración
                 string baseUrl = GetBaseUrlFromConfig();
-                httpClient.BaseAddress = new Uri(baseUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(30);
                 
-                // Crear el cliente de autenticación
-                var authClient = new AuthApiClient();
+                // Crear HttpClient configurado manualmente para login
+                using var httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(baseUrl),
+                    Timeout = TimeSpan.FromSeconds(30)
+                };
                 
                 // Llamar al endpoint de login que devuelve JWT
                 var loginRequest = new LoginRequest
@@ -54,35 +55,47 @@ namespace API.Auth.WindowsForm
                     Password = password
                 };
 
-                var response = await authClient.LoginAsync(loginRequest);
+                var json = JsonSerializer.Serialize(loginRequest);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                if (response != null)
+                var httpResponse = await httpClient.PostAsync("auth/login", content);
+
+                if (httpResponse.IsSuccessStatusCode)
                 {
-                    // Guardar el token JWT real
-                    _currentToken = response.Token;
-                    _tokenExpiration = response.ExpiresAt;
-                    _currentUsername = response.Username;
-                    
-                    // Extraer información del token JWT
-                    var handler = new JwtSecurityTokenHandler();
-                    var jsonToken = handler.ReadJwtToken(response.Token);
-                    
-                    // Opcionalmente, crear un UsuarioDTO desde los claims
-                    var userIdClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                    var emailClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-                    
-                    if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                    var response = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions
                     {
-                        _currentUser = new UsuarioDTO
-                        {
-                            Id = userId,
-                            Username = response.Username,
-                            Email = emailClaim?.Value ?? string.Empty
-                        };
-                    }
+                        PropertyNameCaseInsensitive = true
+                    });
 
-                    AuthenticationStateChanged?.Invoke(true);
-                    return true;
+                    if (response != null)
+                    {
+                        // Guardar el token JWT real
+                        _currentToken = response.Token;
+                        _tokenExpiration = response.ExpiresAt;
+                        _currentUsername = response.Username;
+                        
+                        // Extraer información del token JWT
+                        var handler = new JwtSecurityTokenHandler();
+                        var jsonToken = handler.ReadJwtToken(response.Token);
+                        
+                        // Opcionalmente, crear un UsuarioDTO desde los claims
+                        var userIdClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                        var emailClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                        
+                        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                        {
+                            _currentUser = new UsuarioDTO
+                            {
+                                Id = userId,
+                                Username = response.Username,
+                                Email = emailClaim?.Value ?? string.Empty
+                            };
+                        }
+
+                        AuthenticationStateChanged?.Invoke(true);
+                        return true;
+                    }
                 }
 
                 return false;
@@ -151,7 +164,7 @@ namespace API.Auth.WindowsForm
                 string runtimeInfo = System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
                 if (runtimeInfo.StartsWith("android"))
                 {
-                    return "http://10.0.2.2:5183/";
+                    return "http://10.0.2.2:5239/";
                 }
             }
             catch
@@ -159,8 +172,8 @@ namespace API.Auth.WindowsForm
                 // Ignorar errores
             }
 
-            // URL por defecto
-            return "http://localhost:5183/";
+            // URL por defecto - CORREGIDA para coincidir con launchSettings.json
+            return "http://localhost:5239/";
         }
     }
 }
