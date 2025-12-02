@@ -5,7 +5,7 @@ namespace DTOs.Reservas
         public int Id { get; set; }
         public int ClienteId { get; set; }
         public int EventoId { get; set; }
-        public DateTime FechaReserva { get; set; }
+        public DateTime FechaFinalizacion { get; set; }
         public string Estado { get; set; } = string.Empty;
         public List<UpdateReservaProductoRequest> Productos { get; set; } = new List<UpdateReservaProductoRequest>();
     }

@@ -1,4 +1,6 @@
 using DTOs.Reservas;
+using DTOs.Clientes;
+using DTOs.Eventos;
 using Domain.Model;
 using Data.Repositories;
 using Application.Services.Interfaces;
@@ -72,11 +74,11 @@ namespace Application.Services.Implementations
             if (evento == null)
                 throw new InvalidOperationException($"El evento con ID {request.EventoId} no existe.");
 
-            // Crear la reserva
+            // Crear la reserva (FechaReserva se establece automáticamente a DateTime.Now en el constructor)
             var reserva = new Reserva(
                 request.ClienteId,
                 request.EventoId,
-                request.FechaReserva,
+                request.FechaFinalizacion,
                 request.Estado
             );
 
@@ -88,7 +90,7 @@ namespace Application.Services.Implementations
                     throw new InvalidOperationException($"El producto con ID {productoRequest.ProductoId} no existe.");
 
                 if (producto.Stock < productoRequest.CantidadReservada)
-                    throw new InvalidOperationException($"Stock insuficiente para el producto '{producto.Nombre}'. Stock disponible: {producto.Stock}");
+                    throw new InvalidOperationException($"Stock insuficiente para el producto '{producto.Nombre}'. Stock disponible: {producto.Stock}, solicitado: {productoRequest.CantidadReservada}");
 
                 reserva.AgregarProducto(productoRequest.ProductoId, productoRequest.CantidadReservada);
             }
@@ -115,7 +117,7 @@ namespace Application.Services.Implementations
             // Actualizar propiedades básicas
             reserva.SetClienteId(request.ClienteId);
             reserva.SetEventoId(request.EventoId);
-            reserva.SetFechaReserva(request.FechaReserva);
+            reserva.SetFechaFinalizacion(request.FechaFinalizacion);
             reserva.SetEstado(request.Estado);
 
             // Limpiar productos actuales
@@ -129,7 +131,7 @@ namespace Application.Services.Implementations
                     throw new InvalidOperationException($"El producto con ID {productoRequest.ProductoId} no existe.");
 
                 if (producto.Stock < productoRequest.CantidadReservada)
-                    throw new InvalidOperationException($"Stock insuficiente para el producto '{producto.Nombre}'. Stock disponible: {producto.Stock}");
+                    throw new InvalidOperationException($"Stock insuficiente para el producto '{producto.Nombre}'. Stock disponible: {producto.Stock}, solicitado: {productoRequest.CantidadReservada}");
 
                 reserva.AgregarProducto(productoRequest.ProductoId, productoRequest.CantidadReservada);
             }
@@ -189,14 +191,28 @@ namespace Application.Services.Implementations
             {
                 Id = reserva.Id,
                 ClienteId = reserva.ClienteId,
-                NombreCliente = reserva.Cliente != null 
-                    ? $"{reserva.Cliente.Nombre} {reserva.Cliente.Apellido}" 
-                    : "Cliente no encontrado",
-                EmailCliente = reserva.Cliente?.Email ?? string.Empty,
+                Cliente = reserva.Cliente != null 
+                    ? new ClienteDTO
+                    {
+                        Id = reserva.Cliente.Id,
+                        Nombre = reserva.Cliente.Nombre,
+                        Apellido = reserva.Cliente.Apellido,
+                        Email = reserva.Cliente.Email,
+                        Telefono = reserva.Cliente.Telefono,
+                        Direccion = reserva.Cliente.Direccion
+                    }
+                    : null,
                 EventoId = reserva.EventoId,
-                NombreEvento = reserva.Evento?.NombreEvento ?? "Evento no encontrado",
-                FechaEvento = reserva.Evento?.FechaEvento ?? DateTime.MinValue,
+                Evento = reserva.Evento != null
+                    ? new EventoDTO
+                    {
+                        Id = reserva.Evento.Id,
+                        NombreEvento = reserva.Evento.NombreEvento,
+                        FechaEvento = reserva.Evento.FechaEvento
+                    }
+                    : null,
                 FechaReserva = reserva.FechaReserva,
+                FechaFinalizacion = reserva.FechaFinalizacion,
                 Estado = reserva.Estado,
                 Productos = reserva.Productos.Select(p => new ReservaProductoDTO
                 {

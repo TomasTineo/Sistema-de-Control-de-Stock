@@ -1,15 +1,17 @@
+using DTOs.Clientes;
+using DTOs.Eventos;
+
 namespace DTOs.Reservas
 {
     public class ReservaDTO
     {
         public int Id { get; set; }
         public int ClienteId { get; set; }
-        public string NombreCliente { get; set; } = string.Empty;
-        public string EmailCliente { get; set; } = string.Empty;
+        public ClienteDTO? Cliente { get; set; }
         public int EventoId { get; set; }
-        public string NombreEvento { get; set; } = string.Empty;
-        public DateTime FechaEvento { get; set; }
+        public EventoDTO? Evento { get; set; }
         public DateTime FechaReserva { get; set; }
+        public DateTime FechaFinalizacion { get; set; }
         public string Estado { get; set; } = string.Empty;
         public List<ReservaProductoDTO> Productos { get; set; } = new List<ReservaProductoDTO>();
         public decimal TotalReserva { get; set; }

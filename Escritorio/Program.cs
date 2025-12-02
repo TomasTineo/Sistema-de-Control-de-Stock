@@ -56,6 +56,18 @@ namespace Escritorio
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            services.AddHttpClient<ReservaApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<ClienteApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
             services.AddHttpClient<AuthApiClient>(client =>
             {
                 client.BaseAddress = new Uri(apiBaseUrl);
@@ -73,6 +85,7 @@ namespace Escritorio
             services.AddTransient<Form_Main>();
             services.AddTransient<Form_Categorias>();
             services.AddTransient<Form_Eventos>();
+            services.AddTransient<Form_Reserva>();
 
             ServiceProvider = services.BuildServiceProvider();
 

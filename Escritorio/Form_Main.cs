@@ -62,10 +62,8 @@ namespace Escritorio
 
         private void btnReservas_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Módulo de Reservas en desarrollo.", 
-                          "Próximamente", 
-                          MessageBoxButtons.OK, 
-                          MessageBoxIcon.Information);
+            var formReservas = Program.ServiceProvider.GetRequiredService<Form_Reserva>();
+            formReservas.Show();
         }
 
     }

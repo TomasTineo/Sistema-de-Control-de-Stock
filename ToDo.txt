@@ -1,4 +1,5 @@
 # Falta:
+	- Gestión de clientes
 	- Manejo de usuarios en los form: ajustar vista o avisos del sistema al operador por falta de permisos
 	- Form Gestión de reservas y Gestión Clientes
 	- Ajustar estilos en form: Form_Main, Form_Registro, Form_Login, Form_Acceso

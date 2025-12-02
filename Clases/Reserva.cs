@@ -57,21 +57,24 @@ namespace Domain.Model
         }
 
         public DateTime FechaReserva { get; private set; }
+        public DateTime FechaFinalizacion { get; private set; }
         public string Estado { get; private set; }
 
         // Constructor privado para Entity Framework
         private Reserva() 
         {
             Estado = "Pendiente";
+            FechaReserva = DateTime.Now;
         }
 
         // Constructor para nuevas reservas (sin ID, lo generará la BD)
-        public Reserva(int clienteId, int eventoId, DateTime fechaReserva, string estado = "Pendiente")
+        public Reserva(int clienteId, int eventoId, DateTime fechaFinalizacion, string estado = "Pendiente")
         {
             Productos = new List<ReservaProducto>();
+            FechaReserva = DateTime.Now; // La fecha de creación es siempre hoy
             SetClienteId(clienteId);
             SetEventoId(eventoId);
-            SetFechaReserva(fechaReserva);
+            SetFechaFinalizacion(fechaFinalizacion);
             SetEstado(estado);
         }
 
@@ -100,13 +103,21 @@ namespace Domain.Model
         {
             if (fechaReserva == default(DateTime))
                 throw new ArgumentException("La fecha de reserva no puede estar vacía.", nameof(fechaReserva));
-
-            /*
-            if (fechaReserva < DateTime.Now.Date)
-            throw new ArgumentException("La fecha de reserva no puede ser en el pasado.", nameof(fechaReserva));
-            */
+            
             // Permitir fechas pasadas para edición de reservas existentes
             FechaReserva = fechaReserva;
+        }
+
+        public void SetFechaFinalizacion(DateTime fechaFinalizacion)
+        {
+            if (fechaFinalizacion == default(DateTime))
+                throw new ArgumentException("La fecha de finalización no puede estar vacía.", nameof(fechaFinalizacion));
+            
+            // La fecha de finalización debe ser posterior a la fecha de reserva
+            if (fechaFinalizacion <= FechaReserva)
+                throw new ArgumentException("La fecha de finalización debe ser posterior a la fecha de reserva.", nameof(fechaFinalizacion));
+            
+            FechaFinalizacion = fechaFinalizacion;
         }
 
         public void SetEstado(string estado)
@@ -114,9 +125,9 @@ namespace Domain.Model
             if (string.IsNullOrWhiteSpace(estado))
                 throw new ArgumentException("El estado no puede estar vacío.", nameof(estado));
             
-            var estadosValidos = new[] { "Pendiente", "Confirmada", "Cancelada" };
+            var estadosValidos = new[] { "Pendiente", "Confirmada", "Entregada", "Cancelada", "Completada" };
             if (!estadosValidos.Contains(estado))
-                throw new ArgumentException("El estado debe ser: Pendiente, Confirmada o Cancelada.", nameof(estado));
+                throw new ArgumentException("El estado debe ser: Pendiente, Confirmada, Entregada, Cancelada o Completada.", nameof(estado));
             
             Estado = estado;
         }

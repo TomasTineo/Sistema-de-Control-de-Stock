@@ -69,7 +69,7 @@
             panel_Superior.Location = new Point(0, 0);
             panel_Superior.Name = "panel_Superior";
             panel_Superior.Padding = new Padding(10);
-            panel_Superior.Size = new Size(1109, 70);
+            panel_Superior.Size = new Size(1084, 70);
             panel_Superior.TabIndex = 0;
             // 
             // lbl_Titulo
@@ -85,7 +85,7 @@
             // txt_Buscar
             // 
             txt_Buscar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            txt_Buscar.Location = new Point(759, 20);
+            txt_Buscar.Location = new Point(734, 20);
             txt_Buscar.Name = "txt_Buscar";
             txt_Buscar.PlaceholderText = "Buscar producto...";
             txt_Buscar.Size = new Size(250, 23);
@@ -94,7 +94,7 @@
             // btn_Refrescar
             // 
             btn_Refrescar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btn_Refrescar.Location = new Point(1019, 17);
+            btn_Refrescar.Location = new Point(994, 17);
             btn_Refrescar.Name = "btn_Refrescar";
             btn_Refrescar.Size = new Size(80, 30);
             btn_Refrescar.TabIndex = 2;
@@ -114,7 +114,7 @@
             GrdVw_Product.Name = "GrdVw_Product";
             GrdVw_Product.ReadOnly = true;
             GrdVw_Product.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            GrdVw_Product.Size = new Size(709, 441);
+            GrdVw_Product.Size = new Size(684, 451);
             GrdVw_Product.TabIndex = 3;
             GrdVw_Product.CellContentClick += dataGridView1_CellContentClick;
             GrdVw_Product.CellDoubleClick += GrdVw_Product_CellDoubleClick;
@@ -123,10 +123,10 @@
             // 
             panel_Inferior.Controls.Add(lbl_TotalProductos);
             panel_Inferior.Dock = DockStyle.Bottom;
-            panel_Inferior.Location = new Point(0, 511);
+            panel_Inferior.Location = new Point(0, 521);
             panel_Inferior.Name = "panel_Inferior";
             panel_Inferior.Padding = new Padding(10);
-            panel_Inferior.Size = new Size(709, 40);
+            panel_Inferior.Size = new Size(684, 40);
             panel_Inferior.TabIndex = 4;
             // 
             // lbl_TotalProductos
@@ -151,10 +151,10 @@
             panel_Formulario.Controls.Add(cmb_Categoria);
             panel_Formulario.Controls.Add(panel_Botones);
             panel_Formulario.Dock = DockStyle.Right;
-            panel_Formulario.Location = new Point(709, 70);
+            panel_Formulario.Location = new Point(684, 70);
             panel_Formulario.Name = "panel_Formulario";
             panel_Formulario.Padding = new Padding(15);
-            panel_Formulario.Size = new Size(400, 481);
+            panel_Formulario.Size = new Size(400, 491);
             panel_Formulario.TabIndex = 5;
             // 
             // lbl_FormularioTitulo
@@ -230,7 +230,7 @@
             panel_Botones.Controls.Add(btn_Editar);
             panel_Botones.Controls.Add(btn_Borrar);
             panel_Botones.Dock = DockStyle.Bottom;
-            panel_Botones.Location = new Point(15, 291);
+            panel_Botones.Location = new Point(15, 301);
             panel_Botones.Name = "panel_Botones";
             panel_Botones.Size = new Size(368, 173);
             panel_Botones.TabIndex = 7;
@@ -287,12 +287,12 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1109, 551);
+            ClientSize = new Size(1084, 561);
             Controls.Add(GrdVw_Product);
             Controls.Add(panel_Inferior);
             Controls.Add(panel_Formulario);
             Controls.Add(panel_Superior);
-            MinimumSize = new Size(1100, 560);
+            MinimumSize = new Size(1100, 600);
             Name = "Form_Productos";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Sistema de Control de Stock - Productos";

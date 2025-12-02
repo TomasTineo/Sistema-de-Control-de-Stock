@@ -4,7 +4,7 @@ namespace DTOs.Reservas
     {
         public int ClienteId { get; set; }
         public int EventoId { get; set; }
-        public DateTime FechaReserva { get; set; }
+        public DateTime FechaFinalizacion { get; set; }
         public string Estado { get; set; } = "Pendiente";
         public List<CreateReservaProductoRequest> Productos { get; set; } = new List<CreateReservaProductoRequest>();
     }

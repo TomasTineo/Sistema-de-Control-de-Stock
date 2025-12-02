@@ -109,6 +109,7 @@ namespace Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd(); // ? AUTO-INCREMENT
                 entity.Property(e => e.FechaReserva).IsRequired();
+                entity.Property(e => e.FechaFinalizacion).IsRequired();
                 entity.Property(e => e.Estado).IsRequired().HasMaxLength(50);
 
                 // Relaciones
