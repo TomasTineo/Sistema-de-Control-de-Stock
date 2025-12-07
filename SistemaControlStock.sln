@@ -24,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 		ToDo.txt = ToDo.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp", "BlazorApp\BlazorApp.csproj", "{BD52EA52-2E1E-4155-A441-06769D058A26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor", "Blazor\Blazor.csproj", "{77EC18B6-D02F-4BA2-B399-1298D0E40E09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,10 +64,10 @@ Global
 		{AD2AD7F8-7FB6-4524-A7F4-95B1D13811C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD2AD7F8-7FB6-4524-A7F4-95B1D13811C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD2AD7F8-7FB6-4524-A7F4-95B1D13811C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD52EA52-2E1E-4155-A441-06769D058A26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD52EA52-2E1E-4155-A441-06769D058A26}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD52EA52-2E1E-4155-A441-06769D058A26}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD52EA52-2E1E-4155-A441-06769D058A26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

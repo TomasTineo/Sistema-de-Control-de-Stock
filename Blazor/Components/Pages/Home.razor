@@ -1,0 +1,82 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@rendermode InteractiveServer
+
+@using DTOs.Auth
+@using Blazor.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<h3>Formulario de Login</h3>
+
+<EditForm Model="@LoginR" OnValidSubmit="@Enviar" FormName="formLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Username:</label>
+        <InputText @bind-Value="LoginR.Username" class="form-control" />
+        <ValidationMessage For="@(() => LoginR.Username)" />
+    </div>
+
+    <div class="form-group mt-3">
+        <label>Password:</label>
+        <InputText type="password" @bind-Value="LoginR.Password" class="form-control" />
+        <ValidationMessage For="@(() => LoginR.Password)" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger mt-3">
+            @ErrorMessage
+        </div>
+    }
+
+    <button class="btn btn-primary mt-3" type="submit" disabled="@isLoading">
+        @if (isLoading)
+        {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            <span>Procesando...</span>
+        }
+        else
+        {
+            <span>Iniciar Sesión</span>
+        }
+    </button>
+</EditForm>
+
+@code {
+    private LoginRequest LoginR = new LoginRequest();
+    private string ErrorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task Enviar()
+    {
+        Console.WriteLine($"Username: {LoginR.Username}");
+        Console.WriteLine($"Password: {LoginR.Password}");
+
+        isLoading = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            // Llamar al servicio de autenticación
+            await AuthService.LoginAsync(LoginR.Username, LoginR.Password);
+
+            // Redirigir después del login exitoso
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al iniciar sesión: {ex.Message}";
+            Console.WriteLine($"Error en login: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // Actualizar la UI
+        }
+    }
+}

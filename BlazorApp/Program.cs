@@ -1,23 +1,24 @@
+using BlazorApp;
 using BlazorApp.Components;
+using BlazorApp.Services;
+using Microsoft.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents();  // Esta línea es clave para .NET 8
 
-// Configurar HttpClient
+// Registrar servicios
 builder.Services.AddHttpClient();
-
-// REGISTRAR AuthService (ESTA LÍNEA FALTABA)
-builder.Services.AddScoped<BlazorApp.Services.AuthService>();
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
@@ -26,6 +27,6 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode();  // Y esta también
 
 app.Run();
