@@ -14,8 +14,14 @@ builder.Services.AddHttpClient("AuthAPI", client =>
 });
 
 // 3. Tus servicios personalizados
+builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ITokenStorage, ServerTokenStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Configurar autorización si usas JWT
+builder.Services.AddAuthorizationCore();
+// Si usas autenticación, agrega también:
+// builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
