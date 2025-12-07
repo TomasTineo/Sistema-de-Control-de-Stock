@@ -60,12 +60,7 @@ namespace Domain.Model
         public DateTime FechaFinalizacion { get; private set; }
         public string Estado { get; private set; }
 
-        // Constructor privado para Entity Framework
-        private Reserva() 
-        {
-            Estado = "Pendiente";
-            FechaReserva = DateTime.Now;
-        }
+    
 
         // Constructor para nuevas reservas (sin ID, lo generará la BD)
         public Reserva(int clienteId, int eventoId, DateTime fechaFinalizacion, string estado = "Pendiente")
@@ -78,12 +73,6 @@ namespace Domain.Model
             SetEstado(estado);
         }
 
-        public void SetId(int id)
-        {
-            if (id <= 0)
-                throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
-            Id = id;
-        }
 
         public void SetClienteId(int clienteId)
         {
@@ -132,7 +121,7 @@ namespace Domain.Model
             Estado = estado;
         }
 
-        // Métodos para manejar productos
+      
         public void AgregarProducto(int productoId, int cantidad)
         {
             if (Estado == "Cancelada")
@@ -148,35 +137,7 @@ namespace Domain.Model
             else
             {
                 // Si no existe, agregarlo
-                Productos.Add(new ReservaProducto(Id, productoId, cantidad));
-            }
-        }
-
-        public void RemoverProducto(int productoId)
-        {
-            if (Estado == "Cancelada")
-                throw new InvalidOperationException("No se pueden remover productos de una reserva cancelada.");
-
-            var producto = Productos.FirstOrDefault(p => p.ProductoId == productoId);
-            if (producto != null)
-            {
-                Productos.Remove(producto);
-            }
-        }
-
-        public void ActualizarCantidadProducto(int productoId, int nuevaCantidad)
-        {
-            if (Estado == "Cancelada")
-                throw new InvalidOperationException("No se pueden modificar productos de una reserva cancelada.");
-
-            var producto = Productos.FirstOrDefault(p => p.ProductoId == productoId);
-            if (producto != null)
-            {
-                producto.SetCantidadReservada(nuevaCantidad);
-            }
-            else
-            {
-                throw new ArgumentException($"No existe un producto con ID {productoId} en esta reserva.");
+                Productos.Add(new ReservaProducto(this, productoId, cantidad));
             }
         }
 

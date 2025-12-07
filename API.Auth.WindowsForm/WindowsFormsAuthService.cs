@@ -172,7 +172,7 @@ namespace API.Auth.WindowsForm
                 // Ignorar errores
             }
 
-            // URL por defecto - CORREGIDA para coincidir con launchSettings.json
+            // URL por defecto. coincide con launchSettings.json
             return "http://localhost:5239/";
         }
     }

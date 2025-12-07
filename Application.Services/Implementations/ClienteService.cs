@@ -49,7 +49,6 @@ namespace Application.Services.Implementations
         public async Task<ClienteDTO> CreateAsync(CreateClienteRequest request)
         {
             var cliente = new Cliente(
-                0, // El ID se asignará en la base de datos
                 request.Nombre,
                 request.Apellido,
                 request.Email,

@@ -15,6 +15,17 @@ namespace Domain.Model
         public string Telefono { get; private set; }
         public string Direccion { get; private set; }
 
+
+        // Constructor sin id
+        public Cliente(string nombre, string apellido, string email, string telefono, string direccion)
+        {
+            SetNombre(nombre);
+            SetApellido(apellido);
+            SetEmail(email);
+            SetTelefono(telefono);
+            SetDireccion(direccion);
+        }
+
         public Cliente(int id, string nombre, string apellido, string email, string telefono, string direccion)
         {
             SetId(id);

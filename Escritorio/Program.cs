@@ -85,6 +85,7 @@ namespace Escritorio
             services.AddTransient<Form_Main>();
             services.AddTransient<Form_Categorias>();
             services.AddTransient<Form_Eventos>();
+            services.AddTransient<Form_Clientes>();
             services.AddTransient<Form_Reserva>();
 
             ServiceProvider = services.BuildServiceProvider();

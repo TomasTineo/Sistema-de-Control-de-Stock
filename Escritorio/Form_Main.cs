@@ -66,5 +66,11 @@ namespace Escritorio
             formReservas.Show();
         }
 
+        private void btnClientes_Click(object sender, EventArgs e)
+        {
+            var formClientes = Program.ServiceProvider.GetRequiredService<Form_Clientes>();
+            formClientes.Show();
+        }
+
     }
 }

@@ -6,8 +6,22 @@ namespace Domain.Model
     {
         private int _productoId;
         private Producto? _producto;
+        private Reserva? _reserva;
 
         public int ReservaId { get; private set; } // Clave foránea a Reserva
+        
+        public Reserva? Reserva 
+        { 
+            get => _reserva;
+            private set 
+            {
+                _reserva = value;
+                if (value != null && ReservaId != value.Id && value.Id > 0)
+                {
+                    ReservaId = value.Id;
+                }
+            }
+        }
 
         public int ProductoId 
         { 
@@ -32,11 +46,30 @@ namespace Domain.Model
 
         protected ReservaProducto() { }
 
+        // Constructor para usar con navegación (cuando la reserva aún no tiene ID)
+        public ReservaProducto(Reserva reserva, int productoId, int cantidadReservada)
+        {
+            SetReserva(reserva);
+            SetProductoId(productoId);
+            SetCantidadReservada(cantidadReservada);
+        }
+
+        // Constructor para usar con ID (cuando la reserva ya existe en BD)
         public ReservaProducto(int reservaId, int productoId, int cantidadReservada)
         {
             SetReservaId(reservaId);
             SetProductoId(productoId);
             SetCantidadReservada(cantidadReservada);
+        }
+
+        public void SetReserva(Reserva reserva)
+        {
+            if (reserva == null)
+                throw new ArgumentNullException(nameof(reserva));
+            Reserva = reserva;
+            // Si la reserva ya tiene ID, sincronizar
+            if (reserva.Id > 0)
+                ReservaId = reserva.Id;
         }
 
         public void SetReservaId(int reservaId)

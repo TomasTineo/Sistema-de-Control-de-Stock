@@ -131,7 +131,7 @@ namespace Data
                 entity.Property(e => e.CantidadReservada).IsRequired();
 
                 // Relaciones
-                entity.HasOne<Reserva>()
+                entity.HasOne(rp => rp.Reserva)
                     .WithMany(r => r.Productos)
                     .HasForeignKey(rp => rp.ReservaId)
                     .OnDelete(DeleteBehavior.Cascade);

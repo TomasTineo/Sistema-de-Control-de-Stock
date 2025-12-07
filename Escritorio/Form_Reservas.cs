@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,7 +28,7 @@ namespace Escritorio
         private List<EventoDTO> _eventos = new List<EventoDTO>();
         private List<ProductoDTO> _productos = new List<ProductoDTO>();
         
-        // Lista temporal de productos para la reserva en ediciÃ³n
+        // Lista temporal de productos para la reserva en edición
         private BindingList<ReservaProductoItem> _productosReserva = new BindingList<ReservaProductoItem>();
 
         public Form_Reserva()
@@ -45,7 +45,7 @@ namespace Escritorio
         private async void Form_Reserva_Load(object sender, EventArgs e)
         {
             // Placeholders
-            txt_Buscar.PlaceholderText = "ðŸ” Buscar por cliente o evento...";
+            txt_Buscar.PlaceholderText = "Buscar por cliente o evento...";
             
             // Configurar DataGridView de Reservas
             ConfigurarDataGridViewReservas();
@@ -56,11 +56,11 @@ namespace Escritorio
             // Configurar ComboBox de Estados
             ConfigurarComboEstados();
             
-            // Configurar DateTimePicker para fecha de finalizaciÃ³n
-            dtp_FechaReserva.Value = DateTime.Now.AddDays(1); // Por defecto, un dÃ­a despuÃ©s
+            // Configurar DateTimePicker para fecha de finalización
+            dtp_FechaReserva.Value = DateTime.Now.AddDays(1); // Por defecto, un día después
             dtp_FechaReserva.MinDate = DateTime.Now; // No permitir fechas pasadas
             
-            // Evento de bÃºsqueda
+            // Evento de búsqueda
             txt_Buscar.TextChanged += txt_Buscar_TextChanged;
             
             // Cargar datos
@@ -86,20 +86,22 @@ namespace Escritorio
             GrdVw_Reservas.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Cliente",
-                DataPropertyName = "Cliente.Nombre",
+                Name = "ClienteNombre",
+                Width = 150,
                 ReadOnly = true
             });
 
             GrdVw_Reservas.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Evento",
-                DataPropertyName = "Evento.NombreEvento",
+                Name = "EventoNombre",
+                Width = 150,
                 ReadOnly = true
             });
 
             GrdVw_Reservas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Fecha CreaciÃ³n",
+                HeaderText = "Fecha Creación",
                 DataPropertyName = "FechaReserva",
                 DefaultCellStyle = { Format = "dd/MM/yyyy HH:mm" },
                 Width = 130,
@@ -108,22 +110,21 @@ namespace Escritorio
 
             GrdVw_Reservas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Fecha FinalizaciÃ³n",
+                HeaderText = "Fecha Finalización",
                 DataPropertyName = "FechaFinalizacion",
                 DefaultCellStyle = { Format = "dd/MM/yyyy" },
                 Width = 130,
                 ReadOnly = true
             });
 
-            // Columna editable de Estado con ComboBox
-            var colEstado = new DataGridViewComboBoxColumn
+            // Columna de Estado - SOLO LECTURA
+            GrdVw_Reservas.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Estado",
                 DataPropertyName = "Estado",
                 Width = 110,
-                Items = { "Pendiente", "Confirmada", "Entregada", "Cancelada", "Completada" }
-            };
-            GrdVw_Reservas.Columns.Add(colEstado);
+                ReadOnly = true
+            });
 
             GrdVw_Reservas.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -136,9 +137,27 @@ namespace Escritorio
 
             GrdVw_Reservas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             
-            // Evento para detectar cambios en el estado
-            GrdVw_Reservas.CellValueChanged += GrdVw_Reservas_CellValueChanged;
-            GrdVw_Reservas.CurrentCellDirtyStateChanged += GrdVw_Reservas_CurrentCellDirtyStateChanged;
+            // Evento para formatear las celdas de Cliente y Evento
+            GrdVw_Reservas.CellFormatting += GrdVw_Reservas_CellFormatting;
+        }
+
+        private void GrdVw_Reservas_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (GrdVw_Reservas.Rows[e.RowIndex].DataBoundItem is ReservaDTO reserva)
+            {
+                // Columna Cliente
+                if (GrdVw_Reservas.Columns[e.ColumnIndex].Name == "ClienteNombre")
+                {
+                    e.Value = reserva.Cliente?.Nombre ?? "Sin cliente";
+                    e.FormattingApplied = true;
+                }
+                // Columna Evento
+                else if (GrdVw_Reservas.Columns[e.ColumnIndex].Name == "EventoNombre")
+                {
+                    e.Value = reserva.Evento?.NombreEvento ?? "Sin evento";
+                    e.FormattingApplied = true;
+                }
+            }
         }
 
         private void ConfigurarDataGridViewProductos()
@@ -203,7 +222,7 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Falta de autorizaciÃ³n.",
+                MessageBox.Show(ex.Message, "Falta de autorización.",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
@@ -231,7 +250,7 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Falta de autorizaciÃ³n.",
+                MessageBox.Show(ex.Message, "Falta de autorización.",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
@@ -259,7 +278,7 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Falta de autorizaciÃ³n.",
+                MessageBox.Show(ex.Message, "Falta de autorización.",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
@@ -281,18 +300,18 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Falta de autorizaciÃ³n.",
+                MessageBox.Show(ex.Message, "Falta de autorización.",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
             catch (HttpRequestException ex)
             {
                 MessageBox.Show($"No se puede conectar con el servidor:\n{ex.Message}",
-                              "Error de ConexiÃ³n", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                              "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (TaskCanceledException)
             {
-                MessageBox.Show("La peticiÃ³n ha excedido el tiempo de espera.",
+                MessageBox.Show("La petición ha excedido el tiempo de espera.",
                               "Timeout", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
@@ -347,7 +366,7 @@ namespace Escritorio
 
             int cantidad = (int)nud_Cantidad.Value;
 
-            // Verificar si el producto ya estÃ¡ en la lista
+            // Verificar si el producto ya está en la lista
             var existente = _productosReserva.FirstOrDefault(p => p.ProductoId == productoId);
             int cantidadTotal = cantidad;
             
@@ -371,14 +390,11 @@ namespace Escritorio
                 return;
             }
 
-            // Si pasa la validaciÃ³n, agregar o actualizar
+            // Si pasa la validación, agregar o actualizar
             if (existente != null)
             {
-                // CORREGIR: Actualizar cantidad y recalcular subtotal
                 existente.Cantidad = cantidadTotal;
                 existente.Subtotal = existente.Cantidad * existente.PrecioUnitario;
-                
-                // Notificar al BindingList que hubo cambios
                 _productosReserva.ResetBindings();
             }
             else
@@ -408,7 +424,7 @@ namespace Escritorio
             else
             {
                 MessageBox.Show("Por favor, seleccione un producto para quitar.",
-                              "SelecciÃ³n requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                              "Selección requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -429,11 +445,11 @@ namespace Escritorio
                 return;
             }
 
-            // Validar que la fecha de finalizaciÃ³n sea futura
+            // Validar que la fecha de finalización sea futura
             if (dtp_FechaReserva.Value <= DateTime.Now)
             {
-                MessageBox.Show("La fecha de finalizaciÃ³n debe ser posterior a hoy.",
-                              "Fecha invÃ¡lida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("La fecha de finalización debe ser posterior a hoy.",
+                              "Fecha inválida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -454,8 +470,8 @@ namespace Escritorio
 
                 await _reservaApiClient.CreateAsync(createRequest);
 
-                MessageBox.Show("Reserva creada exitosamente.\n\nFecha de creaciÃ³n: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"), 
-                              "Ã‰xito",
+                MessageBox.Show("Reserva creada exitosamente.\n\nFecha de creación: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"), 
+                              "Éxito",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 LimpiarCampos();
@@ -463,7 +479,7 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "SesiÃ³n Expirada",
+                MessageBox.Show(ex.Message, "Sesión Expirada",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
@@ -478,7 +494,7 @@ namespace Escritorio
         {
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
-                MessageBox.Show("Por favor, seleccione una reserva vÃ¡lida para editar.",
+                MessageBox.Show("Por favor, seleccione una reserva válida para editar.",
                               "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -512,7 +528,7 @@ namespace Escritorio
 
                 if (resultado)
                 {
-                    MessageBox.Show("Reserva actualizada exitosamente.", "Ã‰xito",
+                    MessageBox.Show("Reserva actualizada exitosamente.", "Éxito",
                                   MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     LimpiarCampos();
@@ -526,7 +542,7 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "SesiÃ³n Expirada",
+                MessageBox.Show(ex.Message, "Sesión Expirada",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }
@@ -541,13 +557,13 @@ namespace Escritorio
         {
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
-                MessageBox.Show("Por favor, seleccione una reserva vÃ¡lida para eliminar.",
+                MessageBox.Show("Por favor, seleccione una reserva válida para eliminar.",
                               "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var result = MessageBox.Show("Â¿EstÃ¡ seguro que desea eliminar esta reserva?",
-                                       "Confirmar eliminaciÃ³n", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show("¿Está seguro que desea eliminar esta reserva?",
+                                       "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
@@ -557,7 +573,7 @@ namespace Escritorio
 
                     if (resultado)
                     {
-                        MessageBox.Show("Reserva eliminada exitosamente.", "Ã‰xito",
+                        MessageBox.Show("Reserva eliminada exitosamente.", "Éxito",
                                       MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         LimpiarCampos();
@@ -571,7 +587,7 @@ namespace Escritorio
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    MessageBox.Show(ex.Message, "SesiÃ³n Expirada",
+                    MessageBox.Show(ex.Message, "Sesión Expirada",
                                   MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     this.Close();
                 }
@@ -623,82 +639,6 @@ namespace Escritorio
             LimpiarCampos();
         }
 
-        private void GrdVw_Reservas_CurrentCellDirtyStateChanged(object? sender, EventArgs e)
-        {
-            // Confirmar inmediatamente los cambios en el ComboBox
-            if (GrdVw_Reservas.IsCurrentCellDirty)
-            {
-                GrdVw_Reservas.CommitEdit(DataGridViewDataErrorContexts.Commit);
-            }
-        }
-
-        private async void GrdVw_Reservas_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
-        {
-            // Verificar si es la columna de Estado
-            if (e.RowIndex >= 0 && GrdVw_Reservas.Columns[e.ColumnIndex].HeaderText == "Estado")
-            {
-                try
-                {
-                    var reserva = (ReservaDTO)GrdVw_Reservas.Rows[e.RowIndex].DataBoundItem;
-                    var nuevoEstado = GrdVw_Reservas.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
-
-                    if (string.IsNullOrEmpty(nuevoEstado) || nuevoEstado == reserva.Estado)
-                        return;
-
-                    // Confirmar cambio de estado
-                    var result = MessageBox.Show(
-                        $"Â¿Desea cambiar el estado de la reserva #{reserva.Id} a '{nuevoEstado}'?",
-                        "Confirmar cambio de estado",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-                        // Actualizar solo el estado
-                        var updateRequest = new UpdateReservaRequest
-                        {
-                            Id = reserva.Id,
-                            ClienteId = reserva.ClienteId,
-                            EventoId = reserva.EventoId,
-                            FechaFinalizacion = reserva.FechaFinalizacion,
-                            Estado = nuevoEstado,
-                            Productos = reserva.Productos.Select(p => new UpdateReservaProductoRequest
-                            {
-                                ProductoId = p.ProductoId,
-                                CantidadReservada = p.CantidadReservada
-                            }).ToList()
-                        };
-
-                        bool resultado = await _reservaApiClient.UpdateAsync(updateRequest);
-
-                        if (resultado)
-                        {
-                            MessageBox.Show("Estado actualizado exitosamente.", "Ã‰xito",
-                                          MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            await CargarReservasAsync();
-                        }
-                        else
-                        {
-                            MessageBox.Show("No se pudo actualizar el estado.", "Error",
-                                          MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            await CargarReservasAsync(); // Recargar para revertir el cambio visual
-                        }
-                    }
-                    else
-                    {
-                        // Revertir el cambio
-                        await CargarReservasAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al actualizar estado: {ex.Message}",
-                                  "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    await CargarReservasAsync();
-                }
-            }
-        }
-
         private bool ValidarCampos()
         {
             if (cmb_Cliente.SelectedValue == null)
@@ -735,7 +675,7 @@ namespace Escritorio
             if (cmb_Evento.Items.Count > 0)
                 cmb_Evento.SelectedIndex = 0;
             
-            dtp_FechaReserva.Value = DateTime.Now.AddDays(1); // Resetear a maÃ±ana
+            dtp_FechaReserva.Value = DateTime.Now.AddDays(1); // Resetear a mañana
             
             if (cmb_Estado.Items.Count > 0)
                 cmb_Estado.SelectedIndex = 0;
