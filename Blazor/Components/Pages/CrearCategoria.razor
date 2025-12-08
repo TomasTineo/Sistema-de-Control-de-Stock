@@ -1,0 +1,304 @@
+﻿@page "/categorias/nueva"
+@rendermode InteractiveServer
+@using DTOs.Categorias
+@using Blazor.Services
+@inject ICategoriaService CategoriaService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-plus-circle"></i> Nueva Categoría</h1>
+        <button class="btn btn-outline-secondary" @onclick="VolverALista">
+            <i class="bi bi-arrow-left"></i> Volver a Categorías
+        </button>
+    </div>
+
+    <!-- Formulario -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información de la Categoría</h5>
+        </div>
+
+        <div class="card-body">
+            <EditForm Model="@NuevaCategoria" OnValidSubmit="@HandleCrearCategoria" FormName="crearCategoriaForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="alert alert-danger" />
+
+                <!-- Campo Nombre -->
+                <div class="mb-4">
+                    <label for="nombre" class="form-label fw-bold">
+                        <i class="bi bi-tag"></i> Nombre de la Categoría *
+                    </label>
+                    <InputText id="nombre"
+                               @bind-Value="NuevaCategoria.Nombre"
+                               class="form-control form-control-lg"
+                               placeholder="Ej: Electrónica, Ropa, Hogar..."
+                               autofocus />
+                    <ValidationMessage For="@(() => NuevaCategoria.Nombre)" class="text-danger small" />
+                    <div class="form-text">Nombre único para identificar la categoría</div>
+                </div>
+
+                <!-- Mensajes de estado -->
+                @if (!string.IsNullOrEmpty(SuccessMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                        <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+                        <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                    </div>
+                }
+
+                <!-- Botones de acción -->
+                <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                    <button type="submit"
+                            class="btn btn-primary btn-lg px-4"
+                            disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span>
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Creando...
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                <i class="bi bi-save me-2"></i> Guardar Categoría
+                            </span>
+                        }
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-lg px-4"
+                            @onclick="LimpiarFormulario"
+                            disabled="@isLoading">
+                        <i class="bi bi-eraser me-2"></i> Limpiar
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-danger btn-lg px-4"
+                            @onclick="VolverALista"
+                            disabled="@isLoading">
+                        <i class="bi bi-x-circle me-2"></i> Cancelar
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <!-- Vista previa -->
+        <div class="card-footer bg-light">
+            <h6 class="mb-2"><i class="bi bi-eye"></i> Vista Previa</h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                @if (!string.IsNullOrEmpty(NuevaCategoria.Nombre))
+                                {
+                                    <span class="badge" style="background-color: #3498db; color: white;">
+                                        @NuevaCategoria.Nombre
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Nombre de categoría</span>
+                                }
+                            </h6>
+                            <p class="card-text small text-muted">
+                                Nueva categoría será creada con los datos ingresados.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb"></i> Consejos</h6>
+                        <ul class="mb-0 small">
+                            <li>Usa nombres descriptivos y cortos</li>
+                            <li>Evita nombres duplicados</li>
+                            <li>Considera cómo organizarás tus productos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Modelo para el formulario
+    private CreateCategoriaRequest NuevaCategoria = new();
+
+    // Estados
+    private bool isLoading = false;
+    private bool _hasInitialized = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+
+    // Inicialización
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            _hasInitialized = true;
+            // No necesitamos cargar datos, solo inicializar
+        }
+    }
+
+    // Método para crear la categoría
+    private async Task HandleCrearCategoria()
+    {
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        try
+        {
+            Console.WriteLine("=== CREANDO NUEVA CATEGORÍA ===");
+            Console.WriteLine($"Nombre: {NuevaCategoria.Nombre}");
+
+            // Validación adicional
+            if (string.IsNullOrWhiteSpace(NuevaCategoria.Nombre))
+            {
+                throw new ArgumentException("El nombre de la categoría es requerido");
+            }
+
+            // Llamar al servicio
+            var categoriaCreada = await CategoriaService.CreateCategoriaAsync(NuevaCategoria);
+
+            SuccessMessage = $"¡Categoría '{categoriaCreada.Nombre}' creada exitosamente! ID: {categoriaCreada.Id}";
+
+            // Limpiar formulario después del éxito
+            LimpiarFormulario();
+
+            // Opcional: Redirigir después de un tiempo
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/categorias");
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No tienes permiso para crear categorías. Contacta al administrador.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ErrorMessage = "Error en los datos enviados. Verifica la información.";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                ErrorMessage = "Ya existe una categoría con ese nombre.";
+            }
+            else
+            {
+                ErrorMessage = $"Error al crear categoría: {ex.Message}";
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Métodos auxiliares
+    private void LimpiarFormulario()
+    {
+        NuevaCategoria = new CreateCategoriaRequest();
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/categorias");
+    }
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
+}
+
+<style>
+    .form-control-lg {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .border-top {
+        border-top: 2px solid #dee2e6 !important;
+    }
+
+    .alert {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .badge {
+        font-size: 1rem;
+        padding: 0.5em 1em;
+    }
+
+    /* Efecto de focus en el input */
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .d-flex.gap-3 {
+            flex-direction: column;
+        }
+
+        .btn-lg {
+            width: 100%;
+        }
+    }
+</style>

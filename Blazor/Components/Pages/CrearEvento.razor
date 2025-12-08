@@ -1,0 +1,474 @@
+﻿@page "/eventos/nuevo"
+@rendermode InteractiveServer
+@using DTOs.Eventos
+@using Blazor.Services
+@inject IEventoService EventoService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-plus-circle"></i> Nuevo Evento</h1>
+        <button class="btn btn-outline-secondary" @onclick="VolverALista">
+            <i class="bi bi-arrow-left"></i> Volver a Eventos
+        </button>
+    </div>
+
+    <!-- Formulario -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información del Evento</h5>
+                </div>
+
+                <div class="card-body">
+                    <EditForm Model="@NuevoEvento" OnValidSubmit="@HandleCrearEvento" FormName="crearEventoForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger" />
+
+                        <!-- Campo Nombre del Evento -->
+                        <div class="mb-4">
+                            <label for="nombreEvento" class="form-label fw-bold">
+                                <i class="bi bi-calendar-event"></i> Nombre del Evento *
+                            </label>
+                            <InputText id="nombreEvento"
+                                       @bind-Value="NuevoEvento.NombreEvento"
+                                       class="form-control form-control-lg"
+                                       placeholder="Ej: Reunión de equipo, Conferencia anual, Taller..."
+                                       autofocus />
+                            <ValidationMessage For="@(() => NuevoEvento.NombreEvento)" class="text-danger small" />
+                            <div class="form-text">Nombre descriptivo del evento</div>
+                        </div>
+
+                        <!-- Campo Fecha del Evento -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-calendar-date"></i> Fecha y Hora del Evento *
+                            </label>
+                            <div class="row g-3">
+                                <!-- FECHA -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha</label>
+                                    <input type="date"
+                                           class="form-control"
+                                           value="@FechaInput"
+                                           @onchange="@(e => OnFechaChange(e.Value?.ToString()))"
+                                           min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                </div>
+
+                                <!-- HORA -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Hora</label>
+                                    <input type="time"
+                                           class="form-control"
+                                           value="@HoraInput"
+                                           @onchange="@(e => OnHoraChange(e.Value?.ToString()))" />
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Fecha seleccionada: <strong>@NuevoEvento.FechaEvento.ToString("dd/MM/yyyy HH:mm")</strong>
+                                </small>
+                            </div>
+                            <ValidationMessage For="@(() => NuevoEvento.FechaEvento)" class="text-danger small" />
+                            <div class="form-text">Selecciona la fecha y hora del evento (no se permiten fechas pasadas)</div>
+                        </div>
+
+                        <!-- Mensajes de estado -->
+                        @if (!string.IsNullOrEmpty(SuccessMessage))
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                                <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(ErrorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+                                <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                            </div>
+                        }
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg px-4"
+                                    disabled="@isLoading">
+                                @if (isLoading)
+                                {
+                                    <span>
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                        Creando...
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        <i class="bi bi-save me-2"></i> Guardar Evento
+                                    </span>
+                                }
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-lg px-4"
+                                    @onclick="LimpiarFormulario"
+                                    disabled="@isLoading">
+                                <i class="bi bi-eraser me-2"></i> Limpiar
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-lg px-4"
+                                    @onclick="VolverALista"
+                                    disabled="@isLoading">
+                                <i class="bi bi-x-circle me-2"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral informativo -->
+        <div class="col-lg-4">
+            <!-- Vista previa -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-eye"></i> Vista Previa</h6>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(NuevoEvento.NombreEvento))
+                    {
+                        <div class="mb-3">
+                            <h5>@NuevoEvento.NombreEvento</h5>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <h5 class="text-muted fst-italic">Nombre del evento</h5>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <p class="mb-1">
+                            <i class="bi bi-calendar-date text-primary"></i>
+                            <strong>Fecha:</strong> @NuevoEvento.FechaEvento.ToString("dddd, dd MMMM yyyy")
+                        </p>
+                        <p class="mb-0">
+                            <i class="bi bi-clock text-primary"></i>
+                            <strong>Hora:</strong> @NuevoEvento.FechaEvento.ToString("HH:mm") hrs
+                        </p>
+                    </div>
+
+                    @if (NuevoEvento.FechaEvento.Date == DateTime.Today)
+                    {
+                        <div class="alert alert-warning small">
+                            <i class="bi bi-exclamation-triangle"></i> El evento es para hoy
+                        </div>
+                    }
+                    else if (NuevoEvento.FechaEvento > DateTime.Now)
+                    {
+                        var diasRestantes = (NuevoEvento.FechaEvento.Date - DateTime.Today).Days;
+                        <div class="alert alert-info small">
+                            <i class="bi bi-clock"></i> Faltan @diasRestantes día(s)
+                        </div>
+                    }
+                    else if (NuevoEvento.FechaEvento < DateTime.Now)
+                    {
+                        <div class="alert alert-danger small">
+                            <i class="bi bi-exclamation-triangle"></i> ¡Fecha pasada! Selecciona una fecha futura
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Consejos -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Consejos</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0 small">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Usa nombres claros y descriptivos
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Considera la duración del evento al seleccionar la hora
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Evita fechas pasadas para eventos futuros
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Revisa la vista previa antes de guardar
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle text-success"></i>
+                            Los eventos se pueden editar después de creados
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Modelo para el formulario
+    private CreateEventoRequest NuevoEvento = new();
+
+    // Estados
+    private bool isLoading = false;
+    private bool _hasInitialized = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+
+    // Propiedades para los inputs
+    private string FechaInput => NuevoEvento.FechaEvento.ToString("yyyy-MM-dd");
+    private string HoraInput => NuevoEvento.FechaEvento.ToString("HH:mm");
+
+    // Inicialización
+    protected override void OnInitialized()
+    {
+        // Establecer fecha por defecto (hoy a las 14:00)
+        NuevoEvento.FechaEvento = DateTime.Today.AddHours(14);
+    }
+
+    // Métodos para manejar cambios
+    private void OnFechaChange(string? fechaStr)
+    {
+        if (string.IsNullOrEmpty(fechaStr)) return;
+
+        try
+        {
+            if (DateTime.TryParse(fechaStr, out var nuevaFecha))
+            {
+                // Mantener la hora actual, solo cambiar la fecha
+                var nuevaFechaHora = new DateTime(
+                    nuevaFecha.Year,
+                    nuevaFecha.Month,
+                    nuevaFecha.Day,
+                    NuevoEvento.FechaEvento.Hour,
+                    NuevoEvento.FechaEvento.Minute,
+                    0
+                );
+
+                NuevoEvento.FechaEvento = nuevaFechaHora;
+                Console.WriteLine($"Fecha cambiada a: {nuevaFechaHora}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cambiando fecha: {ex.Message}");
+        }
+    }
+
+    private void OnHoraChange(string? horaStr)
+    {
+        if (string.IsNullOrEmpty(horaStr)) return;
+
+        try
+        {
+            if (TimeSpan.TryParse(horaStr, out var nuevaHora))
+            {
+                // Mantener la fecha actual, solo cambiar la hora
+                var nuevaFechaHora = new DateTime(
+                    NuevoEvento.FechaEvento.Year,
+                    NuevoEvento.FechaEvento.Month,
+                    NuevoEvento.FechaEvento.Day,
+                    nuevaHora.Hours,
+                    nuevaHora.Minutes,
+                    0
+                );
+
+                NuevoEvento.FechaEvento = nuevaFechaHora;
+                Console.WriteLine($"Hora cambiada a: {nuevaFechaHora}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cambiando hora: {ex.Message}");
+        }
+    }
+
+    // Método para crear el evento
+    private async Task HandleCrearEvento()
+    {
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        try
+        {
+            Console.WriteLine("=== CREANDO NUEVO EVENTO ===");
+            Console.WriteLine($"Nombre: {NuevoEvento.NombreEvento}");
+            Console.WriteLine($"Fecha: {NuevoEvento.FechaEvento}");
+
+            // Validaciones
+            if (string.IsNullOrWhiteSpace(NuevoEvento.NombreEvento))
+            {
+                throw new ArgumentException("El nombre del evento es requerido");
+            }
+
+            if (NuevoEvento.FechaEvento < DateTime.Now)
+            {
+                throw new ArgumentException("No se pueden crear eventos con fecha pasada");
+            }
+
+            // Llamar al servicio
+            var eventoCreado = await EventoService.CreateEventoAsync(NuevoEvento);
+
+            SuccessMessage = $"¡Evento '{eventoCreado.NombreEvento}' creado exitosamente! ID: {eventoCreado.Id}";
+
+            // Limpiar formulario después del éxito
+            LimpiarFormulario();
+
+            // Opcional: Redirigir después de un tiempo
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/eventos");
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No tienes permiso para crear eventos. Contacta al administrador.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ErrorMessage = "Error en los datos enviados. Verifica la información.";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                ErrorMessage = "Ya existe un evento con ese nombre en esa fecha.";
+            }
+            else
+            {
+                ErrorMessage = $"Error al crear evento: {ex.Message}";
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Métodos auxiliares
+    private void LimpiarFormulario()
+    {
+        NuevoEvento = new CreateEventoRequest();
+        NuevoEvento.FechaEvento = DateTime.Today.AddHours(14); // Reset a hoy 14:00
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/eventos");
+    }
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
+}
+
+<style>
+    .form-control-lg {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .border-top {
+        border-top: 2px solid #dee2e6 !important;
+    }
+
+    .alert {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Estilos para inputs de fecha y hora */
+    input[type="date"], input[type="time"] {
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        input[type="date"]:focus, input[type="time"]:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .col-lg-8, .col-lg-4 {
+            width: 100%;
+        }
+
+        .d-flex.gap-3 {
+            flex-direction: column;
+        }
+
+        .btn-lg {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .row.g-3 {
+            flex-direction: column;
+        }
+
+        .col-md-6 {
+            width: 100%;
+        }
+    }
+</style>

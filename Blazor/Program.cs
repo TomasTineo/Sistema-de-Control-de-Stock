@@ -15,6 +15,9 @@ builder.Services.AddHttpClient("AuthAPI", client =>
 
 // 3. Tus servicios personalizados
 builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IEventoService, EventoService>();
+
 builder.Services.AddScoped<ITokenStorage, ServerTokenStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 

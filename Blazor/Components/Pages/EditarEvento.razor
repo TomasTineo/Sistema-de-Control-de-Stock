@@ -1,0 +1,662 @@
+﻿@page "/eventos/editar/{id:int}"
+@rendermode InteractiveServer
+@using DTOs.Eventos
+@using Blazor.Services
+@inject IEventoService EventoService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-pencil-square"></i> Editar Evento</h1>
+        <button class="btn btn-outline-secondary" @onclick="VolverALista">
+            <i class="bi bi-arrow-left"></i> Volver a Eventos
+        </button>
+    </div>
+
+    <!-- Estado inicial -->
+    @if (!_hasInitialized)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Inicializando...</span>
+            </div>
+            <p class="mt-2">Inicializando editor...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Loading State -->
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando evento...</p>
+            </div>
+        }
+
+        <!-- Evento no encontrado -->
+        @if (!isLoading && evento == null)
+        {
+            <div class="alert alert-warning">
+                <h5><i class="bi bi-exclamation-triangle"></i> Evento no encontrado</h5>
+                <p>El evento con ID @Id no existe o no se pudo cargar.</p>
+                <button class="btn btn-outline-primary" @onclick="VolverALista">
+                    Volver a la lista
+                </button>
+            </div>
+        }
+
+        <!-- Formulario de edición -->
+        @if (!isLoading && evento != null)
+        {
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle"></i> Editando: @evento.NombreEvento
+                            </h5>
+                        </div>
+
+                        <div class="card-body">
+                            <EditForm Model="@evento" OnValidSubmit="@ActualizarEvento">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary class="alert alert-danger" />
+
+                                <!-- ID (solo lectura) -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-hash"></i> ID del Evento
+                                    </label>
+                                    <input type="text"
+                                           class="form-control-plaintext"
+                                           value="@evento.Id"
+                                           readonly />
+                                    <div class="form-text">El ID no se puede modificar</div>
+                                </div>
+
+                                <!-- Campo Nombre del Evento -->
+                                <div class="mb-4">
+                                    <label for="nombreEvento" class="form-label fw-bold">
+                                        <i class="bi bi-calendar-event"></i> Nombre del Evento *
+                                    </label>
+                                    <InputText id="nombreEvento"
+                                               @bind-Value="evento.NombreEvento"
+                                               class="form-control form-control-lg"
+                                               placeholder="Ej: Reunión de equipo, Conferencia anual, Taller..." />
+                                    <ValidationMessage For="@(() => evento.NombreEvento)" class="text-danger small" />
+                                    <div class="form-text">Nombre descriptivo del evento</div>
+                                </div>
+
+                                <!-- Campo Fecha del Evento -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-calendar-date"></i> Fecha y Hora del Evento *
+                                    </label>
+                                    <div class="row g-3">
+                                        <!-- FECHA -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Fecha</label>
+                                            <input type="date"
+                                                   class="form-control"
+                                                   value="@FechaInput"
+                                                   @onchange="@(e => OnFechaChange(e.Value?.ToString()))"
+                                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                        </div>
+
+                                        <!-- HORA -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Hora</label>
+                                            <input type="time"
+                                                   class="form-control"
+                                                   value="@HoraInput"
+                                                   @onchange="@(e => OnHoraChange(e.Value?.ToString()))" />
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            Fecha actual: <strong>@evento.FechaEvento.ToString("dd/MM/yyyy HH:mm")</strong>
+                                        </small>
+                                    </div>
+                                    <ValidationMessage For="@(() => evento.FechaEvento)" class="text-danger small" />
+                                    <div class="form-text">Actualiza la fecha y hora del evento</div>
+                                </div>
+
+                                <!-- Información del estado -->
+                                <div class="alert alert-info">
+                                    <h6><i class="bi bi-info-circle"></i> Información</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1">
+                                                <strong>Estado actual:</strong>
+                                                @if (evento.FechaEvento > DateTime.Now)
+                                                {
+                                                    <span class="badge bg-primary">Pendiente</span>
+                                                }
+                                                else if (evento.FechaEvento.Date == DateTime.Today)
+                                                {
+                                                    <span class="badge bg-warning">En curso</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Completado</span>
+                                                }
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1">
+                                                <strong>Fecha creación:</strong> @eventoCargadoOriginal?.FechaEvento.ToString("dd/MM/yyyy HH:mm")
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mensajes de estado -->
+                                @if (!string.IsNullOrEmpty(SuccessMessage))
+                                {
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                                        <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(ErrorMessage))
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+                                        <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                                    </div>
+                                }
+
+                                <!-- Botones de acción -->
+                                <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                                    <button type="submit"
+                                            class="btn btn-primary btn-lg px-4"
+                                            disabled="@isSaving">
+                                        @if (isSaving)
+                                        {
+                                            <span>
+                                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                                Guardando...
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                <i class="bi bi-save me-2"></i> Guardar Cambios
+                                            </span>
+                                        }
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-outline-warning btn-lg px-4"
+                                            @onclick="RestaurarOriginal"
+                                            disabled="@isSaving">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i> Restaurar
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-lg px-4"
+                                            @onclick="VolverALista"
+                                            disabled="@isSaving">
+                                        <i class="bi bi-x-circle me-2"></i> Cancelar
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel lateral informativo -->
+                <div class="col-lg-4">
+                    <!-- Resumen -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Resumen</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6>Evento Original</h6>
+                                <p class="mb-1">
+                                    <strong>Nombre:</strong> @eventoCargadoOriginal?.NombreEvento
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Fecha:</strong> @eventoCargadoOriginal?.FechaEvento.ToString("dd/MM/yyyy")
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Hora:</strong> @eventoCargadoOriginal?.FechaEvento.ToString("HH:mm") hrs
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6>Cambios Detectados</h6>
+                                <ul class="mb-0 small">
+                                    @if (evento.NombreEvento != eventoCargadoOriginal?.NombreEvento)
+                                    {
+                                        <li><i class="bi bi-check-circle text-success"></i> Nombre modificado</li>
+                                    }
+                                    @if (evento.FechaEvento != eventoCargadoOriginal?.FechaEvento)
+                                    {
+                                        <li><i class="bi bi-check-circle text-success"></i> Fecha/hora modificada</li>
+                                    }
+                                    @if (evento.NombreEvento == eventoCargadoOriginal?.NombreEvento &&
+                                                                evento.FechaEvento == eventoCargadoOriginal?.FechaEvento)
+                                    {
+                                        <li class="text-muted"><i class="bi bi-dash-circle"></i> Sin cambios</li>
+                                    }
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-warning small">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Cambiar la fecha de un evento puede afectar a los asistentes.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa -->
+                    <div class="card shadow">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-eye"></i> Vista Previa</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h5>@evento.NombreEvento</h5>
+                                <small class="text-muted">ID: @evento.Id</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="mb-1">
+                                    <i class="bi bi-calendar-date text-primary"></i>
+                                    <strong>Fecha:</strong> @evento.FechaEvento.ToString("dddd, dd MMMM yyyy")
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-clock text-primary"></i>
+                                    <strong>Hora:</strong> @evento.FechaEvento.ToString("HH:mm") hrs
+                                </p>
+                            </div>
+
+                            @if (evento.FechaEvento > DateTime.Now)
+                            {
+                                var diasRestantes = (evento.FechaEvento.Date - DateTime.Today).Days;
+                                <div class="alert alert-info small">
+                                    <i class="bi bi-clock"></i>
+                                    El evento será en @diasRestantes día(s)
+                                </div>
+                            }
+                            else if (evento.FechaEvento.Date == DateTime.Today)
+                            {
+                                <div class="alert alert-warning small">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    El evento es para hoy
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-secondary small">
+                                    <i class="bi bi-check-circle"></i>
+                                    Evento ya realizado
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    // Modelo y estados
+    private EventoDTO evento;
+    private EventoDTO eventoCargadoOriginal; // Para restaurar cambios
+    private bool _hasInitialized = false;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+
+    // Propiedades para los inputs
+    private string FechaInput => evento?.FechaEvento.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd");
+    private string HoraInput => evento?.FechaEvento.ToString("HH:mm") ?? "14:00";
+
+    // Inicialización
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            Console.WriteLine($"=== INICIALIZANDO EDICIÓN EVENTO ID: {Id} ===");
+            _hasInitialized = true;
+            StateHasChanged();
+
+            await CargarEvento();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando: {ex.Message}");
+            ErrorMessage = "Error al inicializar la página.";
+            _hasInitialized = true;
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarEvento()
+    {
+        try
+        {
+            Console.WriteLine($"Cargando evento con ID: {Id}");
+            evento = await EventoService.GetEventoByIdAsync(Id);
+
+            if (evento != null)
+            {
+                // Guardar copia original
+                eventoCargadoOriginal = new EventoDTO
+                {
+                    Id = evento.Id,
+                    NombreEvento = evento.NombreEvento,
+                    FechaEvento = evento.FechaEvento
+                };
+
+                Console.WriteLine($"Evento cargado: {evento.NombreEvento} - {evento.FechaEvento}");
+            }
+            else
+            {
+                Console.WriteLine($"Evento con ID {Id} no encontrado");
+                ErrorMessage = "Evento no encontrado.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            ErrorMessage = "El evento solicitado no fue encontrado.";
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para editar eventos.";
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al cargar el evento: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    // Métodos para manejar cambios de fecha/hora
+    private void OnFechaChange(string? fechaStr)
+    {
+        if (string.IsNullOrEmpty(fechaStr) || evento == null) return;
+
+        try
+        {
+            if (DateTime.TryParse(fechaStr, out var nuevaFecha))
+            {
+                // Mantener la hora actual, solo cambiar la fecha
+                var nuevaFechaHora = new DateTime(
+                    nuevaFecha.Year,
+                    nuevaFecha.Month,
+                    nuevaFecha.Day,
+                    evento.FechaEvento.Hour,
+                    evento.FechaEvento.Minute,
+                    0
+                );
+
+                evento.FechaEvento = nuevaFechaHora;
+                Console.WriteLine($"Fecha cambiada a: {nuevaFechaHora}");
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cambiando fecha: {ex.Message}");
+        }
+    }
+
+    private void OnHoraChange(string? horaStr)
+    {
+        if (string.IsNullOrEmpty(horaStr) || evento == null) return;
+
+        try
+        {
+            if (TimeSpan.TryParse(horaStr, out var nuevaHora))
+            {
+                // Mantener la fecha actual, solo cambiar la hora
+                var nuevaFechaHora = new DateTime(
+                    evento.FechaEvento.Year,
+                    evento.FechaEvento.Month,
+                    evento.FechaEvento.Day,
+                    nuevaHora.Hours,
+                    nuevaHora.Minutes,
+                    0
+                );
+
+                evento.FechaEvento = nuevaFechaHora;
+                Console.WriteLine($"Hora cambiada a: {nuevaFechaHora}");
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cambiando hora: {ex.Message}");
+        }
+    }
+
+    // Método para actualizar el evento
+    private async Task ActualizarEvento()
+    {
+        isSaving = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine($"=== ACTUALIZANDO EVENTO ID: {Id} ===");
+            Console.WriteLine($"Nuevo nombre: {evento.NombreEvento}");
+            Console.WriteLine($"Nueva fecha: {evento.FechaEvento}");
+
+            // Validaciones
+            if (string.IsNullOrWhiteSpace(evento.NombreEvento))
+            {
+                throw new ArgumentException("El nombre del evento es requerido");
+            }
+
+            // Verificar si hay cambios
+            if (evento.NombreEvento == eventoCargadoOriginal.NombreEvento &&
+                evento.FechaEvento == eventoCargadoOriginal.FechaEvento)
+            {
+                SuccessMessage = "No hay cambios para guardar.";
+                return;
+            }
+
+            // Llamar al servicio
+            var eventoActualizado = await EventoService.UpdateEventoAsync(Id, evento);
+
+            // Actualizar la copia original
+            eventoCargadoOriginal = new EventoDTO
+            {
+                Id = eventoActualizado.Id,
+                NombreEvento = eventoActualizado.NombreEvento,
+                FechaEvento = eventoActualizado.FechaEvento
+            };
+
+            SuccessMessage = $"¡Evento '{eventoActualizado.NombreEvento}' actualizado exitosamente!";
+
+            // Redirigir después de un tiempo
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/eventos");
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No tienes permiso para actualizar eventos.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ErrorMessage = "El evento no fue encontrado. Puede que haya sido eliminado.";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ErrorMessage = "Error en los datos enviados. Verifica la información.";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                ErrorMessage = "Ya existe un evento con ese nombre en esa fecha.";
+            }
+            else
+            {
+                ErrorMessage = $"Error al actualizar evento: {ex.Message}";
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    // Métodos auxiliares
+    private void RestaurarOriginal()
+    {
+        if (eventoCargadoOriginal != null && evento != null)
+        {
+            evento = new EventoDTO
+            {
+                Id = eventoCargadoOriginal.Id,
+                NombreEvento = eventoCargadoOriginal.NombreEvento,
+                FechaEvento = eventoCargadoOriginal.FechaEvento
+            };
+
+            SuccessMessage = "Cambios restaurados a la versión original.";
+            ErrorMessage = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/eventos");
+    }
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged();
+    }
+}
+
+<style>
+    .form-control-lg {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .border-top {
+        border-top: 2px solid #dee2e6 !important;
+    }
+
+    .alert {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-control-plaintext {
+        font-weight: bold;
+        color: #495057;
+    }
+
+    /* Estilos para inputs de fecha y hora */
+    input[type="date"], input[type="time"] {
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        input[type="date"]:focus, input[type="time"]:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.8em;
+    }
+
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .col-lg-8, .col-lg-4 {
+            width: 100%;
+        }
+
+        .d-flex.gap-3 {
+            flex-direction: column;
+        }
+
+        .btn-lg {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
