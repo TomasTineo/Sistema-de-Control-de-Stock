@@ -45,6 +45,38 @@ namespace Escritorio
 
             // Cargar productos desde la API
             await CargarProductosAsync();
+
+            // Aplicar permisos
+            await ConfigurarPermisos();
+        }
+
+        private async Task ConfigurarPermisos()
+        {
+            var authService = AuthServiceProvider.Instance;
+
+            // Verificar permisos con los nombres CORRECTOS de la BD (minúsculas)
+            btn_agregar.Enabled = await authService.HasPermissionAsync("productos.agregar");
+            btn_Editar.Enabled = await authService.HasPermissionAsync("productos.actualizar");
+            btn_Borrar.Enabled = await authService.HasPermissionAsync("productos.eliminar");
+
+            // Aplicar estilo visual a botones deshabilitados
+            if (!btn_agregar.Enabled)
+            {
+                btn_agregar.Text = "🔒 " + btn_agregar.Text;
+                btn_agregar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Editar.Enabled)
+            {
+                btn_Editar.Text = "🔒 " + btn_Editar.Text;
+                btn_Editar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Borrar.Enabled)
+            {
+                btn_Borrar.Text = "🔒 " + btn_Borrar.Text;
+                btn_Borrar.ForeColor = Color.Gray;
+            }
         }
 
         private void txt_Buscar_TextChanged(object sender, EventArgs e)
@@ -188,6 +220,14 @@ namespace Escritorio
 
         private async void btnAgregar_Click(object sender, EventArgs e)
         {
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("productos.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para crear productos.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txt_Name.Text) ||
                 string.IsNullOrWhiteSpace(txt_Description.Text) ||
                 string.IsNullOrWhiteSpace(txt_Price.Text) ||
@@ -396,6 +436,10 @@ namespace Escritorio
 
             txt_Name.Focus();
         }
+
+
+ 
+
 
         // Eventos existentes que no necesitan cambios
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) { }

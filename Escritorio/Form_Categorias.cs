@@ -35,6 +35,38 @@ namespace Escritorio
 
             // Cargar categorias desde la API
             await cargarCategoriaAsync();
+
+            // Aplicar permisos
+            await ConfigurarPermisos();
+        }
+
+        private async Task ConfigurarPermisos()
+        {
+            var authService = AuthServiceProvider.Instance;
+
+            // Verificar permisos 
+            btn_agregar.Enabled = await authService.HasPermissionAsync("categorias.agregar");
+            btn_Editar.Enabled = await authService.HasPermissionAsync("categorias.actualizar");
+            btn_Borrar.Enabled = await authService.HasPermissionAsync("categorias.eliminar");
+
+            // Aplicar estilo visual a botones deshabilitados
+            if (!btn_agregar.Enabled)
+            {
+                btn_agregar.Text = "🔒 " + btn_agregar.Text;
+                btn_agregar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Editar.Enabled)
+            {
+                btn_Editar.Text = "🔒 " + btn_Editar.Text;
+                btn_Editar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Borrar.Enabled)
+            {
+                btn_Borrar.Text = "🔒 " + btn_Borrar.Text;
+                btn_Borrar.ForeColor = Color.Gray;
+            }
         }
 
         private void ConfigurarDataGridView()
@@ -108,6 +140,14 @@ namespace Escritorio
 
         private async void button1_Click(object sender, EventArgs e)
         {
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("categorias.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para crear categorías.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txt_Name.Text))
             {
                 MessageBox.Show("Por favor, ingrese el nombre de la categoría.", 

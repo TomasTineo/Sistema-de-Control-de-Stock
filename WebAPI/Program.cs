@@ -182,16 +182,20 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
-    // Borrar y recrear (SOLO EN DESARROLLO)
-
- //   if (app.Environment.IsDevelopment())
- //   {
-       // await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
-        await context.Database.EnsureCreatedAsync();  // ? CREA NUEVA
- //   }
+    // Borrar y recrear (SOLO EN DESARROLLO) 
+    // DESCOMENTAR SOLO CUANDO NECESITES RECREAR LA BD CON DATOS INICIALES
+    //if (app.Environment.IsDevelopment())
+    //{
+    //    await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
+    //    await context.Database.EnsureCreatedAsync();  // ? CREA NUEVA
+    //}
+    
+    // Solo asegurar que exista (sin borrar)
+    await context.Database.EnsureCreatedAsync();
 }
 
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -206,6 +210,7 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -45,7 +45,7 @@ namespace Escritorio
         private async void Form_Reserva_Load(object sender, EventArgs e)
         {
             // Placeholders
-            txt_Buscar.PlaceholderText = "Buscar por cliente o evento...";
+            txt_Buscar.PlaceholderText = "?? Buscar por cliente o evento...";
             
             // Configurar DataGridView de Reservas
             ConfigurarDataGridViewReservas();
@@ -68,6 +68,38 @@ namespace Escritorio
             await CargarEventosAsync();
             await CargarProductosAsync();
             await CargarReservasAsync();
+
+            // Aplicar permisos
+            await ConfigurarPermisos();
+        }
+
+        private async Task ConfigurarPermisos()
+        {
+            var authService = AuthServiceProvider.Instance;
+
+            // Verificar permisos 
+            btn_Crear.Enabled = await authService.HasPermissionAsync("reservas.agregar");
+            btn_Editar.Enabled = await authService.HasPermissionAsync("reservas.actualizar");
+            btn_Eliminar.Enabled = await authService.HasPermissionAsync("reservas.eliminar");
+
+            // Aplicar estilo visual a botones deshabilitados
+            if (!btn_Crear.Enabled)
+            {
+                btn_Crear.Text = "?? " + btn_Crear.Text;
+                btn_Crear.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Editar.Enabled)
+            {
+                btn_Editar.Text = "?? " + btn_Editar.Text;
+                btn_Editar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Eliminar.Enabled)
+            {
+                btn_Eliminar.Text = "?? " + btn_Eliminar.Text;
+                btn_Eliminar.ForeColor = Color.Gray;
+            }
         }
 
         private void ConfigurarDataGridViewReservas()
@@ -141,6 +173,8 @@ namespace Escritorio
             GrdVw_Reservas.CellFormatting += GrdVw_Reservas_CellFormatting;
         }
 
+
+        // El DataGridView no soporta navegación de propiedades anidadas cuando pueden ser nulas, las inyectamos con una función usando el nombre del campo
         private void GrdVw_Reservas_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
             if (GrdVw_Reservas.Rows[e.RowIndex].DataBoundItem is ReservaDTO reserva)
@@ -436,6 +470,14 @@ namespace Escritorio
 
         private async void btnCrear_Click(object sender, EventArgs e)
         {
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("reservas.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para crear reservas.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!ValidarCampos()) return;
 
             if (!_productosReserva.Any())

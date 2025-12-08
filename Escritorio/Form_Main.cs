@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using API.Clients;
 
 
 namespace Escritorio
@@ -38,9 +40,42 @@ namespace Escritorio
             }
         }
 
-        private void FormMain_Load(object sender, EventArgs e)
+        private async void FormMain_Load(object sender, EventArgs e)
         {
-            // Configuración inicial si es necesaria
+            await ConfigurarPermisos();
+        }
+
+        private async Task ConfigurarPermisos()
+        {
+            var authService = AuthServiceProvider.Instance;
+
+            // Verificar permisos
+            btn_Productos.Enabled = await authService.HasPermissionAsync("productos.leer");
+            btn_Categorias.Enabled = await authService.HasPermissionAsync("categorias.leer");
+            btn_Clientes.Enabled = await authService.HasPermissionAsync("clientes.leer");
+            btn_Eventos.Enabled = await authService.HasPermissionAsync("eventos.leer");
+            btn_Reservas.Enabled = await authService.HasPermissionAsync("reservas.leer");
+
+            // Aplicar estilo visual a botones deshabilitados
+            AplicarEstiloSinPermiso(btn_Productos);
+            AplicarEstiloSinPermiso(btn_Categorias);
+            AplicarEstiloSinPermiso(btn_Clientes);
+            AplicarEstiloSinPermiso(btn_Eventos);
+            AplicarEstiloSinPermiso(btn_Reservas);
+        }
+
+        private void AplicarEstiloSinPermiso(Button button)
+        {
+            if (!button.Enabled)
+            {
+                button.ForeColor = Color.Gray;
+                button.Cursor = Cursors.No;
+                button.Text = "🔒 " + button.Text;
+            }
+            else
+            {
+                button.Cursor = Cursors.Hand;
+            }
         }
 
         private void buttonProducts_Click(object sender, EventArgs e)
@@ -48,6 +83,7 @@ namespace Escritorio
             var formProducts = Program.ServiceProvider.GetRequiredService<Form_Productos>();
             formProducts.Show();
         }
+        
         private void btnCategorias_Click(object sender, EventArgs e)
         {
             var formCategorias = Program.ServiceProvider.GetRequiredService<Form_Categorias>();

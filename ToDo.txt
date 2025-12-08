@@ -1,9 +1,8 @@
 # Falta:
 	
-	- Manejo de usuarios en los form: ajustar vista o avisos del sistema al operador por falta de permisos
-	- Form Gestión de reservas y Gestión Clientes	
 	- Form de reportes y estadisticas
 	- App web
 
-	- Grilla de reservas no muestra cliente y evento
 
+
+	- BORRAR INITIALDATA DE LA BASE DE DATOS 

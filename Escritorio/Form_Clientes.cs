@@ -39,15 +39,45 @@ namespace Escritorio
             txtEmail.PlaceholderText = "email@ejemplo.com";
             txtTelefono.PlaceholderText = "+54 XXX XXXXXXX";
             txtDireccion.PlaceholderText = "Dirección del cliente";
-            txtBuscar.PlaceholderText = "Buscar por nombre, apellido o email";
+            txtBuscar.PlaceholderText = "🔍 Buscar por nombre, apellido o email";
 
             // busqueda en tiempo real
             txtBuscar.TextChanged += txtBuscar_TextChanged;
 
-
-
             ConfigurarDataGridView();
             await CargarClientes();
+
+            // Aplicar permisos
+            await ConfigurarPermisos();
+        }
+
+        private async Task ConfigurarPermisos()
+        {
+            var authService = AuthServiceProvider.Instance;
+
+            // Verificar permisos
+            btnAgregar.Enabled = await authService.HasPermissionAsync("clientes.agregar");
+            btnModificar.Enabled = await authService.HasPermissionAsync("clientes.actualizar");
+            btnEliminar.Enabled = await authService.HasPermissionAsync("clientes.eliminar");
+
+            // Aplicar estilo visual a botones deshabilitados
+            if (!btnAgregar.Enabled)
+            {
+                btnAgregar.Text = "🔒 " + btnAgregar.Text;
+                btnAgregar.ForeColor = Color.Gray;
+            }
+            
+            if (!btnModificar.Enabled)
+            {
+                btnModificar.Text = "🔒 " + btnModificar.Text;
+                btnModificar.ForeColor = Color.Gray;
+            }
+            
+            if (!btnEliminar.Enabled)
+            {
+                btnEliminar.Text = "🔒 " + btnEliminar.Text;
+                btnEliminar.ForeColor = Color.Gray;
+            }
         }
 
         private void txtBuscar_TextChanged(object? sender, EventArgs e)
@@ -171,6 +201,14 @@ namespace Escritorio
 
         private async void btnAgregar_Click(object sender, EventArgs e)
         {
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("clientes.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para crear clientes.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!ValidarFormulario())
                 return;
             try
@@ -207,6 +245,14 @@ namespace Escritorio
 
         private async void btnModificar_Click(object sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("Clientes.Editar"))
+            {
+                MessageBox.Show("No tiene permisos para modificar clientes.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txtId.Text))
             {
                 MessageBox.Show("Seleccione un cliente para modificar.", "Advertencia",
@@ -266,6 +312,14 @@ namespace Escritorio
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("Clientes.Eliminar"))
+            {
+                MessageBox.Show("No tiene permisos para eliminar clientes.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txtId.Text))
             {
                 MessageBox.Show("Seleccione un cliente para eliminar.", "Advertencia",
