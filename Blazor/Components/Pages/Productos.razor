@@ -106,20 +106,18 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-outline-primary" 
-                                            @onclick="() => VerDetalles(producto.Id)"
-                                            title="Ver detalles">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
+                                    
                                     <button class="btn btn-sm btn-outline-warning" 
                                             @onclick="() => EditarProducto(producto.Id)"
                                             title="Editar">
                                         <i class="bi bi-pencil"></i>
+                                        Editar
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger" 
                                             @onclick="() => EliminarProducto(producto)"
                                             title="Eliminar">
                                         <i class="bi bi-trash"></i>
+                                        Eliminar
                                     </button>
                                 </div>
                             </td>

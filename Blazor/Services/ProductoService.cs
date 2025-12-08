@@ -14,18 +14,18 @@ namespace Blazor.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ITokenStorage _tokenStorage;
-        private readonly IJSRuntime _jsRuntime;
+
         private readonly NavigationManager _navigationManager;
 
         public ProductoService(
-             IHttpClientFactory httpClientFactory,
-               ITokenStorage tokenStorage,
+            IHttpClientFactory httpClientFactory,
+            ITokenStorage tokenStorage,
             IJSRuntime jsRuntime,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");
             _tokenStorage = tokenStorage;
-            _jsRuntime = jsRuntime;
+
             _navigationManager = navigationManager;
 
             // Configurar BaseAddress si no está configurado
@@ -42,25 +42,9 @@ namespace Blazor.Services
             {
                 Console.WriteLine("=== DEBUG GET PRODUCTOS ===");
 
-                // 1. Obtener token del ITokenStorage (no de sessionStorage directamente)
-                var token = await _tokenStorage.GetTokenAsync();
-                Console.WriteLine($"Token obtenido de ITokenStorage: {!string.IsNullOrEmpty(token)}");
+                await AgregarTokenAlRequest();
 
-                if (string.IsNullOrEmpty(token))
-                {
-                    Console.WriteLine("ERROR: No hay token. Redirigiendo al login...");
-                    _navigationManager.NavigateTo("/", true);
-                    return new List<ProductoDTO>();
-                }
-
-                // 2. Configurar el header Authorization
-                _httpClient.DefaultRequestHeaders.Remove("Authorization");
-                _httpClient.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-                Console.WriteLine("Authorization header configurado");
-
-                // 3. Hacer la petición
+                // Hacer la petición
                 var response = await _httpClient.GetAsync("api/productos");
 
                 Console.WriteLine($"Status Code: {response.StatusCode}");
@@ -86,31 +70,118 @@ namespace Blazor.Services
                 throw;
             }
         }
-        
+
 
         public async Task<ProductoDTO> GetProductoByIdAsync(int id)
         {
-            await AgregarTokenAlRequest();
-            var response = await _httpClient.GetAsync($"api/productos/{id}");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ProductoDTO>();
+            try
+            {
+                // Configurar token (este método ahora debe manejar el prerrender)
+                await AgregarTokenAlRequest();
+
+                Console.WriteLine($"Obteniendo producto con ID: {id}");
+                var response = await _httpClient.GetAsync($"api/productos/{id}");
+
+                Console.WriteLine($"Status Code GetById: {response.StatusCode}");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("No autorizado en GetProductoByIdAsync");
+                    // Lanzar excepción para que la página lo maneje
+                    throw new HttpRequestException("No autorizado", null, System.Net.HttpStatusCode.Unauthorized);
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Console.WriteLine($"Producto {id} no encontrado");
+                    return null;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var producto = await response.Content.ReadFromJsonAsync<ProductoDTO>();
+                Console.WriteLine($"Producto obtenido: {producto?.Nombre}");
+
+                return producto;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en GetProductoByIdAsync: {ex.Message}");
+                throw;
+            }
         }
 
-        public async Task<ProductoDTO> CreateProductoAsync(ProductoDTO producto)
+        public async Task<ProductoDTO> CreateProductoAsync(CreateProductoRequest producto)
         {
-            await AgregarTokenAlRequest();
-            var response = await _httpClient.PostAsJsonAsync("api/productos", producto);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ProductoDTO>();
+
+            try
+            {
+                Console.WriteLine("=== DEBUG CREAR PRODUCTOS ===");
+
+                await AgregarTokenAlRequest();
+
+                var response = await _httpClient.PostAsJsonAsync("api/productos", producto);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    await _tokenStorage.RemoveTokenAsync();
+                    _navigationManager.NavigateTo("/", true);
+                    throw new UnauthorizedAccessException("No autorizado");
+                }
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<ProductoDTO>();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en GetProductosAsync: {ex.Message}");
+                throw;
+            }
+
         }
 
-        // Método corregido - solo recibe ProductoDTO
-        public async Task<ProductoDTO> UpdateProductoAsync(ProductoDTO producto)
+
+        public async Task<bool> UpdateProductoAsync(int id, ProductoDTO producto)
         {
             await AgregarTokenAlRequest();
-            var response = await _httpClient.PutAsJsonAsync($"api/productos/{producto.Id}", producto);
+
+            producto.Id = id;
+
+            Console.WriteLine("=== DEBUG UPDATE PRODUCTO ===");
+            Console.WriteLine($"ID: {producto.Id}");
+            Console.WriteLine($"Nombre: {producto.Nombre}");
+            Console.WriteLine($"Precio: {producto.Precio}");
+            Console.WriteLine($"Descripción: {producto.Descripcion}");
+            Console.WriteLine($"Stock: {producto.Stock}");
+            Console.WriteLine($"CategoríaId: {producto.CategoriaId}");
+
+            // Serializar manualmente para ver el JSON
+            var json = System.Text.Json.JsonSerializer.Serialize(producto);
+            Console.WriteLine($"JSON enviado: {json}");
+
+            var response = await _httpClient.PutAsJsonAsync($"api/productos/{id}", producto);
+
+            Console.WriteLine($"Status Code: {response.StatusCode}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error content: {errorContent}");
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return true;
+            }
+
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ProductoDTO>();
+            return true;
         }
 
         public async Task<bool> DeleteProductoAsync(int id)
@@ -124,34 +195,39 @@ namespace Blazor.Services
         {
             try
             {
-                var token = await GetTokenAsync();
-                if (!string.IsNullOrEmpty(token))
+                // Intenta obtener el token
+                var token = await _tokenStorage.GetTokenAsync();
+
+                if (string.IsNullOrEmpty(token))
                 {
-                    if (_httpClient.DefaultRequestHeaders.Authorization != null)
-                    {
-                        _httpClient.DefaultRequestHeaders.Authorization = null;
-                    }
-                    _httpClient.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    Console.WriteLine("Token no disponible o vacío");
+                    return; // No configurar header si no hay token
                 }
+
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                Console.WriteLine("Token configurado en header");
+            }
+            catch (JSException)
+            {
+                // Esto ocurre durante prerrender - está bien, no configuramos token
+                Console.WriteLine("Prerrender detectado - omitiendo token");
+            }
+            catch (InvalidOperationException ex) when (
+                ex.Message.Contains("JavaScript interop") ||
+                ex.Message.Contains("statically rendered"))
+            {
+                // También durante prerrender
+                Console.WriteLine("Prerrender detectado - omitiendo token");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error agregando token: {ex.Message}");
+                Console.WriteLine($"Error configurando token: {ex.Message}");
+                // No relanzar - dejamos que la petición vaya sin token
             }
-        }
 
-        private async Task<string> GetTokenAsync()
-        {
-            try
-            {
-                return await _jsRuntime.InvokeAsync<string>(
-                    "sessionStorage.getItem", "authToken");
-            }
-            catch
-            {
-                return null;
-            }
         }
     }
 }

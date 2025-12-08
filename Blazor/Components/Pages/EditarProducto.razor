@@ -1,0 +1,355 @@
+﻿@page "/productos/editar/{id:int}"
+@rendermode InteractiveServer
+@using DTOs.Productos
+@using Blazor.Services
+@inject IProductoService ProductoService
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-pencil-square"></i> Editar Producto ID: @Id</h1>
+        <button class="btn btn-outline-secondary" @onclick="VolverALista">
+            <i class="bi bi-arrow-left"></i> Volver a Productos
+        </button>
+    </div>
+
+    <!-- Estado inicial (mientras se inicializa) -->
+    @if (!_hasInitialized)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Inicializando...</span>
+            </div>
+            <p class="mt-2">Inicializando editor...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Loading State (después de inicializar) -->
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando producto...</p>
+            </div>
+        }
+
+        <!-- Producto no encontrado -->
+        @if (!isLoading && producto == null)
+        {
+            <div class="alert alert-warning">
+                <h5><i class="bi bi-exclamation-triangle"></i> Producto no encontrado</h5>
+                <p>El producto con ID @Id no existe o no se pudo cargar.</p>
+                <button class="btn btn-outline-primary" @onclick="VolverALista">
+                    Volver a la lista
+                </button>
+            </div>
+        }
+
+        <!-- Formulario de edición -->
+        @if (!isLoading && producto != null)
+        {
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Editando: @producto.Nombre
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <EditForm Model="@producto" OnValidSubmit="@ActualizarProducto">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger" />
+
+                        <div class="row">
+                            <!-- Nombre -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre" class="form-label fw-bold">
+                                    <i class="bi bi-tag"></i> Nombre *
+                                </label>
+                                <InputText id="nombre"
+                                           @bind-Value="producto.Nombre"
+                                           class="form-control"
+                                           placeholder="Nombre del producto" />
+                                <ValidationMessage For="@(() => producto.Nombre)" class="text-danger small" />
+                            </div>
+
+                            <!-- Precio -->
+                            <div class="col-md-6 mb-3">
+                                <label for="precio" class="form-label fw-bold">
+                                    <i class="bi bi-currency-dollar"></i> Precio *
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <InputNumber id="precio"
+                                                 @bind-Value="producto.Precio"
+                                                 class="form-control"
+                                                 placeholder="0.00" />
+                                </div>
+                                <ValidationMessage For="@(() => producto.Precio)" class="text-danger small" />
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label fw-bold">
+                                <i class="bi bi-card-text"></i> Descripción
+                            </label>
+                            <InputTextArea id="descripcion"
+                                           @bind-Value="producto.Descripcion"
+                                           class="form-control"
+                                           rows="3"
+                                           placeholder="Descripción del producto..." />
+                            <ValidationMessage For="@(() => producto.Descripcion)" class="text-danger small" />
+                        </div>
+
+                        <div class="row">
+                            <!-- Stock -->
+                            <div class="col-md-6 mb-3">
+                                <label for="stock" class="form-label fw-bold">
+                                    <i class="bi bi-box"></i> Stock *
+                                </label>
+                                <InputNumber id="stock"
+                                             @bind-Value="producto.Stock"
+                                             class="form-control"
+                                             placeholder="0" />
+                                <ValidationMessage For="@(() => producto.Stock)" class="text-danger small" />
+                            </div>
+
+                            <!-- Categoría ID -->
+                            <div class="col-md-6 mb-3">
+                                <label for="categoriaId" class="form-label fw-bold">
+                                    <i class="bi bi-folder"></i> Categoría ID *
+                                </label>
+                                <InputNumber id="categoriaId"
+                                             @bind-Value="producto.CategoriaId"
+                                             class="form-control"
+                                             placeholder="Ej: 1, 2, 3..." />
+                                <ValidationMessage For="@(() => producto.CategoriaId)" class="text-danger small" />
+                            </div>
+                        </div>
+
+                        <!-- Mensajes de estado -->
+                        @if (!string.IsNullOrEmpty(SuccessMessage))
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                                <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(ErrorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+                                <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                            </div>
+                        }
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit"
+                                    class="btn btn-primary px-4"
+                                    disabled="@isSaving">
+                                @if (isSaving)
+                                {
+                                    <span>
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                        Guardando...
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        <i class="bi bi-save me-2"></i> Guardar Cambios
+                                    </span>
+                                }
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary px-4"
+                                    @onclick="VolverALista"
+                                    disabled="@isSaving">
+                                <i class="bi bi-x-circle me-2"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ProductoDTO producto;
+    private bool _hasInitialized = false; // Controla si ya se inicializó
+    private bool isLoading = true;        // Controla si está cargando el producto
+    private bool isSaving = false;        // Controla si está guardando
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+
+    // Este método se ejecuta DESPUÉS del primer render, cuando JS está disponible
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            Console.WriteLine($"=== INICIALIZANDO PÁGINA EDITAR (ID: {Id}) ===");
+
+            // Marcar que ya estamos inicializando
+            _hasInitialized = true;
+            StateHasChanged(); // Actualizar UI para quitar el spinner inicial
+
+            // Ahora cargar el producto (esto se ejecuta cuando JS está disponible)
+            await CargarProducto();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando página: {ex.Message}");
+            ErrorMessage = "Error al inicializar la página. Por favor, recarga.";
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarProducto()
+    {
+        try
+        {
+            Console.WriteLine($"Cargando producto con ID: {Id}");
+            producto = await ProductoService.GetProductoByIdAsync(Id);
+
+            if (producto != null)
+            {
+                // IMPORTANTE: Asegurar que el Id del objeto coincida con el parámetro de la URL
+                producto.Id = Id;
+
+                Console.WriteLine($"Producto cargado: {producto.Nombre}");
+            }
+            else
+            {
+                Console.WriteLine($"Producto con ID {Id} no encontrado");
+                ErrorMessage = "Producto no encontrado.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            ErrorMessage = "El producto solicitado no fue encontrado.";
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para editar este producto.";
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/productos");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al cargar el producto: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // Actualizar UI con los resultados
+        }
+    }
+
+    private async Task ActualizarProducto()
+    {
+        isSaving = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged(); // Actualizar UI para mostrar loading
+
+        try
+        {
+            Console.WriteLine($"Actualizando producto ID: {Id}");
+            Console.WriteLine($"Datos a enviar:");
+            Console.WriteLine($"- Id: {producto.Id}");
+            Console.WriteLine($"- Nombre: {producto.Nombre}");
+            Console.WriteLine($"- Precio: {producto.Precio}");
+            Console.WriteLine($"- Stock: {producto.Stock}");
+            Console.WriteLine($"- Categoría: {producto.CategoriaId}");
+
+            // Verificar que coincidan los IDs
+            producto.Id = Id;
+
+            // Llamar al servicio para actualizar
+            var resultado = await ProductoService.UpdateProductoAsync(Id, producto);
+
+            if (resultado)
+            {
+                SuccessMessage = $"¡Producto '{producto.Nombre}' actualizado exitosamente!";
+
+                // Redirigir después de un tiempo
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/productos");
+            }
+            else
+            {
+                ErrorMessage = "El producto no fue encontrado. Puede haber sido eliminado.";
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No tienes permiso para actualizar productos. Contacta al administrador.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ErrorMessage = "El producto no fue encontrado. Puede haber sido eliminado.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/productos");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ErrorMessage = "Error en los datos enviados. Verifica la información.";
+            }
+            else
+            {
+                ErrorMessage = $"Error al actualizar producto: {ex.Message}";
+            }
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("ID mismatch"))
+        {
+            ErrorMessage = "Error: El ID del producto no coincide. Por favor, recarga la página.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged(); // Actualizar UI para quitar loading
+        }
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/productos");
+    }
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged();
+    }
+}

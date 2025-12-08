@@ -1,0 +1,290 @@
+﻿@page "/productos/nuevo"
+@rendermode InteractiveServer
+@using DTOs.Productos
+@using Blazor.Services
+@inject IProductoService ProductoService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-plus-circle"></i> Nuevo Producto</h1>
+        <button class="btn btn-outline-secondary" @onclick="VolverALista">
+            <i class="bi bi-arrow-left"></i> Volver a Productos
+        </button>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Información del Producto</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model="@NuevoProducto" OnValidSubmit="@HandleCrearProducto" FormName="crearProductoForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="alert alert-danger" />
+
+                <div class="row">
+                    <!-- Nombre -->
+                    <div class="col-md-6 mb-3">
+                        <label for="nombre" class="form-label fw-bold">
+                            <i class="bi bi-tag"></i> Nombre *
+                        </label>
+                        <InputText id="nombre"
+                                   @bind-Value="NuevoProducto.Nombre"
+                                   class="form-control form-control-lg"
+                                   placeholder="Ej: Laptop Dell XPS 15" />
+                        <ValidationMessage For="@(() => NuevoProducto.Nombre)" class="text-danger small" />
+                        <div class="form-text">Nombre descriptivo del producto</div>
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="col-md-6 mb-3">
+                        <label for="precio" class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar"></i> Precio *
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <InputNumber id="precio"
+                                         @bind-Value="NuevoProducto.Precio"
+                                         class="form-control form-control-lg"
+                                         placeholder="0.00" />
+                        </div>
+                        <ValidationMessage For="@(() => NuevoProducto.Precio)" class="text-danger small" />
+                        <div class="form-text">Precio de venta del producto</div>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label fw-bold">
+                        <i class="bi bi-card-text"></i> Descripción
+                    </label>
+                    <InputTextArea id="descripcion"
+                                   @bind-Value="NuevoProducto.Descripcion"
+                                   class="form-control"
+                                   rows="3"
+                                   placeholder="Descripción detallada del producto..." />
+                    <ValidationMessage For="@(() => NuevoProducto.Descripcion)" class="text-danger small" />
+                    <div class="form-text">Opcional. Descripción detallada del producto</div>
+                </div>
+
+                <div class="row">
+                    <!-- Stock -->
+                    <div class="col-md-6 mb-3">
+                        <label for="stock" class="form-label fw-bold">
+                            <i class="bi bi-box"></i> Stock Inicial *
+                        </label>
+                        <InputNumber id="stock"
+                                     @bind-Value="NuevoProducto.Stock"
+                                     class="form-control form-control-lg"
+                                     placeholder="0" />
+                        <ValidationMessage For="@(() => NuevoProducto.Stock)" class="text-danger small" />
+                        <div class="form-text">Cantidad inicial en inventario</div>
+                    </div>
+
+                    <!-- Categoría ID -->
+                    <div class="col-md-6 mb-3">
+                        <label for="categoriaId" class="form-label fw-bold">
+                            <i class="bi bi-folder"></i> Categoría ID *
+                        </label>
+                        <InputNumber id="categoriaId"
+                                     @bind-Value="NuevoProducto.CategoriaId"
+                                     class="form-control form-control-lg"
+                                     placeholder="Ej: 1, 2, 3..." />
+                        <ValidationMessage For="@(() => NuevoProducto.CategoriaId)" class="text-danger small" />
+                        <div class="form-text">ID de la categoría del producto</div>
+                    </div>
+                </div>
+
+                <!-- Mensajes de estado -->
+                @if (!string.IsNullOrEmpty(SuccessMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                        <button type="button" class="btn-close" @onclick="CerrarMensaje"></button>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+                        <button type="button" class="btn-close" @onclick="CerrarMensaje"></button>
+                    </div>
+                }
+
+                <!-- Botones de acción -->
+                <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                    <button type="submit"
+                            class="btn btn-primary btn-lg px-4"
+                            disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span>
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Guardando...
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                <i class="bi bi-save me-2"></i> Guardar Producto
+                            </span>
+                        }
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-lg px-4"
+                            @onclick="LimpiarFormulario"
+                            disabled="@isLoading">
+                        <i class="bi bi-eraser me-2"></i> Limpiar
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-danger btn-lg px-4"
+                            @onclick="VolverALista"
+                            disabled="@isLoading">
+                        <i class="bi bi-x-circle me-2"></i> Cancelar
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <!-- Preview del producto -->
+        <div class="card-footer bg-light">
+            <h6 class="mb-2"><i class="bi bi-eye"></i> Vista Previa</h6>
+            <div class="row small text-muted">
+                <div class="col-md-3"><strong>Nombre:</strong> @NuevoProducto.Nombre</div>
+                <div class="col-md-2"><strong>Precio:</strong> $@NuevoProducto.Precio.ToString("N2")</div>
+                <div class="col-md-2"><strong>Stock:</strong> @NuevoProducto.Stock</div>
+                <div class="col-md-2"><strong>Categoría:</strong> @NuevoProducto.CategoriaId</div>
+                <div class="col-md-3"><strong>Descripción:</strong> @(string.IsNullOrEmpty(NuevoProducto.Descripcion) ? "Sin descripción" : NuevoProducto.Descripcion)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateProductoRequest NuevoProducto = new();
+    private bool isLoading = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+
+    private async Task HandleCrearProducto()
+    {
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        try
+        {
+            Console.WriteLine("Creando producto...");
+            Console.WriteLine($"Nombre: {NuevoProducto.Nombre}");
+            Console.WriteLine($"Precio: {NuevoProducto.Precio}");
+            Console.WriteLine($"Stock: {NuevoProducto.Stock}");
+            Console.WriteLine($"Categoría: {NuevoProducto.CategoriaId}");
+            Console.WriteLine($"Descripción: {NuevoProducto.Descripcion}");
+
+            // Llamar al servicio para crear el producto
+            // Necesitarás agregar este método a IProductoService y ProductoService
+            var producto = await ProductoService.CreateProductoAsync(NuevoProducto);
+
+            SuccessMessage = $"¡Producto '{producto.Nombre}' creado exitosamente! ID: {producto.Id}";
+
+            // Opcional: Redirigir después de un tiempo
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/productos");
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No tienes permiso para crear productos. Contacta al administrador.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/productos");
+            }
+            else
+            {
+                ErrorMessage = $"Error al crear producto: {ex.Message}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void LimpiarFormulario()
+    {
+        NuevoProducto = new CreateProductoRequest();
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/productos");
+    }
+
+    private void CerrarMensaje()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
+}
+
+<style>
+    .form-control-lg {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .border-top {
+        border-top: 2px solid #dee2e6 !important;
+    }
+
+    /* Animación para los mensajes */
+    .alert {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
