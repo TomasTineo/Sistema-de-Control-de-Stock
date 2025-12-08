@@ -40,6 +40,7 @@
             btn_Reservas = new Button();
             panel_Header.SuspendLayout();
             panel_Menu.SuspendLayout();
+            table_Botones.SuspendLayout();
             SuspendLayout();
             // 
             // panel_Header
@@ -53,26 +54,25 @@
             // 
             // lbl_Bienvenida
             // 
-            lbl_Bienvenida.AutoSize = true;
-            lbl_Bienvenida.BorderStyle = BorderStyle.Fixed3D;
+            lbl_Bienvenida.Dock = DockStyle.Fill;
             lbl_Bienvenida.Font = new Font("Times New Roman", 28F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            lbl_Bienvenida.Location = new Point(150, 24);
+            lbl_Bienvenida.Location = new Point(0, 0);
             lbl_Bienvenida.Name = "lbl_Bienvenida";
-            lbl_Bienvenida.Size = new Size(466, 46);
+            lbl_Bienvenida.Size = new Size(900, 100);
             lbl_Bienvenida.TabIndex = 0;
             lbl_Bienvenida.Text = "Sistema de Control de Stock";
             lbl_Bienvenida.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lbl_Subtitulo
             // 
-            lbl_Subtitulo.Anchor = AnchorStyles.Top;
-            lbl_Subtitulo.AutoSize = true;
+            lbl_Subtitulo.Dock = DockStyle.Top;
             lbl_Subtitulo.Font = new Font("Segoe UI", 12F);
-            lbl_Subtitulo.Location = new Point(230, 20);
+            lbl_Subtitulo.Location = new Point(20, 20);
             lbl_Subtitulo.Name = "lbl_Subtitulo";
-            lbl_Subtitulo.Size = new Size(340, 21);
+            lbl_Subtitulo.Size = new Size(860, 50);
             lbl_Subtitulo.TabIndex = 1;
             lbl_Subtitulo.Text = "Seleccione una opción del menú para comenzar";
+            lbl_Subtitulo.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // panel_Menu
             // 
@@ -87,26 +87,34 @@
             // 
             // table_Botones
             // 
-            table_Botones.Anchor = AnchorStyles.Top;
+            table_Botones.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             table_Botones.ColumnCount = 2;
             table_Botones.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             table_Botones.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            table_Botones.RowCount = 3;
-            table_Botones.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
-            table_Botones.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
-            table_Botones.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
-            table_Botones.Location = new Point(100, 60);
+            table_Botones.Controls.Add(btn_Productos, 0, 0);
+            table_Botones.Controls.Add(btn_Categorias, 1, 0);
+            table_Botones.Controls.Add(btn_Clientes, 0, 1);
+            table_Botones.Controls.Add(btn_Eventos, 1, 1);
+            table_Botones.Controls.Add(btn_Reservas, 0, 2);
+            table_Botones.Location = new Point(20, 70);
             table_Botones.Name = "table_Botones";
             table_Botones.Padding = new Padding(10);
-            table_Botones.Size = new Size(700, 320);
+            table_Botones.RowCount = 3;
+            table_Botones.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            table_Botones.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            table_Botones.RowStyles.Add(new RowStyle(SizeType.Percent, 33.34F));
+            table_Botones.Size = new Size(860, 360);
             table_Botones.TabIndex = 2;
             // 
             // btn_Productos
             // 
             btn_Productos.Cursor = Cursors.Hand;
+            btn_Productos.Dock = DockStyle.Fill;
             btn_Productos.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btn_Productos.Location = new Point(30, 30);
             btn_Productos.Margin = new Padding(20);
-            btn_Productos.Size = new Size(300, 70);
+            btn_Productos.Name = "btn_Productos";
+            btn_Productos.Size = new Size(380, 73);
             btn_Productos.TabIndex = 0;
             btn_Productos.Text = "Gestión de Productos";
             btn_Productos.UseVisualStyleBackColor = true;
@@ -115,9 +123,12 @@
             // btn_Categorias
             // 
             btn_Categorias.Cursor = Cursors.Hand;
+            btn_Categorias.Dock = DockStyle.Fill;
             btn_Categorias.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            btn_Categorias.Location = new Point(450, 30);
             btn_Categorias.Margin = new Padding(20);
-            btn_Categorias.Size = new Size(300, 70);
+            btn_Categorias.Name = "btn_Categorias";
+            btn_Categorias.Size = new Size(380, 73);
             btn_Categorias.TabIndex = 1;
             btn_Categorias.Text = "Gestión de Categorías";
             btn_Categorias.UseVisualStyleBackColor = true;
@@ -126,9 +137,12 @@
             // btn_Clientes
             // 
             btn_Clientes.Cursor = Cursors.Hand;
+            btn_Clientes.Dock = DockStyle.Fill;
             btn_Clientes.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            btn_Clientes.Location = new Point(30, 143);
             btn_Clientes.Margin = new Padding(20);
-            btn_Clientes.Size = new Size(300, 70);
+            btn_Clientes.Name = "btn_Clientes";
+            btn_Clientes.Size = new Size(380, 73);
             btn_Clientes.TabIndex = 2;
             btn_Clientes.Text = "Gestión de Clientes";
             btn_Clientes.UseVisualStyleBackColor = true;
@@ -137,9 +151,12 @@
             // btn_Eventos
             // 
             btn_Eventos.Cursor = Cursors.Hand;
+            btn_Eventos.Dock = DockStyle.Fill;
             btn_Eventos.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            btn_Eventos.Location = new Point(450, 143);
             btn_Eventos.Margin = new Padding(20);
-            btn_Eventos.Size = new Size(300, 70);
+            btn_Eventos.Name = "btn_Eventos";
+            btn_Eventos.Size = new Size(380, 73);
             btn_Eventos.TabIndex = 3;
             btn_Eventos.Text = "Gestión de Eventos";
             btn_Eventos.UseVisualStyleBackColor = true;
@@ -147,27 +164,18 @@
             // 
             // btn_Reservas
             // 
-            btn_Reservas.Anchor = AnchorStyles.Top;
+            table_Botones.SetColumnSpan(btn_Reservas, 2);
             btn_Reservas.Cursor = Cursors.Hand;
+            btn_Reservas.Dock = DockStyle.Fill;
             btn_Reservas.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            btn_Reservas.Location = new Point(30, 256);
             btn_Reservas.Margin = new Padding(20);
-            btn_Reservas.Size = new Size(300, 70);
+            btn_Reservas.Name = "btn_Reservas";
+            btn_Reservas.Size = new Size(800, 74);
             btn_Reservas.TabIndex = 4;
             btn_Reservas.Text = "Gestión de Reservas";
             btn_Reservas.UseVisualStyleBackColor = true;
             btn_Reservas.Click += btnReservas_Click;
-            // 
-            // add controls to table
-            // 
-            table_Botones.Controls.Add(btn_Productos, 0, 0);
-            table_Botones.Controls.Add(btn_Categorias, 1, 0);
-            table_Botones.Controls.Add(btn_Clientes, 0, 1);
-            table_Botones.Controls.Add(btn_Eventos, 1, 1);
-            table_Botones.Controls.Add(btn_Reservas, 0, 2);
-            table_Botones.SetColumnSpan(btn_Reservas, 2);
-            // center reservas in its row
-            btn_Reservas.Anchor = AnchorStyles.Top;
-
             // 
             // Form_Main
             // 
@@ -182,9 +190,8 @@
             Text = "Sistema de Control de Stock - Menú Principal";
             Load += FormMain_Load;
             panel_Header.ResumeLayout(false);
-            panel_Header.PerformLayout();
             panel_Menu.ResumeLayout(false);
-            panel_Menu.PerformLayout();
+            table_Botones.ResumeLayout(false);
             ResumeLayout(false);
         }
 

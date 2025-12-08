@@ -32,7 +32,6 @@ namespace Escritorio
             // Evento de búsqueda
             txt_Buscar.TextChanged += txt_Buscar_TextChanged;
            
-
             dtp_FechaEvento.Format = DateTimePickerFormat.Short;
             dtp_FechaEvento.MinDate = DateTime.Today;
             dtp_FechaEvento.MaxDate = DateTime.Today.AddYears(2);
@@ -40,6 +39,38 @@ namespace Escritorio
 
             ConfigurarDataGridView();
             await CargarEventosAsync();
+
+            // Aplicar permisos
+            await ConfigurarPermisos();
+        }
+
+        private async Task ConfigurarPermisos()
+        {
+            var authService = AuthServiceProvider.Instance;
+
+            // Verificar permisos 
+            btn_agregar.Enabled = await authService.HasPermissionAsync("eventos.agregar");
+            btn_Editar.Enabled = await authService.HasPermissionAsync("eventos.actualizar");
+            btn_Borrar.Enabled = await authService.HasPermissionAsync("eventos.eliminar");
+
+            // Aplicar estilo visual a botones deshabilitados
+            if (!btn_agregar.Enabled)
+            {
+                btn_agregar.Text = "🔒 " + btn_agregar.Text;
+                btn_agregar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Editar.Enabled)
+            {
+                btn_Editar.Text = "🔒 " + btn_Editar.Text;
+                btn_Editar.ForeColor = Color.Gray;
+            }
+            
+            if (!btn_Borrar.Enabled)
+            {
+                btn_Borrar.Text = "🔒 " + btn_Borrar.Text;
+                btn_Borrar.ForeColor = Color.Gray;
+            }
         }
 
         //  Método de búsqueda
@@ -133,6 +164,14 @@ namespace Escritorio
 
         private async void btn_agregar_Click(object sender, EventArgs e)
         {
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("eventos.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para crear eventos.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txt_Name.Text))
             {
                 MessageBox.Show("Por favor, ingrese el nombre del evento.",
