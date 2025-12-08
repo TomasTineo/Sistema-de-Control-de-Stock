@@ -245,8 +245,8 @@ namespace Escritorio
 
         private async void btnModificar_Click(object sender, EventArgs e)
         {
-            var authService = AuthServiceProvider.Instance;
-            if (!await authService.HasPermissionAsync("Clientes.Editar"))
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("clientes.actualizar"))
             {
                 MessageBox.Show("No tiene permisos para modificar clientes.",
                                "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -266,7 +266,7 @@ namespace Escritorio
                 var confirmResult = MessageBox.Show("¿Está seguro de modificar este cliente?",
                     "Confirmar Modificación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-                if (confirmResult == DialogResult.Yes)
+                if (confirmResult != DialogResult.Yes)
                     return;
 
                 var request = new UpdateClienteRequest
@@ -297,23 +297,21 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Falta de autorización.",
+                MessageBox.Show(ex.Message, "Sesión Expirada",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al modificar cliente: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-
-
             }
         }
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
-            var authService = AuthServiceProvider.Instance;
-            if (!await authService.HasPermissionAsync("Clientes.Eliminar"))
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("clientes.eliminar"))
             {
                 MessageBox.Show("No tiene permisos para eliminar clientes.",
                                "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -356,15 +354,15 @@ namespace Escritorio
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, "Falta de autorización.",
+                MessageBox.Show(ex.Message, "Sesión Expirada",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al eliminar cliente: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e)

@@ -6,7 +6,3 @@
 
 
 	- BORRAR INITIALDATA DE LA BASE DE DATOS 
-
-
-	- Error al eliminar categorias
-	-Falta de permisos para eliminar y modificar cliente
