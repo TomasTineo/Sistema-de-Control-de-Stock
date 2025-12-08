@@ -21,6 +21,7 @@ namespace WebAPI.Endpoints
             .Produces<IEnumerable<ProductoDTO>>(StatusCodes.Status200OK);
 
 
+
             // GET /api/productos/{id} - Requiere permiso de lectura
             productos.MapGet("/{id:int}", async (int id, IProductoService productoService) =>
             {

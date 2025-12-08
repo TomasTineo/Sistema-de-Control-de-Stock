@@ -1,0 +1,154 @@
+﻿@page "/dashboard"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+<h1 class="dashboard-title">Panel de Administración</h1>
+<p class="dashboard-subtitle">Selecciona una opción para gestionar</p>
+
+<div class="dashboard-grid">
+    <!-- Tarjeta Productos -->
+    <div class="dashboard-card" @onclick="GoToProductos">
+        <div class="card-icon">📦</div>
+        <h3 class="card-title">Productos</h3>
+        <p class="card-description">Gestiona el inventario de productos</p>
+    </div>
+
+    <!-- Tarjeta Eventos -->
+    <div class="dashboard-card" @onclick="GoToEventos">
+        <div class="card-icon">📅</div>
+        <h3 class="card-title">Eventos</h3>
+        <p class="card-description">Administra eventos y actividades</p>
+    </div>
+
+    <!-- Tarjeta Categorías -->
+    <div class="dashboard-card" @onclick="GoToCategorias">
+        <div class="card-icon">🏷️</div>
+        <h3 class="card-title">Categorías</h3>
+        <p class="card-description">Organiza productos por categorías</p>
+    </div>
+
+    <!-- Tarjeta Reservas -->
+    <div class="dashboard-card" @onclick="GoToReservas">
+        <div class="card-icon">⏰</div>
+        <h3 class="card-title">Reservas</h3>
+        <p class="card-description">Maneja reservas y citas</p>
+    </div>
+</div>
+
+<!-- Versión alternativa con botones -->
+<div class="button-container mt-5">
+    <h3>Acceso rápido:</h3>
+    <div class="d-flex flex-wrap gap-3 mt-3">
+        <button class="btn btn-primary btn-lg" @onclick="GoToProductos">
+            Productos
+        </button>
+        <button class="btn btn-success btn-lg" @onclick="GoToEventos">
+            Eventos
+        </button>
+        <button class="btn btn-info btn-lg" @onclick="GoToCategorias">
+            Categorías
+        </button>
+        <button class="btn btn-warning btn-lg" @onclick="GoToReservas">
+            Reservas
+        </button>
+    </div>
+</div>
+
+@code {
+    private void GoToProductos()
+    {
+        Navigation.NavigateTo("/productos");
+    }
+
+    private void GoToEventos()
+    {
+        Navigation.NavigateTo("/eventos");
+    }
+
+    private void GoToCategorias()
+    {
+        Navigation.NavigateTo("/categorias");
+    }
+
+    private void GoToReservas()
+    {
+        Navigation.NavigateTo("/reservas");
+    }
+}
+
+<style>
+    .dashboard-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-subtitle {
+        color: #7f8c8d;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid #e0e0e0;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+        }
+
+    .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-title {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-description {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .button-container {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 10px;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        min-width: 150px;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .d-flex {
+            flex-direction: column;
+        }
+
+        .btn-lg {
+            width: 100%;
+        }
+    }
+</style>
