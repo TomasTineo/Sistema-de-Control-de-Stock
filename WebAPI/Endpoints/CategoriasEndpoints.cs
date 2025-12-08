@@ -74,13 +74,21 @@ namespace WebAPI.Endpoints
             // DELETE /api/categorias/{id} - Requiere permiso de eliminar
             categorias.MapDelete("/{id:int}", async (int id, ICategoriaService categoriaService) =>
             {
-                var result = await categoriaService.DeleteAsync(id);
-                return result ? Results.NoContent() : Results.NotFound();
+                try
+                {
+                    var result = await categoriaService.DeleteAsync(id);
+                    return result ? Results.NoContent() : Results.NotFound();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.Conflict(new { message = ex.Message });
+                }
             })
             .WithName("DeleteCategoria")
             .RequireAuthorization("CategoriasEliminar")
             .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status409Conflict);
 
             // GET /api/categorias/exists/{nombre} - Requiere permiso de lectura
             categorias.MapGet("/exists/{nombre}", async (string nombre, ICategoriaService categoriaService) =>

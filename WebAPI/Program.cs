@@ -130,7 +130,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CategoriasLeer", policy => policy.RequireClaim("permission", "categorias.leer"));
     options.AddPolicy("CategoriasAgregar", policy => policy.RequireClaim("permission", "categorias.agregar"));
     options.AddPolicy("CategoriasActualizar", policy => policy.RequireClaim("permission", "categorias.actualizar"));
-    options.AddPolicy("CategoriasEliminar", policy => policy.RequireClaim("permission", "cateogrias.eliminar"));
+    options.AddPolicy("CategoriasEliminar", policy => policy.RequireClaim("permission", "categorias.eliminar"));
 
     // Políticas para Clientes
     options.AddPolicy("ClientesLeer", policy => policy.RequireClaim("permission", "clientes.leer"));

@@ -80,6 +80,14 @@ namespace API.Clients
             var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Delete, $"api/categorias/{id}");
             var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
+            
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(content, _jsonOptions);
+                throw new InvalidOperationException(errorResponse?.Message ?? "No se puede eliminar la categoría porque tiene productos asociados.");
+            }
+            
             return response.IsSuccessStatusCode;
         }
 
@@ -97,5 +105,10 @@ namespace API.Clients
 
             return false;
         }
+    }
+
+    public class ErrorResponse
+    {
+        public string Message { get; set; } = string.Empty;
     }
 }

@@ -25,7 +25,7 @@ namespace Escritorio
             // TextBox placeholders
             txt_ID.PlaceholderText = "Identificación";
             txt_Name.PlaceholderText = "Nombre de la Categoría";
-            txt_Buscar.PlaceholderText = "🔍 Buscar categoría por nombre...";
+            txt_Buscar.PlaceholderText = "Buscar categoría por nombre...";
 
             // Evento de búsqueda
             txt_Buscar.TextChanged += txt_Buscar_TextChanged;
@@ -241,6 +241,14 @@ namespace Escritorio
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
+            var authService = Program.ServiceProvider.GetRequiredService<IAuthService>();
+            if (!await authService.HasPermissionAsync("categorias.eliminar"))
+            {
+                MessageBox.Show("No tiene permisos para eliminar categorías.",
+                               "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!int.TryParse(txt_ID.Text, out int id) || id <= 0)
             {
                 MessageBox.Show("Por favor, seleccione una categoría válida para eliminar.", 
@@ -270,6 +278,12 @@ namespace Escritorio
                         MessageBox.Show("No se pudo eliminar la categoría.", "Error", 
                                       MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("productos asociados"))
+                {
+                    MessageBox.Show("No se puede eliminar la categoría porque tiene productos asociados.\n\n" +
+                                  "Por favor, elimine o reasigne los productos antes de eliminar la categoría.", 
+                                  "No se puede eliminar", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 catch (UnauthorizedAccessException ex)
                 {

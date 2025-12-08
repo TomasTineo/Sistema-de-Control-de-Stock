@@ -41,9 +41,18 @@ namespace Data.Repositories
             var categoria = await _context.Categorias.FindAsync(id);
             if (categoria == null) return false;
 
-            _context.Categorias.Remove(categoria);
-            var result = await _context.SaveChangesAsync();
-            return result > 0;
+            try
+            {
+                _context.Categorias.Remove(categoria);
+                var result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            catch (DbUpdateException ex)
+            {
+                // La categoría tiene productos asociados
+                throw new InvalidOperationException(
+                    "No se puede eliminar la categoría porque tiene productos asociados.", ex);
+            }
         }
 
         public async Task<bool> ExisteNombreAsync(string nombre, int? excludeId = null)
