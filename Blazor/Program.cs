@@ -19,7 +19,7 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
-
+builder.Services.AddScoped<IReportesService, ReportesService>();
 
 builder.Services.AddScoped<ITokenStorage, ServerTokenStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();

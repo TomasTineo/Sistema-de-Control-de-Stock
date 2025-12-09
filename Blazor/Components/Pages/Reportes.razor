@@ -1,0 +1,118 @@
+@page "/reportes"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+<h1 class="dashboard-title">Reportes</h1>
+<p class="dashboard-subtitle">Visualiza estadísticas e información clave del sistema</p>
+
+<div class="dashboard-grid">
+    <!-- Tarjeta Productos Bajo Stock -->
+    <div class="dashboard-card" @onclick="GoToProductosBajoStock">
+        
+        <h3 class="card-title">Productos con Bajo Stock</h3>
+        <p class="card-description">Consulta productos que necesitan reabastecimiento</p>
+    </div>
+
+    <!-- Tarjeta Top Productos Reservados -->
+    <div class="dashboard-card" @onclick="GoToTopProductosReservados">
+        
+        <h3 class="card-title">Top Productos Reservados</h3>
+        <p class="card-description">Los productos más solicitados y populares</p>
+    </div>
+</div>
+
+<div class="button-container text-center">
+    <button class="btn btn-secondary btn-lg" @onclick="VolverDashboard">
+        Volver al Dashboard
+    </button>
+</div>
+
+@code {
+    private void GoToProductosBajoStock()
+    {
+        Navigation.NavigateTo("/reportes/productos-bajo-stock");
+    }
+
+    private void GoToTopProductosReservados()
+    {
+        Navigation.NavigateTo("/reportes/top-productos-reservados");
+    }
+
+    private void VolverDashboard()
+    {
+        Navigation.NavigateTo("/dashboard");
+    }
+}
+
+<style>
+    .dashboard-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-subtitle {
+        color: #7f8c8d;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid #e0e0e0;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+        }
+
+    .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-title {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-description {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .button-container {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 10px;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        min-width: 150px;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-lg {
+            width: 100%;
+        }
+    }
+</style>

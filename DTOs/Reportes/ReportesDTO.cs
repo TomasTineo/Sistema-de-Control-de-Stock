@@ -1,3 +1,4 @@
+
 namespace DTOs.Reportes
 {
     // DTO para el Reporte 1: Productos con bajo stock.

@@ -40,6 +40,13 @@
         <h3 class="card-title">Clientes</h3>
         <p class="card-description">Administra y maneja clientes</p>
     </div>
+
+    <!-- Tarjeta Reportes -->
+    <div class="dashboard-card" @onclick="GoToReportes">
+        <div class="card-icon">📊</div>
+        <h3 class="card-title">Reportes</h3>
+        <p class="card-description">Consulta estadísticas e información clave</p>
+    </div>
 </div>
 
 
@@ -67,6 +74,11 @@
     private void GoToClientes()
     {
         Navigation.NavigateTo("/clientes");
+    }
+
+    private void GoToReportes()
+    {
+        Navigation.NavigateTo("/reportes");
     }
 }
 
