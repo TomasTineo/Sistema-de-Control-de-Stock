@@ -109,9 +109,7 @@
             <div class="card">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Lista de Clientes</h5>
-                    <button class="btn btn-sm btn-outline-primary" @onclick="ExportarClientes">
-                        <i class="bi bi-download"></i> Exportar
-                    </button>
+
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
@@ -204,69 +202,6 @@
                 }
             </div>
             
-           
-
-            <!-- Estadísticas -->
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-people fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Total Clientes</h6>
-                                    <p class="fs-4 mb-0">@clientes.Count</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-envelope fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Con Email</h6>
-                                    <p class="fs-4 mb-0">
-                                        @clientes.Count(c => !string.IsNullOrEmpty(c.Email))
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-info">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-telephone fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Con Teléfono</h6>
-                                    <p class="fs-4 mb-0">
-                                        @clientes.Count(c => !string.IsNullOrEmpty(c.Telefono))
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-house fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Con Dirección</h6>
-                                    <p class="fs-4 mb-0">
-                                        @clientes.Count(c => !string.IsNullOrEmpty(c.Direccion))
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         }
     }
 </div>
@@ -398,19 +333,7 @@
         }
     }
 
-    private async Task ExportarClientes()
-    {
-        try
-        {
-            // Implementar exportación a Excel/CSV
-            await JSRuntime.InvokeVoidAsync("alert", "Función de exportación en desarrollo");
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Error al exportar: {ex.Message}";
-            StateHasChanged();
-        }
-    }
+   
 
     // Métodos auxiliares
     private string GetInitials(string nombre, string apellido)

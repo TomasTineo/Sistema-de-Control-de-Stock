@@ -118,9 +118,6 @@
             <div class="card">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Lista de Reservas</h5>
-                    <button class="btn btn-sm btn-outline-primary" @onclick="ExportarReservas">
-                        <i class="bi bi-download"></i> Exportar
-                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
@@ -218,135 +215,6 @@
                 }
             </div>
 
-            <!-- Tarjetas de vista rápida -->
-            <div class="row mt-4">
-                @foreach (var reserva in reservasFiltradas.Take(4))
-                {
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-header @GetEstadoCardClass(reserva.Estado)">
-                                <h6 class="mb-0 text-white">
-                                    <i class="bi bi-calendar-event"></i>
-                                    @reserva.NombreEvento
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-secondary">
-                                        #@reserva.Id
-                                    </span>
-                                    <span class="badge @GetEstadoBadgeClass(reserva.Estado)">
-                                        @reserva.Estado
-                                    </span>
-                                </div>
-
-                                <div class="mb-2">
-                                    <i class="bi bi-person text-primary"></i>
-                                    <small>@reserva.NombreCliente</small>
-                                </div>
-
-                                <div class="mb-2">
-                                    <i class="bi bi-calendar text-success"></i>
-                                    <small>Evento: @reserva.FechaEvento.ToString("dd/MM/yyyy")</small>
-                                </div>
-
-                                <div class="mb-2">
-                                    <i class="bi bi-calendar-plus text-info"></i>
-                                    <small>Reserva: @reserva.FechaReserva.ToString("dd/MM/yyyy")</small>
-                                </div>
-
-                                <div class="mt-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <strong class="text-success">@reserva.TotalReserva.ToString("C")</strong>
-                                        <span class="badge bg-info">
-                                            @reserva.CantidadTiposProductos productos
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-transparent border-top">
-                                <div class="d-flex justify-content-between">
-                                    
-                                    <button class="btn btn-sm btn-outline-warning"
-                                            @onclick="() => EditarReserva(reserva.Id)">
-                                            Editar
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-
-                                    <button class="btn btn-sm btn-outline-danger"
-                                            @onclick="() => EliminarReserva(reserva)"
-                                            title="Eliminar">
-                                        Eliminar
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <!-- Estadísticas -->
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-calendar-check fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Total Reservas</h6>
-                                    <p class="fs-4 mb-0">@reservasList.Count</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-check-circle fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Confirmadas</h6>
-                                    <p class="fs-4 mb-0">
-                                        @reservasList.Count(r => r.Estado == "Confirmada")
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-clock-history fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Pendientes</h6>
-                                    <p class="fs-4 mb-0">
-                                        @reservasList.Count(r => r.Estado == "Pendiente")
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-danger">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-x-circle fs-1 me-3"></i>
-                                <div>
-                                    <h6 class="card-title mb-0">Canceladas</h6>
-                                    <p class="fs-4 mb-0">
-                                        @reservasList.Count(r => r.Estado == "Cancelada")
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Reservas próximas -->
             @if (proximasReservas.Count > 0)
@@ -534,19 +402,6 @@
         }
     }
 
-    private async Task ExportarReservas()
-    {
-        try
-        {
-            // Implementar exportación a Excel/CSV
-            await JSRuntime.InvokeVoidAsync("alert", "Función de exportación en desarrollo");
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Error al exportar: {ex.Message}";
-            StateHasChanged();
-        }
-    }
 
     // Métodos auxiliares
     private string GetEstadoBadgeClass(string estado)
