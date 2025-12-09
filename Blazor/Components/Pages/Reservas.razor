@@ -1,7 +1,620 @@
-﻿@page "/Reservas"
+﻿@page "/reservas"
+@rendermode InteractiveServer
+@using DTOs.Reservas
+@using Blazor.Services
+@inject IReservaService ReservaService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
-<h3>Reservas</h3>
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-calendar-check"></i> Reservas</h1>
+            <p class="text-muted">Administra las reservas de eventos</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary me-2" @onclick="GoToDashboard">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </button>
+            <button class="btn btn-success" @onclick="GoToCreateReserva">
+                <i class="bi bi-plus-circle"></i> Nueva Reserva
+            </button>
+        </div>
+    </div>
+
+    <!-- Estado inicial -->
+    @if (!_hasInitialized)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Inicializando...</span>
+            </div>
+            <p class="mt-2">Inicializando...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Loading State -->
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Cargando reservas...</p>
+            </div>
+        }
+
+        <!-- Error State -->
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                <p>@ErrorMessage</p>
+                @if (ErrorMessage.Contains("No autorizado") || ErrorMessage.Contains("401"))
+                {
+                    <button class="btn btn-primary mt-2" @onclick="RedirectToLogin">
+                        Ir al Login
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-outline-danger mt-2" @onclick="CargarReservas">
+                        Reintentar
+                    </button>
+                }
+            </div>
+        }
+
+        <!-- Sin reservas -->
+        @if (!isLoading && string.IsNullOrEmpty(ErrorMessage) && reservasList.Count == 0)
+        {
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle"></i> No hay reservas</h5>
+                <p>No se encontraron reservas registradas.</p>
+                <button class="btn btn-outline-info" @onclick="GoToCreateReserva">
+                    <i class="bi bi-plus-circle"></i> Crear primera reserva
+                </button>
+            </div>
+        }
+
+        <!-- Con reservas -->
+        @if (!isLoading && string.IsNullOrEmpty(ErrorMessage) && reservasList.Count > 0)
+        {
+            <!-- Barra de búsqueda y filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Buscar por cliente, evento..."
+                                       @bind="searchTerm"
+                                       @bind:event="oninput" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" @bind="filtroEstado">
+                                <option value="">Todos los estados</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Confirmada">Confirmada</option>
+                                <option value="Cancelada">Cancelada</option>
+                                <option value="Finalizada">Finalizada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="badge bg-primary">
+                                @reservasFiltradas.Count reservas
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de reservas -->
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Lista de Reservas</h5>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="ExportarReservas">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Evento</th>
+                                <th>Fechas</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reserva in reservasFiltradas)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">#@reserva.Id</span>
+                                    </td>
+                                    <td>
+                                        <strong>@reserva.NombreCliente</strong>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@reserva.NombreEvento</strong>
+                                            <div class="small text-muted">
+                                                Evento: @reserva.FechaEvento.ToString("dd/MM/yyyy")
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div class="small">
+                                                <i class="bi bi-calendar-plus"></i>
+                                                Reserva: @reserva.FechaReserva.ToString("dd/MM/yyyy")
+                                            </div>
+                                            <div class="small">
+                                                <i class="bi bi-calendar-event"></i>
+                                                Evento: @reserva.FechaEvento.ToString("dd/MM/yyyy")
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetEstadoBadgeClass(reserva.Estado)">
+                                            @reserva.Estado
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">@reserva.TotalReserva.ToString("C")</strong>
+                                        <div class="small text-muted">
+                                            @reserva.CantidadTiposProductos tipos de productos
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-sm btn-outline-info"
+                                                    @onclick="() => VerDetalles(reserva.Id)"
+                                                    title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                    @onclick="() => EditarReserva(reserva.Id)"
+                                                    title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => EliminarReserva(reserva)"
+                                                    title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (reservasFiltradas.Count > 10)
+                {
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Mostrando @Math.Min(reservasFiltradas.Count, 10) de @reservasFiltradas.Count reservas
+                            </small>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Tarjetas de vista rápida -->
+            <div class="row mt-4">
+                @foreach (var reserva in reservasFiltradas.Take(4))
+                {
+                    <div class="col-md-3 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header @GetEstadoCardClass(reserva.Estado)">
+                                <h6 class="mb-0 text-white">
+                                    <i class="bi bi-calendar-event"></i>
+                                    @reserva.NombreEvento
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-secondary">
+                                        #@reserva.Id
+                                    </span>
+                                    <span class="badge @GetEstadoBadgeClass(reserva.Estado)">
+                                        @reserva.Estado
+                                    </span>
+                                </div>
+
+                                <div class="mb-2">
+                                    <i class="bi bi-person text-primary"></i>
+                                    <small>@reserva.NombreCliente</small>
+                                </div>
+
+                                <div class="mb-2">
+                                    <i class="bi bi-calendar text-success"></i>
+                                    <small>Evento: @reserva.FechaEvento.ToString("dd/MM/yyyy")</small>
+                                </div>
+
+                                <div class="mb-2">
+                                    <i class="bi bi-calendar-plus text-info"></i>
+                                    <small>Reserva: @reserva.FechaReserva.ToString("dd/MM/yyyy")</small>
+                                </div>
+
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong class="text-success">@reserva.TotalReserva.ToString("C")</strong>
+                                        <span class="badge bg-info">
+                                            @reserva.CantidadTiposProductos productos
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-outline-info"
+                                            @onclick="() => VerDetalles(reserva.Id)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning"
+                                            @onclick="() => EditarReserva(reserva.Id)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-check fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Total Reservas</h6>
+                                    <p class="fs-4 mb-0">@reservasList.Count</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Confirmadas</h6>
+                                    <p class="fs-4 mb-0">
+                                        @reservasList.Count(r => r.Estado == "Confirmada")
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock-history fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Pendientes</h6>
+                                    <p class="fs-4 mb-0">
+                                        @reservasList.Count(r => r.Estado == "Pendiente")
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-x-circle fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Canceladas</h6>
+                                    <p class="fs-4 mb-0">
+                                        @reservasList.Count(r => r.Estado == "Cancelada")
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservas próximas -->
+            @if (proximasReservas.Count > 0)
+            {
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-alarm"></i> Próximas Reservas (7 días)
+                        </h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        @foreach (var reserva in proximasReservas)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@reserva.NombreEvento</strong>
+                                        <div class="small text-muted">
+                                            Cliente: @reserva.NombreCliente
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-success">@reserva.TotalReserva.ToString("C")</div>
+                                        <div class="small">
+                                            <span class="badge @GetEstadoBadgeClass(reserva.Estado)">
+                                                @reserva.Estado
+                                            </span>
+                                            <span class="text-muted ms-2">
+                                                @reserva.FechaEvento.ToString("dd/MM/yyyy")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
 
 @code {
+    // Estados
+    private List<ReservaListDTO> reservasList = new();
+    private List<ReservaListDTO> proximasReservas = new();
+    private bool _hasInitialized = false;
+    private bool isLoading = true;
+    private string ErrorMessage = string.Empty;
+    private string searchTerm = string.Empty;
+    private string filtroEstado = string.Empty;
 
+    // Propiedad calculada
+    private List<ReservaListDTO> reservasFiltradas => GetFilteredReservas();
+
+    // Inicialización
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            Console.WriteLine("=== INICIALIZANDO PÁGINA RESERVAS ===");
+            _hasInitialized = true;
+            StateHasChanged();
+
+            await CargarReservas();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando: {ex.Message}");
+            ErrorMessage = "Error al inicializar la página.";
+            _hasInitialized = true;
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarReservas()
+    {
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine("Cargando reservas...");
+            reservasList = await ReservaService.GetReservasListAsync();
+
+            // Calcular reservas próximas
+            proximasReservas = reservasList
+                .Where(r => r.FechaEvento >= DateTime.Today &&
+                            r.FechaEvento <= DateTime.Today.AddDays(7) &&
+                            r.Estado != "Cancelada")
+                .OrderBy(r => r.FechaEvento)
+                .Take(5)
+                .ToList();
+
+            Console.WriteLine($"Reservas cargadas: {reservasList.Count}");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para ver las reservas.";
+            await Task.Delay(2000);
+            RedirectToLogin();
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
+            Console.WriteLine($"Error HTTP: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+            Console.WriteLine($"Error general: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    // Métodos de filtrado
+    private List<ReservaListDTO> GetFilteredReservas()
+    {
+        var filtrados = reservasList;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.ToLower();
+            filtrados = filtrados.Where(r =>
+                r.NombreCliente.ToLower().Contains(term) ||
+                r.NombreEvento.ToLower().Contains(term)
+            ).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(filtroEstado))
+        {
+            filtrados = filtrados.Where(r => r.Estado == filtroEstado).ToList();
+        }
+
+        return filtrados;
+    }
+
+    // Métodos de navegación
+    private void GoToDashboard() => Navigation.NavigateTo("/dashboard");
+    private void GoToCreateReserva() => Navigation.NavigateTo("/reservas/nueva");
+    private void VerDetalles(int id) => Navigation.NavigateTo($"/reservas/{id}");
+    private void EditarReserva(int id) => Navigation.NavigateTo($"/reservas/editar/{id}");
+    private void RedirectToLogin() => Navigation.NavigateTo("/", true);
+
+    // Métodos de acciones
+    private async Task EliminarReserva(ReservaListDTO reserva)
+    {
+        var confirmar = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Estás seguro de eliminar la reserva #{reserva.Id} del cliente '{reserva.NombreCliente}'?");
+
+        if (confirmar)
+        {
+            try
+            {
+                var resultado = await ReservaService.DeleteReservaAsync(reserva.Id);
+                if (resultado)
+                {
+                    await CargarReservas(); // Recargar lista
+                }
+                else
+                {
+                    ErrorMessage = "No se pudo eliminar la reserva.";
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error al eliminar reserva: {ex.Message}";
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task ExportarReservas()
+    {
+        try
+        {
+            // Implementar exportación a Excel/CSV
+            await JSRuntime.InvokeVoidAsync("alert", "Función de exportación en desarrollo");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al exportar: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    // Métodos auxiliares
+    private string GetEstadoBadgeClass(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "bg-warning",
+            "Confirmada" => "bg-success",
+            "Cancelada" => "bg-danger",
+            "Finalizada" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetEstadoCardClass(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "bg-warning",
+            "Confirmada" => "bg-success",
+            "Cancelada" => "bg-danger",
+            "Finalizada" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
 }
+
+<style>
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.8em;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .row > .col-md-3 {
+            margin-bottom: 1rem;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .card-header .btn {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+    }
+</style>

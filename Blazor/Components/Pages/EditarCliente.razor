@@ -1,0 +1,458 @@
+﻿@page "/clientes/editar/{id:int}"
+@rendermode InteractiveServer
+@using DTOs.Clientes
+@using Blazor.Services
+@inject IClienteService ClienteService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-person-gear"></i> Editar Cliente</h1>
+            <p class="text-muted">Actualiza la información del cliente</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary" @onclick="VolverALista">
+                <i class="bi bi-arrow-left"></i> Volver
+            </button>
+        </div>
+    </div>
+
+    <!-- Estado inicial (mientras se inicializa) -->
+    @if (!_hasInitialized)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Inicializando...</span>
+            </div>
+            <p class="mt-2">Inicializando editor...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Loading State (después de inicializar) -->
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Cargando información del cliente...</p>
+            </div>
+        }
+
+        <!-- Cliente no encontrado -->
+        @if (!isLoading && cliente == null)
+        {
+            <div class="alert alert-warning" role="alert">
+                <h5><i class="bi bi-exclamation-triangle"></i> Cliente no encontrado</h5>
+                <p>El cliente con ID @Id no existe o no se pudo cargar.</p>
+                <button class="btn btn-outline-primary" @onclick="VolverALista">
+                    Volver a la lista
+                </button>
+            </div>
+        }
+
+        <!-- Formulario de edición -->
+        @if (!isLoading && cliente != null)
+        {
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-person-badge"></i> Editando: @cliente.Nombre @cliente.Apellido
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Información del cliente -->
+                            <div class="alert alert-info mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle fs-4 me-3"></i>
+                                    <div>
+                                        <strong>ID del cliente:</strong> #@cliente.Id
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mensajes de estado -->
+                            @if (!string.IsNullOrEmpty(ErrorMessage))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+                                    <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(SuccessMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                                    <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                                </div>
+                            }
+
+                            <!-- Form -->
+                            @if (!isSaving)
+                            {
+                                <EditForm Model="@cliente" OnValidSubmit="@ActualizarCliente">
+                                    <DataAnnotationsValidator />
+                                    <ValidationSummary class="alert alert-danger" />
+
+                                    <div class="row g-3">
+                                        <!-- Nombre -->
+                                        <div class="col-md-6">
+                                            <label for="nombre" class="form-label fw-bold">
+                                                <i class="bi bi-person me-1"></i> Nombre *
+                                            </label>
+                                            <InputText id="nombre"
+                                                       @bind-Value="cliente.Nombre"
+                                                       class="form-control"
+                                                       placeholder="Nombre" />
+                                            <ValidationMessage For="@(() => cliente.Nombre)" class="text-danger small" />
+                                        </div>
+
+                                        <!-- Apellido -->
+                                        <div class="col-md-6">
+                                            <label for="apellido" class="form-label fw-bold">
+                                                <i class="bi bi-person me-1"></i> Apellido *
+                                            </label>
+                                            <InputText id="apellido"
+                                                       @bind-Value="cliente.Apellido"
+                                                       class="form-control"
+                                                       placeholder="Apellido" />
+                                            <ValidationMessage For="@(() => cliente.Apellido)" class="text-danger small" />
+                                        </div>
+
+                                        <!-- Email -->
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label fw-bold">
+                                                <i class="bi bi-envelope me-1"></i> Email *
+                                            </label>
+                                            <InputText id="email"
+                                                       @bind-Value="cliente.Email"
+                                                       class="form-control"
+                                                       placeholder="correo@ejemplo.com" />
+                                            <ValidationMessage For="@(() => cliente.Email)" class="text-danger small" />
+                                        </div>
+
+                                        <!-- Teléfono -->
+                                        <div class="col-md-6">
+                                            <label for="telefono" class="form-label fw-bold">
+                                                <i class="bi bi-telephone me-1"></i> Teléfono *
+                                            </label>
+                                            <InputText id="telefono"
+                                                       @bind-Value="cliente.Telefono"
+                                                       class="form-control"
+                                                       placeholder="+34 600 000 000" />
+                                            <ValidationMessage For="@(() => cliente.Telefono)" class="text-danger small" />
+                                        </div>
+
+                                        <!-- Dirección -->
+                                        <div class="col-12">
+                                            <label for="direccion" class="form-label fw-bold">
+                                                <i class="bi bi-house me-1"></i> Dirección
+                                            </label>
+                                            <InputTextArea id="direccion"
+                                                           @bind-Value="cliente.Direccion"
+                                                           class="form-control"
+                                                           rows="3"
+                                                           placeholder="Dirección completa" />
+                                            <ValidationMessage For="@(() => cliente.Direccion)" class="text-danger small" />
+                                        </div>
+
+                                        <!-- Botones -->
+                                        <div class="col-12 mt-4">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <button type="button" class="btn btn-outline-danger me-2" @onclick="EliminarCliente">
+                                                        <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-secondary" @onclick="VolverALista">
+                                                        <i class="bi bi-x-circle"></i> Cancelar
+                                                    </button>
+                                                </div>
+                                                <div>
+                                                    <button type="submit" class="btn btn-warning" disabled="@isSaving">
+                                                        @if (isSaving)
+                                                        {
+                                                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                            <span> Guardando...</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi bi-check-circle"></i>
+                                                            <span> Actualizar Cliente</span>
+                                                        }
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </EditForm>
+                            }
+
+                            <!-- Loading al guardar -->
+                            @if (isSaving)
+                            {
+                                <div class="text-center my-5">
+                                    <div class="spinner-border text-warning" role="status"></div>
+                                    <p class="mt-2">Actualizando cliente...</p>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i>
+                                Los campos marcados con * son obligatorios.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    // Modelo
+    private ClienteDTO cliente;
+    private bool _hasInitialized = false;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+
+    // Este método se ejecuta DESPUÉS del primer render, cuando JS está disponible
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            Console.WriteLine($"=== INICIALIZANDO PÁGINA EDITAR CLIENTE (ID: {Id}) ===");
+
+            // Marcar que ya estamos inicializando
+            _hasInitialized = true;
+            StateHasChanged(); // Actualizar UI para quitar el spinner inicial
+
+            // Ahora cargar el cliente (esto se ejecuta cuando JS está disponible)
+            await CargarCliente();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando página: {ex.Message}");
+            ErrorMessage = "Error al inicializar la página. Por favor, recarga.";
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarCliente()
+    {
+        try
+        {
+            Console.WriteLine($"Cargando cliente con ID: {Id}");
+            cliente = await ClienteService.GetClienteByIdAsync(Id);
+
+            if (cliente != null)
+            {
+                // IMPORTANTE: Asegurar que el Id del objeto coincida con el parámetro de la URL
+                cliente.Id = Id;
+
+                Console.WriteLine($"Cliente cargado: {cliente.Nombre} {cliente.Apellido}");
+            }
+            else
+            {
+                Console.WriteLine($"Cliente con ID {Id} no encontrado");
+                ErrorMessage = "Cliente no encontrado.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            ErrorMessage = "El cliente solicitado no fue encontrado.";
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para editar este cliente.";
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/clientes");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al cargar el cliente: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // Actualizar UI con los resultados
+        }
+    }
+
+    private async Task ActualizarCliente()
+    {
+        isSaving = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged(); // Actualizar UI para mostrar loading
+
+        try
+        {
+            Console.WriteLine($"Actualizando cliente ID: {Id}");
+            Console.WriteLine($"Datos a enviar:");
+            Console.WriteLine($"- Id: {cliente.Id}");
+            Console.WriteLine($"- Nombre: {cliente.Nombre}");
+            Console.WriteLine($"- Apellido: {cliente.Apellido}");
+            Console.WriteLine($"- Email: {cliente.Email}");
+            Console.WriteLine($"- Teléfono: {cliente.Telefono}");
+            Console.WriteLine($"- Dirección: {cliente.Direccion}");
+
+            // Verificar que coincidan los IDs
+            cliente.Id = Id;
+
+            // Llamar al servicio para actualizar
+            var clienteActualizado = await ClienteService.UpdateClienteAsync(Id, cliente);
+
+            if (clienteActualizado != null)
+            {
+                cliente = clienteActualizado;
+                SuccessMessage = $"¡Cliente '{cliente.Nombre} {cliente.Apellido}' actualizado exitosamente!";
+
+                // Redirigir después de un tiempo
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/clientes");
+            }
+            else
+            {
+                ErrorMessage = "El cliente no fue encontrado. Puede haber sido eliminado.";
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No tienes permiso para actualizar clientes. Contacta al administrador.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ErrorMessage = "El cliente no fue encontrado. Puede haber sido eliminado.";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/clientes");
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ErrorMessage = "Error en los datos enviados. Verifica la información.";
+            }
+            else
+            {
+                ErrorMessage = $"Error al actualizar cliente: {ex.Message}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged(); // Actualizar UI para quitar loading
+        }
+    }
+
+    private async Task EliminarCliente()
+    {
+        if (cliente == null) return;
+
+        var confirmar = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Estás seguro de eliminar al cliente '{cliente.Nombre} {cliente.Apellido}'? Esta acción no se puede deshacer.");
+
+        if (confirmar)
+        {
+            try
+            {
+                var resultado = await ClienteService.DeleteClienteAsync(cliente.Id);
+                if (resultado)
+                {
+                    SuccessMessage = $"Cliente '{cliente.Nombre} {cliente.Apellido}' eliminado exitosamente.";
+                    StateHasChanged();
+
+                    await Task.Delay(1500);
+                    VolverALista();
+                }
+                else
+                {
+                    ErrorMessage = "No se pudo eliminar el cliente.";
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error al eliminar cliente: {ex.Message}";
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/clientes");
+    }
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged();
+    }
+}
+
+<style>
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+            color: #212529;
+        }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+            .d-flex.justify-content-between > div {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .d-flex.justify-content-between .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+    }
+</style>

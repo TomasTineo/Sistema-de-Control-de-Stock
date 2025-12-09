@@ -1,0 +1,506 @@
+﻿@page "/clientes"
+@rendermode InteractiveServer
+@using DTOs.Clientes
+@using Blazor.Services
+@inject IClienteService ClienteService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-people-fill"></i> Clientes</h1>
+            <p class="text-muted">Administra los clientes del sistema</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary me-2" @onclick="GoToDashboard">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </button>
+            <button class="btn btn-success" @onclick="GoToCreateCliente">
+                <i class="bi bi-person-plus"></i> Nuevo Cliente
+            </button>
+        </div>
+    </div>
+
+    <!-- Estado inicial -->
+    @if (!_hasInitialized)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Inicializando...</span>
+            </div>
+            <p class="mt-2">Inicializando...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Loading State -->
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Cargando clientes...</p>
+            </div>
+        }
+
+        <!-- Error State -->
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                <p>@ErrorMessage</p>
+                @if (ErrorMessage.Contains("No autorizado") || ErrorMessage.Contains("401"))
+                {
+                    <button class="btn btn-primary mt-2" @onclick="RedirectToLogin">
+                        Ir al Login
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-outline-danger mt-2" @onclick="CargarClientes">
+                        Reintentar
+                    </button>
+                }
+            </div>
+        }
+
+        <!-- Sin clientes -->
+        @if (!isLoading && string.IsNullOrEmpty(ErrorMessage) && clientes.Count == 0)
+        {
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle"></i> No hay clientes</h5>
+                <p>No se encontraron clientes registrados.</p>
+                <button class="btn btn-outline-info" @onclick="GoToCreateCliente">
+                    <i class="bi bi-person-plus"></i> Registrar primer cliente
+                </button>
+            </div>
+        }
+
+        <!-- Con clientes -->
+        @if (!isLoading && string.IsNullOrEmpty(ErrorMessage) && clientes.Count > 0)
+        {
+            <!-- Barra de búsqueda -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Buscar por nombre, apellido, email o teléfono..."
+                                       @bind="searchTerm"
+                                       @bind:event="oninput" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-primary">
+                                @clientesFiltrados.Count clientes
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de clientes -->
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Lista de Clientes</h5>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="ExportarClientes">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Contacto</th>
+                                <th>Dirección</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cliente in clientesFiltrados)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">#@cliente.Id</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-2">
+                                                @GetInitials(cliente.Nombre, cliente.Apellido)
+                                            </div>
+                                            <div>
+                                                <strong>@cliente.Nombre @cliente.Apellido</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div>
+                                                <i class="bi bi-envelope"></i>
+                                                <a href="mailto:@cliente.Email" class="text-decoration-none">@cliente.Email</a>
+                                            </div>
+                                            <div>
+                                                <i class="bi bi-telephone"></i>
+                                                @cliente.Telefono
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(cliente.Direccion))
+                                        {
+                                            <small>@cliente.Direccion</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin dirección</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-sm btn-outline-info"
+                                                    @onclick="() => VerDetalles(cliente.Id)"
+                                                    title="Ver detalles">
+                                                    Ver
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                    @onclick="() => EditarCliente(cliente.Id)"
+                                                    title="Editar">
+                                                    Editar
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => EliminarCliente(cliente)"
+                                                    title="Eliminar">
+                                                    Eliminar
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (clientesFiltrados.Count > 10)
+                {
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Mostrando @Math.Min(clientesFiltrados.Count, 10) de @clientesFiltrados.Count clientes
+                            </small>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+           
+
+            <!-- Estadísticas -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-people fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Total Clientes</h6>
+                                    <p class="fs-4 mb-0">@clientes.Count</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-envelope fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Con Email</h6>
+                                    <p class="fs-4 mb-0">
+                                        @clientes.Count(c => !string.IsNullOrEmpty(c.Email))
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-telephone fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Con Teléfono</h6>
+                                    <p class="fs-4 mb-0">
+                                        @clientes.Count(c => !string.IsNullOrEmpty(c.Telefono))
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-house fs-1 me-3"></i>
+                                <div>
+                                    <h6 class="card-title mb-0">Con Dirección</h6>
+                                    <p class="fs-4 mb-0">
+                                        @clientes.Count(c => !string.IsNullOrEmpty(c.Direccion))
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    // Estados
+    private List<ClienteDTO> clientes = new();
+    private bool _hasInitialized = false;
+    private bool isLoading = true;
+    private string ErrorMessage = string.Empty;
+    private string searchTerm = string.Empty;
+
+    // Propiedad calculada
+    private List<ClienteDTO> clientesFiltrados => GetFilteredClientes();
+
+    // Inicialización
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            Console.WriteLine("=== INICIALIZANDO PÁGINA CLIENTES ===");
+            _hasInitialized = true;
+            StateHasChanged();
+
+            await CargarClientes();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando: {ex.Message}");
+            ErrorMessage = "Error al inicializar la página.";
+            _hasInitialized = true;
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarClientes()
+    {
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine("Cargando clientes...");
+            clientes = await ClienteService.GetClientesAsync();
+            Console.WriteLine($"Clientes cargados: {clientes.Count}");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para ver los clientes.";
+            await Task.Delay(2000);
+            RedirectToLogin();
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
+            Console.WriteLine($"Error HTTP: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+            Console.WriteLine($"Error general: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    // Métodos de filtrado
+    private List<ClienteDTO> GetFilteredClientes()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return clientes;
+
+        var term = searchTerm.ToLower();
+        return clientes.Where(c =>
+            c.Nombre.ToLower().Contains(term) ||
+            c.Apellido.ToLower().Contains(term) ||
+            c.Email.ToLower().Contains(term) ||
+            c.Telefono.ToLower().Contains(term) ||
+            c.Direccion?.ToLower().Contains(term) == true
+        ).ToList();
+    }
+
+    // Métodos de navegación
+    private void GoToDashboard() => Navigation.NavigateTo("/dashboard");
+    private void GoToCreateCliente() => Navigation.NavigateTo("/clientes/nuevo");
+    private void VerDetalles(int id) => Navigation.NavigateTo($"/clientes/{id}");
+    private void EditarCliente(int id) => Navigation.NavigateTo($"/clientes/editar/{id}");
+    private void RedirectToLogin() => Navigation.NavigateTo("/", true);
+
+    // Métodos de acciones
+    private async Task EliminarCliente(ClienteDTO cliente)
+    {
+        var confirmar = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Estás seguro de eliminar al cliente '{cliente.Nombre} {cliente.Apellido}'?");
+
+        if (confirmar)
+        {
+            try
+            {
+                var resultado = await ClienteService.DeleteClienteAsync(cliente.Id);
+                if (resultado)
+                {
+                    await CargarClientes(); // Recargar lista
+                }
+                else
+                {
+                    ErrorMessage = "No se pudo eliminar el cliente.";
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error al eliminar cliente: {ex.Message}";
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task ExportarClientes()
+    {
+        try
+        {
+            // Implementar exportación a Excel/CSV
+            await JSRuntime.InvokeVoidAsync("alert", "Función de exportación en desarrollo");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al exportar: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    // Métodos auxiliares
+    private string GetInitials(string nombre, string apellido)
+    {
+        if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido))
+            return "??";
+
+        return $"{nombre[0]}{apellido[0]}".ToUpper();
+    }
+
+    private string GetClienteColor(int id)
+    {
+        var colors = new[]
+        {
+            "#3498db", "#2ecc71", "#e74c3c", "#f39c12", "#9b59b6",
+            "#1abc9c", "#d35400", "#c0392b", "#16a085", "#8e44ad"
+        };
+        return colors[id % colors.Length];
+    }
+
+    private string GetDireccionCorta(string direccion)
+    {
+        if (string.IsNullOrEmpty(direccion)) return "";
+        if (direccion.Length <= 30) return direccion;
+        return direccion.Substring(0, 27) + "...";
+    }
+}
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.8em;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .row > .col-md-3, .row > .col-md-4 {
+            margin-bottom: 1rem;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .card-header .btn {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+    }
+</style>

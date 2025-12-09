@@ -1,0 +1,574 @@
+﻿@page "/clientes/nuevo"
+@rendermode InteractiveServer
+@using DTOs.Clientes
+@using Blazor.Services
+@inject IClienteService ClienteService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-person-plus"></i> Nuevo Cliente</h1>
+            <p class="text-muted">Registra un nuevo cliente en el sistema</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary" @onclick="VolverALista">
+                <i class="bi bi-arrow-left"></i> Volver
+            </button>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-badge"></i> Información del Cliente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Loading State -->
+                    @if (isLoading)
+                    {
+                        <div class="text-center my-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Procesando...</p>
+                        </div>
+                    }
+
+                    <!-- Error State -->
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                            <p>@ErrorMessage</p>
+                        </div>
+                    }
+
+                    <!-- Success Message -->
+                    @if (!string.IsNullOrEmpty(SuccessMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <h5><i class="bi bi-check-circle"></i> ¡Éxito!</h5>
+                            <p>@SuccessMessage</p>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-success me-2" @onclick="VolverALista">
+                                    <i class="bi bi-list"></i> Ver todos los clientes
+                                </button>
+                                <button class="btn btn-success" @onclick="CrearOtroCliente">
+                                    <i class="bi bi-person-plus"></i> Crear otro cliente
+                                </button>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Form -->
+                    @if (!isLoading && string.IsNullOrEmpty(SuccessMessage))
+                    {
+                        <EditForm Model="@nuevoCliente" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="row g-3">
+                                <!-- Nombre -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text"
+                                               class="form-control @(validationErrors.ContainsKey("Nombre") ? "is-invalid" : "")"
+                                               id="nombre"
+                                               placeholder="Nombre"
+                                               @bind="nuevoCliente.Nombre"
+                                               @bind:event="oninput" />
+                                        <label for="nombre" class="form-label">
+                                            <i class="bi bi-person me-1"></i> Nombre *
+                                        </label>
+                                        @if (validationErrors.ContainsKey("Nombre"))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @validationErrors["Nombre"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Ej: Juan, María, Carlos</div>
+                                    </div>
+                                </div>
+
+                                <!-- Apellido -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text"
+                                               class="form-control @(validationErrors.ContainsKey("Apellido") ? "is-invalid" : "")"
+                                               id="apellido"
+                                               placeholder="Apellido"
+                                               @bind="nuevoCliente.Apellido"
+                                               @bind:event="oninput" />
+                                        <label for="apellido" class="form-label">
+                                            <i class="bi bi-person me-1"></i> Apellido *
+                                        </label>
+                                        @if (validationErrors.ContainsKey("Apellido"))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @validationErrors["Apellido"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Ej: Pérez, González, Rodríguez</div>
+                                    </div>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="email"
+                                               class="form-control @(validationErrors.ContainsKey("Email") ? "is-invalid" : "")"
+                                               id="email"
+                                               placeholder="correo@ejemplo.com"
+                                               @bind="nuevoCliente.Email"
+                                               @bind:event="oninput" />
+                                        <label for="email" class="form-label">
+                                            <i class="bi bi-envelope me-1"></i> Email *
+                                        </label>
+                                        @if (validationErrors.ContainsKey("Email"))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @validationErrors["Email"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Ej: cliente@correo.com</div>
+                                    </div>
+                                </div>
+
+                                <!-- Teléfono -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="tel"
+                                               class="form-control @(validationErrors.ContainsKey("Telefono") ? "is-invalid" : "")"
+                                               id="telefono"
+                                               placeholder="+34 600 000 000"
+                                               @bind="nuevoCliente.Telefono"
+                                               @bind:event="oninput" />
+                                        <label for="telefono" class="form-label">
+                                            <i class="bi bi-telephone me-1"></i> Teléfono *
+                                        </label>
+                                        @if (validationErrors.ContainsKey("Telefono"))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @validationErrors["Telefono"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Ej: +34 600 000 000</div>
+                                    </div>
+                                </div>
+
+                                <!-- Dirección -->
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control @(validationErrors.ContainsKey("Direccion") ? "is-invalid" : "")"
+                                                  id="direccion"
+                                                  placeholder="Dirección completa"
+                                                  style="height: 100px"
+                                                  @bind="nuevoCliente.Direccion"
+                                                  @bind:event="oninput"></textarea>
+                                        <label for="direccion" class="form-label">
+                                            <i class="bi bi-house me-1"></i> Dirección
+                                        </label>
+                                        @if (validationErrors.ContainsKey("Direccion"))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @validationErrors["Direccion"]
+                                            </div>
+                                        }
+                                    <div class="form-text">Dirección completa (calle, número, ciudad, código postal)</div>
+                                </div>
+                            </div>
+
+                            <!-- Vista previa -->
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-eye"></i> Vista previa del cliente
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-2 text-center">
+                                                <div class="avatar-circle-lg mx-auto">
+                                                    @GetInitials()
+                                                </div>
+                                            </div>
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p class="mb-1">
+                                                            <strong>Nombre completo:</strong><br />
+                                                            <span class="@(string.IsNullOrEmpty(nuevoCliente.Nombre) ? "text-muted" : "")">
+                                                                @(string.IsNullOrEmpty(nuevoCliente.Nombre) && string.IsNullOrEmpty(nuevoCliente.Apellido) ?
+                                                                                                                                "No ingresado" : $"{nuevoCliente.Nombre} {nuevoCliente.Apellido}")
+                                                            </span>
+                                                        </p>
+                                                        <p class="mb-1">
+                                                            <strong>Email:</strong><br />
+                                                            <span class="@(string.IsNullOrEmpty(nuevoCliente.Email) ? "text-muted" : "")">
+                                                                @(string.IsNullOrEmpty(nuevoCliente.Email) ? "No ingresado" : nuevoCliente.Email)
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p class="mb-1">
+                                                            <strong>Teléfono:</strong><br />
+                                                            <span class="@(string.IsNullOrEmpty(nuevoCliente.Telefono) ? "text-muted" : "")">
+                                                                @(string.IsNullOrEmpty(nuevoCliente.Telefono) ? "No ingresado" : nuevoCliente.Telefono)
+                                                            </span>
+                                                        </p>
+                                                        <p class="mb-1">
+                                                            <strong>Dirección:</strong><br />
+                                                            <small class="@(string.IsNullOrEmpty(nuevoCliente.Direccion) ? "text-muted" : "")">
+                                                                @(string.IsNullOrEmpty(nuevoCliente.Direccion) ? "No ingresada" : nuevoCliente.Direccion)
+                                                            </small>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                                <!-- Botones -->
+                                <div class="col-12 mt-4">
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-outline-secondary" @onclick="VolverALista">
+                                            <i class="bi bi-x-circle"></i> Cancelar
+                                        </button>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-info me-2" @onclick="LimpiarFormulario">
+                                                <i class="bi bi-eraser"></i> Limpiar
+                                            </button>
+                                            <button type="submit" class="btn btn-success" disabled="@isLoading">
+                                            @if (isLoading)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                    <span> Guardando...</span>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-check-circle"></i>
+                                                    <span> Guardar Cliente</span>
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        Los campos marcados con * son obligatorios.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guía rápida -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6><i class="bi bi-lightbulb text-primary"></i> Tip útil</h6>
+                    <p class="small mb-0">
+                        Verifica que el email sea correcto, ya que se usará para notificaciones importantes.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6><i class="bi bi-shield-check text-success"></i> Validación</h6>
+                    <p class="small mb-0">
+                        Todos los campos se validan automáticamente antes de guardar.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6><i class="bi bi-clock-history text-warning"></i> Rápido y fácil</h6>
+                    <p class="small mb-0">
+                        Puedes crear un cliente en menos de 2 minutos con esta forma.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Modelo
+    private CreateClienteRequest nuevoCliente = new();
+
+    // Estados
+    private bool isLoading = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+    private Dictionary<string, string> validationErrors = new();
+
+    // Métodos
+    private async Task HandleValidSubmit()
+    {
+        await GuardarCliente();
+    }
+
+    private async Task GuardarCliente()
+    {
+        // Validación manual adicional
+        if (!ValidarCliente())
+        {
+            return;
+        }
+
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        validationErrors.Clear();
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine("Creando cliente...");
+            var clienteCreado = await ClienteService.CreateClienteAsync(nuevoCliente);
+
+            if (clienteCreado != null && clienteCreado.Id > 0)
+            {
+                SuccessMessage = $"Cliente '{clienteCreado.Nombre} {clienteCreado.Apellido}' creado exitosamente con ID #{clienteCreado.Id}.";
+                Console.WriteLine($"Cliente creado: ID {clienteCreado.Id}");
+            }
+            else
+            {
+                ErrorMessage = "No se pudo crear el cliente. Intenta nuevamente.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para crear clientes.";
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/", true);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ErrorMessage = "Datos inválidos. Verifica la información ingresada.";
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
+            Console.WriteLine($"Error HTTP: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+            Console.WriteLine($"Error general: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private bool ValidarCliente()
+    {
+        validationErrors.Clear();
+        bool isValid = true;
+
+        // Validar Nombre
+        if (string.IsNullOrWhiteSpace(nuevoCliente.Nombre))
+        {
+            validationErrors["Nombre"] = "El nombre es obligatorio.";
+            isValid = false;
+        }
+        else if (nuevoCliente.Nombre.Length < 2)
+        {
+            validationErrors["Nombre"] = "El nombre debe tener al menos 2 caracteres.";
+            isValid = false;
+        }
+
+        // Validar Apellido
+        if (string.IsNullOrWhiteSpace(nuevoCliente.Apellido))
+        {
+            validationErrors["Apellido"] = "El apellido es obligatorio.";
+            isValid = false;
+        }
+        else if (nuevoCliente.Apellido.Length < 2)
+        {
+            validationErrors["Apellido"] = "El apellido debe tener al menos 2 caracteres.";
+            isValid = false;
+        }
+
+        // Validar Email
+        if (string.IsNullOrWhiteSpace(nuevoCliente.Email))
+        {
+            validationErrors["Email"] = "El email es obligatorio.";
+            isValid = false;
+        }
+        else if (!IsValidEmail(nuevoCliente.Email))
+        {
+            validationErrors["Email"] = "Ingresa un email válido.";
+            isValid = false;
+        }
+
+        // Validar Teléfono
+        if (string.IsNullOrWhiteSpace(nuevoCliente.Telefono))
+        {
+            validationErrors["Telefono"] = "El teléfono es obligatorio.";
+            isValid = false;
+        }
+        else if (nuevoCliente.Telefono.Length < 8)
+        {
+            validationErrors["Telefono"] = "El teléfono debe tener al menos 8 dígitos.";
+            isValid = false;
+        }
+
+        // Validar Dirección (opcional, pero si se ingresa, mínimo 10 caracteres)
+        if (!string.IsNullOrWhiteSpace(nuevoCliente.Direccion) && nuevoCliente.Direccion.Length < 10)
+        {
+            validationErrors["Direccion"] = "La dirección debe tener al menos 10 caracteres.";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+    
+    private async Task LimpiarFormulario()
+    {
+        if (!string.IsNullOrEmpty(SuccessMessage))
+            return;
+
+        var confirmar = await JSRuntime.InvokeAsync<bool>("confirm",
+            "¿Estás seguro de limpiar el formulario? Se perderán todos los datos ingresados.");
+
+        if (confirmar)
+        {
+            nuevoCliente = new CreateClienteRequest();
+            validationErrors.Clear();
+            ErrorMessage = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/clientes");
+    }
+
+    private void CrearOtroCliente()
+    {
+        nuevoCliente = new CreateClienteRequest();
+        SuccessMessage = string.Empty;
+        ErrorMessage = string.Empty;
+        validationErrors.Clear();
+        StateHasChanged();
+    }
+
+    private string GetInitials()
+    {
+        var nombre = nuevoCliente.Nombre?.Trim() ?? "";
+        var apellido = nuevoCliente.Apellido?.Trim() ?? "";
+
+        if (string.IsNullOrEmpty(nombre) && string.IsNullOrEmpty(apellido))
+            return "??";
+
+        var inicialNombre = nombre.Length > 0 ? nombre[0].ToString() : "";
+        var inicialApellido = apellido.Length > 0 ? apellido[0].ToString() : "";
+
+        return (inicialNombre + inicialApellido).ToUpper();
+    }
+}
+
+<style>
+    .avatar-circle-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-floating > .form-control {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+
+        .form-floating > .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:disabled {
+        cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+            .d-flex.justify-content-between .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+        .col-12 .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .avatar-circle-lg {
+            width: 60px;
+            height: 60px;
+            font-size: 18px;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
