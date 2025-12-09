@@ -444,7 +444,7 @@
             isValid = false;
         }
 
-        // Validar Dirección (opcional, pero si se ingresa, mínimo 10 caracteres)
+        // Validar Dirección
         if (!string.IsNullOrWhiteSpace(nuevoCliente.Direccion) && nuevoCliente.Direccion.Length < 10)
         {
             validationErrors["Direccion"] = "La dirección debe tener al menos 10 caracteres.";

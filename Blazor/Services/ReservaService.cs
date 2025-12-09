@@ -81,7 +81,7 @@ namespace Blazor.Services
             response.EnsureSuccessStatusCode();
 
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return null; // O manejar según tu API
+                return null; 
 
             return await response.Content.ReadFromJsonAsync<ReservaDTO>();
         }

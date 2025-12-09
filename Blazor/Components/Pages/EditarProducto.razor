@@ -193,7 +193,7 @@
     private string ErrorMessage = string.Empty;
     private string SuccessMessage = string.Empty;
 
-    // Este método se ejecuta DESPUÉS del primer render, cuando JS está disponible
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_hasInitialized)
@@ -233,7 +233,7 @@
 
             if (producto != null)
             {
-                // IMPORTANTE: Asegurar que el Id del objeto coincida con el parámetro de la URL
+                
                 producto.Id = Id;
 
                 Console.WriteLine($"Producto cargado: {producto.Nombre}");

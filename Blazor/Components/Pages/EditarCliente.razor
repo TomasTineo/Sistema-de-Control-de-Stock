@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <!-- Estado inicial (mientras se inicializa) -->
+    <!-- Estado inicial -->
     @if (!_hasInitialized)
     {
         <div class="text-center my-5">
@@ -32,7 +32,7 @@
     }
     else
     {
-        <!-- Loading State (después de inicializar) -->
+        <!-- Loading State -->
         @if (isLoading)
         {
             <div class="text-center my-5">
@@ -244,7 +244,7 @@
             _hasInitialized = true;
             StateHasChanged(); // Actualizar UI para quitar el spinner inicial
 
-            // Ahora cargar el cliente (esto se ejecuta cuando JS está disponible)
+            // cargar el cliente (esto se ejecuta cuando JS está disponible)
             await CargarCliente();
         }
         catch (Exception ex)
@@ -265,7 +265,7 @@
 
             if (cliente != null)
             {
-                // IMPORTANTE: Asegurar que el Id del objeto coincida con el parámetro de la URL
+                // Asegurar que el Id del objeto coincida con el parámetro de la URL
                 cliente.Id = Id;
 
                 Console.WriteLine($"Cliente cargado: {cliente.Nombre} {cliente.Apellido}");

@@ -186,12 +186,12 @@
             Console.WriteLine($"Descripción: {NuevoProducto.Descripcion}");
 
             // Llamar al servicio para crear el producto
-            // Necesitarás agregar este método a IProductoService y ProductoService
+          
             var producto = await ProductoService.CreateProductoAsync(NuevoProducto);
 
             SuccessMessage = $"¡Producto '{producto.Nombre}' creado exitosamente! ID: {producto.Id}";
 
-            // Opcional: Redirigir después de un tiempo
+            // Redirigir después de un tiempo
             await Task.Delay(2000);
             Navigation.NavigateTo("/productos");
         }

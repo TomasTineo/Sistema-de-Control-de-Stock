@@ -4,8 +4,8 @@ using Blazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Agregar servicios
-builder.Services.AddRazorComponents()  // ← NUEVA forma en .NET 8+
-    .AddInteractiveServerComponents();  // ← Para Blazor Server
+builder.Services.AddRazorComponents()  
+    .AddInteractiveServerComponents();  
 
 // Configurar HttpClient para tu API
 builder.Services.AddHttpClient("AuthAPI", client =>
@@ -24,10 +24,9 @@ builder.Services.AddScoped<IReportesService, ReportesService>();
 builder.Services.AddScoped<ITokenStorage, ServerTokenStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Configurar autorización si usas JWT
+
 builder.Services.AddAuthorizationCore();
-// Si usas autenticación, agrega también:
-// builder.Services.AddAuthentication();
+
 
 var app = builder.Build();
 

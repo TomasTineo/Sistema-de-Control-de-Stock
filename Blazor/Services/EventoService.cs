@@ -93,13 +93,12 @@ namespace Blazor.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
                 {
                     Console.WriteLine("204 No Content - devolviendo objeto actualizado");
-                    // Si la API devuelve 204 sin contenido, devolvemos el objeto que enviamos
+                    
                     return evento;
                 }
 
                 response.EnsureSuccessStatusCode();
 
-                // Solo intentar leer JSON si hay contenido
                 if (response.Content.Headers.ContentLength > 0)
                 {
                     return await response.Content.ReadFromJsonAsync<EventoDTO>();

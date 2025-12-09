@@ -76,7 +76,7 @@ namespace Blazor.Services
         {
             try
             {
-                // Configurar token (este método ahora debe manejar el prerrender)
+                
                 await AgregarTokenAlRequest();
 
                 Console.WriteLine($"Obteniendo producto con ID: {id}");
@@ -87,7 +87,7 @@ namespace Blazor.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
                     Console.WriteLine("No autorizado en GetProductoByIdAsync");
-                    // Lanzar excepción para que la página lo maneje
+                    
                     throw new HttpRequestException("No autorizado", null, System.Net.HttpStatusCode.Unauthorized);
                 }
 
@@ -213,20 +213,20 @@ namespace Blazor.Services
             }
             catch (JSException)
             {
-                // Esto ocurre durante prerrender - está bien, no configuramos token
+                
                 Console.WriteLine("Prerrender detectado - omitiendo token");
             }
             catch (InvalidOperationException ex) when (
                 ex.Message.Contains("JavaScript interop") ||
                 ex.Message.Contains("statically rendered"))
             {
-                // También durante prerrender
+                
                 Console.WriteLine("Prerrender detectado - omitiendo token");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error configurando token: {ex.Message}");
-                // No relanzar - dejamos que la petición vaya sin token
+                
             }
 
         }

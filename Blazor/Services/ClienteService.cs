@@ -85,7 +85,7 @@ namespace Blazor.Services
                         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 }
             }
-            catch
+           catch
             {
                 // Manejar error de token durante prerrender
             }

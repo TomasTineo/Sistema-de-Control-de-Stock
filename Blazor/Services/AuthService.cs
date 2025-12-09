@@ -53,7 +53,7 @@ namespace Blazor.Services
             }
             catch (Exception ex)
             {
-                // Log del error (puedes usar ILogger aquí)
+                // Log del error 
                 throw new Exception($"Error durante la autenticación: {ex.Message}", ex);
             }
         }

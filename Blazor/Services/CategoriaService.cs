@@ -88,13 +88,13 @@ namespace Blazor.Services
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
                 Console.WriteLine("Respuesta 204 No Content - devolviendo objeto original");
-                // Si la API devuelve 204 sin contenido, devolvemos el objeto que enviamos
+              
                 return categoria;
             }
 
             response.EnsureSuccessStatusCode();
 
-            // Solo intentar leer JSON si hay contenido
+           
             if (response.Content.Headers.ContentLength > 0)
             {
                 var content = await response.Content.ReadAsStringAsync();
@@ -131,6 +131,7 @@ namespace Blazor.Services
             {
                 // Manejar error de token durante prerrender
             }
+
         }
     }
 }
