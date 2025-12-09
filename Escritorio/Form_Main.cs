@@ -108,5 +108,10 @@ namespace Escritorio
             formClientes.Show();
         }
 
+        private void btnReportes_Click(object sender, EventArgs e)
+        {
+            var formReportes = Program.ServiceProvider.GetRequiredService<Form_Reportes>();
+            formReportes.Show();
+        }
     }
 }

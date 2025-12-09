@@ -2,7 +2,6 @@ using Application.Services.Interfaces;
 using Application.Services.Implementations;
 using Data;
 using Data.Repositories;
-using Data.Repositories.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens; 
@@ -35,9 +34,6 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
-builder.Services.AddScoped<IReportesService, ReporteService>();
-
-// Reportes
 builder.Services.AddScoped<IReportesService, ReporteService>();
 
 

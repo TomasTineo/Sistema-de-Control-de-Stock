@@ -22,12 +22,12 @@ namespace Application.Services.Implementations
             return await _reporteRepository.GetProductosBajoStockAsync(stockMinimo);
         }
 
-        public async Task<IEnumerable<ReservasPorMesDTO>> GetReservasPorMesAsync(int anio)
+        public async Task<IEnumerable<TopProductoReservadoDTO>> GetTopProductosReservadosAsync(int top)
         {
-            if (anio < 2000)
-                throw new ArgumentException("Año no válido");
+            if (top <= 0)
+                throw new ArgumentException("El número de productos debe ser mayor a cero");
 
-            return await _reporteRepository.GetReservasPorMesAsync(anio);
+            return await _reporteRepository.GetTopProductosReservadosAsync(top);
         }
     }
 }

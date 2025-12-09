@@ -39,7 +39,7 @@ namespace Escritorio
             txtEmail.PlaceholderText = "email@ejemplo.com";
             txtTelefono.PlaceholderText = "+54 XXX XXXXXXX";
             txtDireccion.PlaceholderText = "Dirección del cliente";
-            txtBuscar.PlaceholderText = "🔍 Buscar por nombre, apellido o email";
+            txtBuscar.PlaceholderText = "Buscar por nombre, apellido o email";
 
             // busqueda en tiempo real
             txtBuscar.TextChanged += txtBuscar_TextChanged;

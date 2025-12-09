@@ -7,11 +7,11 @@ namespace DTOs.Reportes
         public int StockActual { get; set; }
     }
 
-    // DTO para el Reporte 2: Reservas por mes.
-    public class ReservasPorMesDTO
+    // DTO para el Reporte 2: Top Productos Más Reservados
+    public class TopProductoReservadoDTO
     {
-        public int MesNumero { get; set; }
-        public string NombreMes { get; set; } = string.Empty;
-        public int TotalReservas { get; set; }
+        public string NombreProducto { get; set; } = string.Empty;
+        public int CantidadReservada { get; set; }
+        public int NumeroReservas { get; set; }
     }
 }

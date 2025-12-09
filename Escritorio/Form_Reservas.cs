@@ -45,7 +45,7 @@ namespace Escritorio
         private async void Form_Reserva_Load(object sender, EventArgs e)
         {
             // Placeholders
-            txt_Buscar.PlaceholderText = "?? Buscar por cliente o evento...";
+            txt_Buscar.PlaceholderText = "Buscar por cliente o evento...";
             
             // Configurar DataGridView de Reservas
             ConfigurarDataGridViewReservas();

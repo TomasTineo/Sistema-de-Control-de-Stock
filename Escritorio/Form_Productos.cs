@@ -32,7 +32,7 @@ namespace Escritorio
             txt_Description.PlaceholderText = "Descripción";
             txt_Price.PlaceholderText = "Precio";
             txt_Stock.PlaceholderText = "Stock actual";
-            txt_Buscar.PlaceholderText = "🔍 Buscar por nombre o descripción...";
+            txt_Buscar.PlaceholderText = "Buscar por nombre o descripción...";
 
             //Evento de búsqueda en tiempo real
             txt_Buscar.TextChanged += txt_Buscar_TextChanged;

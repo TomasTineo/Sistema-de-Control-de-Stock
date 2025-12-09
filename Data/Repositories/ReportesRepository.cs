@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient; // Necesario para ADO.NET
 using System.Globalization;
 
 
-namespace Data.Repositories.Implementations
+namespace Data.Repositories
 {
     public class ReporteRepository : IReportesRepository
     {
@@ -47,42 +47,42 @@ namespace Data.Repositories.Implementations
             return productos;
         }
 
-        // Implementación ADO.NET para Reporte 2 (Reservas por Mes)
-        public async Task<IEnumerable<ReservasPorMesDTO>> GetReservasPorMesAsync(int anio)
+        // Implementación ADO.NET para Reporte 2 (Top Productos Más Reservados)
+        public async Task<IEnumerable<TopProductoReservadoDTO>> GetTopProductosReservadosAsync(int top)
         {
-            var reservas = new List<ReservasPorMesDTO>();
+            var productos = new List<TopProductoReservadoDTO>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 var sql = @"
-                    SELECT 
-                        MONTH(FechaReserva) AS MesNumero, 
-                        COUNT(Id) AS TotalReservas
-                    FROM Reservas
-                    WHERE YEAR(FechaReserva) = @Anio
-                    GROUP BY MONTH(FechaReserva)
-                    ORDER BY MesNumero ASC";
+                    SELECT TOP (@Top)
+                        p.Nombre AS NombreProducto,
+                        SUM(rp.CantidadReservada) AS CantidadReservada,
+                        COUNT(DISTINCT rp.ReservaId) AS NumeroReservas
+                    FROM ReservaProductos rp
+                    INNER JOIN Productos p ON rp.ProductoId = p.Id
+                    GROUP BY p.Nombre
+                    ORDER BY CantidadReservada DESC";
 
                 using (var command = new SqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@Anio", anio);
+                    command.Parameters.AddWithValue("@Top", top);
                     await connection.OpenAsync();
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            int mesNum = Convert.ToInt32(reader["MesNumero"]);
-                            reservas.Add(new ReservasPorMesDTO
+                            productos.Add(new TopProductoReservadoDTO
                             {
-                                MesNumero = mesNum,
-                                NombreMes = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(mesNum),
-                                TotalReservas = Convert.ToInt32(reader["TotalReservas"])
+                                NombreProducto = reader["NombreProducto"].ToString() ?? string.Empty,
+                                CantidadReservada = Convert.ToInt32(reader["CantidadReservada"]),
+                                NumeroReservas = Convert.ToInt32(reader["NumeroReservas"])
                             });
                         }
                     }
                 }
             }
-            return reservas;
+            return productos;
         }
     }
 }

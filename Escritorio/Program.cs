@@ -74,6 +74,12 @@ namespace Escritorio
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            services.AddHttpClient<ReportesApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
             // Registrar AuthService como singleton
             services.AddSingleton<IAuthService>(authService);
 
@@ -87,6 +93,7 @@ namespace Escritorio
             services.AddTransient<Form_Eventos>();
             services.AddTransient<Form_Clientes>();
             services.AddTransient<Form_Reserva>();
+            services.AddTransient<Form_Reportes>();
 
             ServiceProvider = services.BuildServiceProvider();
 

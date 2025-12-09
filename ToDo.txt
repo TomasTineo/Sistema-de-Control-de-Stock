@@ -1,6 +1,6 @@
 # Falta:
 	
-	- Form de reportes y estadisticas
+	
 	- App web
 
 

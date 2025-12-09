@@ -24,16 +24,16 @@ namespace WebAPI.Endpoints
             })
             .WithDescription("Obtiene productos cuyo stock es menor al mínimo definido.");
 
-            // Endpoint GET para el reporte de Reservas por Mes
-            group.MapGet("/reservas-por-mes/{anio}", async (
+            // Endpoint GET para el reporte de Top Productos Más Reservados
+            group.MapGet("/top-productos-reservados", async (
                 [FromServices] IReportesService reporteService,
-                int anio)
+                [FromQuery] int top = 10)
             =>
             {
-                var reporte = await reporteService.GetReservasPorMesAsync(anio);
+                var reporte = await reporteService.GetTopProductosReservadosAsync(top);
                 return Results.Ok(reporte);
             })
-            .WithDescription("Obtiene el número total de reservas por mes para un año dado.");
+            .WithDescription("Obtiene los productos más reservados ordenados por cantidad.");
         }
     }
 }

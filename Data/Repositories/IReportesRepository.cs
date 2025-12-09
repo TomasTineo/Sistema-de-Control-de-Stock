@@ -6,6 +6,6 @@ namespace Data.Repositories
     public interface IReportesRepository
     {
         Task<IEnumerable<ProductoStockDTO>> GetProductosBajoStockAsync(int stockMinimo);
-        Task<IEnumerable<ReservasPorMesDTO>> GetReservasPorMesAsync(int anio);
+        Task<IEnumerable<TopProductoReservadoDTO>> GetTopProductosReservadosAsync(int top);
     }
 }

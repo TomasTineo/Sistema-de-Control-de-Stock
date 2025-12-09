@@ -38,6 +38,7 @@
             btn_Clientes = new Button();
             btn_Eventos = new Button();
             btn_Reservas = new Button();
+            btn_Reportes = new Button();
             panel_Header.SuspendLayout();
             panel_Menu.SuspendLayout();
             table_Botones.SuspendLayout();
@@ -96,6 +97,7 @@
             table_Botones.Controls.Add(btn_Clientes, 0, 1);
             table_Botones.Controls.Add(btn_Eventos, 1, 1);
             table_Botones.Controls.Add(btn_Reservas, 0, 2);
+            table_Botones.Controls.Add(btn_Reportes, 1, 2);
             table_Botones.Location = new Point(20, 70);
             table_Botones.Name = "table_Botones";
             table_Botones.Padding = new Padding(10);
@@ -164,18 +166,31 @@
             // 
             // btn_Reservas
             // 
-            table_Botones.SetColumnSpan(btn_Reservas, 2);
             btn_Reservas.Cursor = Cursors.Hand;
             btn_Reservas.Dock = DockStyle.Fill;
             btn_Reservas.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             btn_Reservas.Location = new Point(30, 256);
             btn_Reservas.Margin = new Padding(20);
             btn_Reservas.Name = "btn_Reservas";
-            btn_Reservas.Size = new Size(800, 74);
+            btn_Reservas.Size = new Size(380, 74);
             btn_Reservas.TabIndex = 4;
             btn_Reservas.Text = "Gestión de Reservas";
             btn_Reservas.UseVisualStyleBackColor = true;
             btn_Reservas.Click += btnReservas_Click;
+            // 
+            // btn_Reportes
+            // 
+            btn_Reportes.Cursor = Cursors.Hand;
+            btn_Reportes.Dock = DockStyle.Fill;
+            btn_Reportes.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            btn_Reportes.Location = new Point(450, 256);
+            btn_Reportes.Margin = new Padding(20);
+            btn_Reportes.Name = "btn_Reportes";
+            btn_Reportes.Size = new Size(380, 74);
+            btn_Reportes.TabIndex = 5;
+            btn_Reportes.Text = "Reportes y Estadísticas";
+            btn_Reportes.UseVisualStyleBackColor = true;
+            btn_Reportes.Click += btnReportes_Click;
             // 
             // Form_Main
             // 
@@ -206,6 +221,7 @@
         private Button btn_Clientes;
         private Button btn_Eventos;
         private Button btn_Reservas;
+        private Button btn_Reportes;
         private Label lbl_Bienvenida;
     }
 }
