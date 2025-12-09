@@ -205,7 +205,15 @@
             }
             else
             {
-                ErrorMessage = $"Error al crear producto: {ex.Message}";
+                if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    ErrorMessage = $"Requiere admin";
+                }
+                else
+                {
+                    ErrorMessage = $"Error al crear producto: {ex.Message}";
+                }
+               
             }
         }
         catch (Exception ex)

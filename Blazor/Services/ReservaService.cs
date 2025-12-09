@@ -49,9 +49,9 @@ namespace Blazor.Services
             {
                 Id = r.Id,
                 NombreCliente = r.Cliente?.Nombre + " " + r.Cliente?.Apellido,
-                NombreEvento = r.Evento?.NombreEvento ?? "Sin nombre",
+                NombreEvento = r.Evento?.NombreEvento ?? "Sin nombre", // Cambiado de NombreEvento a Nombre
                 FechaReserva = r.FechaReserva,
-                FechaEvento = r.Evento?.FechaEvento ?? DateTime.MinValue,
+                FechaEvento = r.Evento?.FechaEvento ?? DateTime.MinValue, // Cambiado de FechaEvento a Fecha
                 Estado = r.Estado,
                 TotalReserva = r.TotalReserva,
                 CantidadTiposProductos = r.Productos?.Count ?? 0

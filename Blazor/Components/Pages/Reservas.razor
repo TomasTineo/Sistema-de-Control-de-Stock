@@ -178,19 +178,17 @@
                                     </td>
                                     <td>
                                         <div class="d-flex justify-content-end gap-2">
-                                            <button class="btn btn-sm btn-outline-info"
-                                                    @onclick="() => VerDetalles(reserva.Id)"
-                                                    title="Ver detalles">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
+                                            
                                             <button class="btn btn-sm btn-outline-warning"
                                                     @onclick="() => EditarReserva(reserva.Id)"
                                                     title="Editar">
+                                                    Editar
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger"
                                                     @onclick="() => EliminarReserva(reserva)"
                                                     title="Eliminar">
+                                                    Eliminar
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -268,13 +266,18 @@
                             </div>
                             <div class="card-footer bg-transparent border-top">
                                 <div class="d-flex justify-content-between">
-                                    <button class="btn btn-sm btn-outline-info"
-                                            @onclick="() => VerDetalles(reserva.Id)">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
+                                    
                                     <button class="btn btn-sm btn-outline-warning"
                                             @onclick="() => EditarReserva(reserva.Id)">
+                                            Editar
                                         <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            @onclick="() => EliminarReserva(reserva)"
+                                            title="Eliminar">
+                                        Eliminar
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </div>

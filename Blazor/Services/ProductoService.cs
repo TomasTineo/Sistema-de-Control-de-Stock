@@ -129,6 +129,7 @@ namespace Blazor.Services
                     throw new UnauthorizedAccessException("No autorizado");
                 }
 
+
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<ProductoDTO>();
 

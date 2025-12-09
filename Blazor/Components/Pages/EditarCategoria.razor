@@ -351,9 +351,13 @@
             else if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
                 ErrorMessage = "Ya existe una categoría con ese nombre.";
-            }
-            else
+            }else if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
+                ErrorMessage = "Requiere admin";
+            }
+            else 
+            {
+               
                 ErrorMessage = $"Error al actualizar categoría: {ex.Message}";
             }
         }
