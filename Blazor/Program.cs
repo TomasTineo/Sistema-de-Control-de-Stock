@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()  // ← NUEVA forma en .NET 8+
 // Configurar HttpClient para tu API
 builder.Services.AddHttpClient("AuthAPI", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7001/");
+    client.BaseAddress = new Uri("http://localhost:5239/");
 });
 
 // Servicios 
@@ -42,8 +42,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-// Configurar routing de Blazor (¡CORRECTO!)
-app.MapRazorComponents<App>()  // ← App.razor es tu componente raíz
-    .AddInteractiveServerRenderMode();  // ← Modo Server
+// Configurar routing de Blazor 
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();  
 
 app.Run();

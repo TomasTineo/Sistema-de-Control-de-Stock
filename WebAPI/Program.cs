@@ -180,11 +180,11 @@ using (var scope = app.Services.CreateScope())
     
     // Borrar y recrear (SOLO EN DESARROLLO) 
     // DESCOMENTAR SOLO CUANDO NECESITES RECREAR LA BD CON DATOS INICIALES
-    //if (app.Environment.IsDevelopment())
-    //{
-    //    await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
-    //    await context.Database.EnsureCreatedAsync();  // ? CREA NUEVA
-    //}
+    if (app.Environment.IsDevelopment())
+    {
+        await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
+        await context.Database.EnsureCreatedAsync();  // ? CREA NUEVA
+    }
     
     // Solo asegurar que exista (sin borrar)
     await context.Database.EnsureCreatedAsync();

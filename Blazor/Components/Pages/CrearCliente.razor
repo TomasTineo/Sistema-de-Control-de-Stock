@@ -367,8 +367,17 @@
         }
         catch (HttpRequestException ex)
         {
-            ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
-            Console.WriteLine($"Error HTTP: {ex.Message}");
+            if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                ErrorMessage = $"Requiere admin";
+            }
+            else
+            {
+                ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
+                Console.WriteLine($"Error HTTP: {ex.Message}");
+            }
+
+           
         }
         catch (Exception ex)
         {
