@@ -1,0 +1,912 @@
+﻿@page "/reservas/nueva"
+@rendermode InteractiveServer
+@using DTOs.Reservas
+@using DTOs.Clientes
+@using DTOs.Eventos
+@using DTOs.Productos
+@using Blazor.Services
+@inject IReservaService ReservaService
+@inject IClienteService ClienteService
+@inject IEventoService EventoService
+@inject IProductoService ProductoService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-calendar-plus"></i> Nueva Reserva</h1>
+            <p class="text-muted">Crea una nueva reserva para un evento</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary" @onclick="VolverALista">
+                <i class="bi bi-arrow-left"></i> Volver a Reservas
+            </button>
+        </div>
+    </div>
+
+    <!-- Estado inicial -->
+    @if (!_hasInitialized)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Inicializando...</span>
+            </div>
+            <p class="mt-2">Inicializando formulario...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Loading State -->
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Cargando datos necesarios...</p>
+            </div>
+        }
+
+        <!-- Error State -->
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                <p>@ErrorMessage</p>
+                @if (ShowRetryButton)
+                {
+                    <button class="btn btn-outline-danger mt-2" @onclick="CargarDatosIniciales">
+                        Reintentar
+                    </button>
+                }
+            </div>
+        }
+
+        <!-- Formulario -->
+        @if (!isLoading && string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clipboard-check"></i> Información de la Reserva
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Success Message -->
+                            @if (!string.IsNullOrEmpty(SuccessMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-check-circle-fill"></i> @SuccessMessage
+                                    <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+                                </div>
+                            }
+
+                            <!-- Form -->
+                            <EditForm Model="@nuevaReserva" OnValidSubmit="@HandleCrearReserva">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary class="alert alert-danger" />
+
+                                <div class="row g-3">
+                                    <!-- Cliente -->
+                                    <div class="col-md-6">
+                                        <label for="clienteId" class="form-label fw-bold">
+                                            <i class="bi bi-person me-1"></i> Cliente *
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-people"></i>
+                                            </span>
+                                            <select id="clienteId"
+                                                    class="form-select @(validationErrors.ContainsKey("ClienteId") ? "is-invalid" : "")"
+                                                    @bind="nuevaReserva.ClienteId"
+                                                    @bind:event="onchange">
+                                                <option value="0">Seleccionar cliente...</option>
+                                                @foreach (var cliente in clientes)
+                                                {
+                                                    <option value="@cliente.Id">
+                                                        @cliente.Nombre @cliente.Apellido
+                                                        @if (!string.IsNullOrEmpty(cliente.Email))
+                                                        {
+                                                            <text> - @cliente.Email</text>
+                                                        }
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        @if (validationErrors.ContainsKey("ClienteId"))
+                                        {
+                                            <div class="invalid-feedback d-block">
+                                                @validationErrors["ClienteId"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Selecciona el cliente que realizará la reserva</div>
+                                    </div>
+
+                                    <!-- Evento -->
+                                    <div class="col-md-6">
+                                        <label for="eventoId" class="form-label fw-bold">
+                                            <i class="bi bi-calendar-event me-1"></i> Evento *
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-calendar-check"></i>
+                                            </span>
+                                            <select id="eventoId"
+                                                    class="form-select @(validationErrors.ContainsKey("EventoId") ? "is-invalid" : "")"
+                                                    @bind="nuevaReserva.EventoId"
+                                                    @bind:event="onchange">
+                                                <option value="0">Seleccionar evento...</option>
+                                                @foreach (var evento in eventos)
+                                                {
+                                                    <option value="@evento.Id">
+                                                        @evento.NombreEvento - @evento.FechaEvento.ToString("dd/MM/yyyy")
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        @if (validationErrors.ContainsKey("EventoId"))
+                                        {
+                                            <div class="invalid-feedback d-block">
+                                                @validationErrors["EventoId"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Selecciona el evento para la reserva</div>
+                                    </div>
+
+                                    <!-- Fecha Finalización -->
+                                    <div class="col-md-6">
+                                        <label for="fechaFinalizacion" class="form-label fw-bold">
+                                            <i class="bi bi-calendar-x me-1"></i> Fecha de Finalización *
+                                        </label>
+                                        <input type="date"
+                                               id="fechaFinalizacion"
+                                               class="form-control @(validationErrors.ContainsKey("FechaFinalizacion") ? "is-invalid" : "")"
+                                               @bind="nuevaReserva.FechaFinalizacion"
+                                               @bind:format="yyyy-MM-dd"
+                                               min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                        @if (validationErrors.ContainsKey("FechaFinalizacion"))
+                                        {
+                                            <div class="invalid-feedback d-block">
+                                                @validationErrors["FechaFinalizacion"]
+                                            </div>
+                                        }
+                                        <div class="form-text">Fecha límite para la reserva</div>
+                                    </div>
+
+                                    <!-- Estado -->
+                                    <div class="col-md-6">
+                                        <label for="estado" class="form-label fw-bold">
+                                            <i class="bi bi-tag me-1"></i> Estado
+                                        </label>
+                                        <select id="estado"
+                                                class="form-select"
+                                                @bind="nuevaReserva.Estado">
+                                            <option value="Pendiente">Pendiente</option>
+                                            <option value="Confirmada">Confirmada</option>
+                                            <option value="Cancelada">Cancelada</option>
+                                        </select>
+                                        <div class="form-text">Estado inicial de la reserva (Pendiente por defecto)</div>
+                                    </div>
+
+                                    <!-- Productos -->
+                                    <div class="col-12">
+                                        <div class="card border-primary mt-3">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0">
+                                                    <i class="bi bi-box-seam"></i> Productos de la Reserva
+                                                    <span class="badge bg-light text-primary ms-2">
+                                                        @productosSeleccionados.Sum(p => p.CantidadReservada) unidades
+                                                    </span>
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                @if (productos.Count == 0)
+                                                {
+                                                    <div class="alert alert-warning">
+                                                        <i class="bi bi-exclamation-triangle"></i>
+                                                        No hay productos disponibles para reservar.
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="row g-3">
+                                                        <!-- Selector de Producto -->
+                                                        <div class="col-md-5">
+                                                            <label class="form-label fw-bold">Seleccionar Producto</label>
+                                                            <select class="form-select" @bind="productoSeleccionadoId" @bind:event="onchange">
+                                                                <option value="0">Seleccionar producto...</option>
+                                                                @foreach (var producto in productosDisponibles)
+                                                                {
+                                                                    <option value="@producto.Id">
+                                                                        @producto.Nombre - Stock: @producto.Stock - $@producto.Precio.ToString("N2")
+                                                                    </option>
+                                                                }
+                                                            </select>
+                                                        </div>
+
+                                                        <!-- Cantidad -->
+                                                        <div class="col-md-3">
+                                                            <label class="form-label fw-bold">Cantidad</label>
+                                                            <div class="input-group">
+                                                                <button class="btn btn-outline-secondary" type="button"
+                                                                        @onclick="DecrementarCantidad"
+                                                                        disabled="@(cantidadSeleccionada <= 1)">
+                                                                    <i class="bi bi-dash"></i>
+                                                                </button>
+                                                                <input type="number"
+                                                                       class="form-control text-center"
+                                                                       @bind="cantidadSeleccionada"
+                                                                       min="1"
+                                                                       max="@(productoSeleccionadoId > 0 ? ObtenerStockDisponible(productoSeleccionadoId) : 1)"
+                                                                       disabled="@(productoSeleccionadoId == 0)" />
+                                                                <button class="btn btn-outline-secondary" type="button"
+                                                                        @onclick="IncrementarCantidad"
+                                                                        disabled="@(cantidadSeleccionada >= ObtenerStockDisponible(productoSeleccionadoId))">
+                                                                    <i class="bi bi-plus"></i>
+                                                                </button>
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                Stock disponible: @ObtenerStockDisponible(productoSeleccionadoId)
+                                                            </small>
+                                                        </div>
+
+                                                        <!-- Botón Agregar -->
+                                                        <div class="col-md-4 d-flex align-items-end">
+                                                            <button class="btn btn-success w-100"
+                                                                    type="button"
+                                                                    @onclick="AgregarProducto"
+                                                                    disabled="@(productoSeleccionadoId == 0 || cantidadSeleccionada <= 0)">
+                                                                <i class="bi bi-plus-circle"></i> Agregar Producto
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Lista de Productos Seleccionados -->
+                                                    @if (productosSeleccionados.Count > 0)
+                                                    {
+                                                        <div class="table-responsive mt-4">
+                                                            <table class="table table-sm table-hover">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th>Producto</th>
+                                                                        <th class="text-center">Cantidad</th>
+                                                                        <th class="text-end">Precio Unit.</th>
+                                                                        <th class="text-end">Subtotal</th>
+                                                                        <th class="text-end">Acciones</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (var item in productosSeleccionados)
+                                                                    {
+                                                                        var productoInfo = productos.FirstOrDefault(p => p.Id == item.ProductoId);
+                                                                        <tr>
+                                                                            <td>
+                                                                                <strong>@(productoInfo?.Nombre ?? "Producto")</strong>
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <span class="badge bg-primary">@item.CantidadReservada</span>
+                                                                            </td>
+                                                                            <td class="text-end">
+                                                                                $@((productoInfo?.Precio ?? 0).ToString("N2"))
+                                                                            </td>
+                                                                            <td class="text-end">
+                                                                                <strong>$@((productoInfo?.Precio ?? 0) * item.CantidadReservada).ToString("N2")</strong>
+                                                                            </td>
+                                                                            <td class="text-end">
+                                                                                <button type="button"
+                                                                                        class="btn btn-sm btn-outline-danger"
+                                                                                        @onclick="() => RemoverProducto(item.ProductoId)">
+                                                                                        Remover
+                                                                                    <i class="bi bi-trash"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                                <tfoot class="table-secondary">
+                                                                    <tr>
+                                                                        <td colspan="3" class="text-end fw-bold">Total estimado:</td>
+                                                                        <td class="text-end fw-bold">
+                                                                            $@CalcularTotalEstimado().ToString("N2")
+                                                                        </td>
+                                                                        <td></td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botones -->
+                                    <div class="col-12 mt-4">
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary" @onclick="VolverALista">
+                                                <i class="bi bi-x-circle"></i> Cancelar
+                                            </button>
+                                            <div>
+                                                <button type="button" class="btn btn-outline-warning me-2" @onclick="LimpiarFormulario">
+                                                    <i class="bi bi-eraser"></i> Limpiar
+                                                </button>
+                                                <button type="submit" class="btn btn-success" disabled="@isSaving">
+                                                    @if (isSaving)
+                                                    {
+                                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                        <span> Creando Reserva...</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-check-circle"></i>
+                                                        <span> Crear Reserva</span>
+                                                    }
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel lateral - Resumen -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle"></i> Resumen de la Reserva
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Cliente seleccionado -->
+                            <div class="mb-3">
+                                <h6><i class="bi bi-person text-primary"></i> Cliente</h6>
+                                <p class="mb-1">
+                                    @if (nuevaReserva.ClienteId > 0)
+                                    {
+                                        var cliente = clientes.FirstOrDefault(c => c.Id == nuevaReserva.ClienteId);
+                                        <strong>@cliente?.Nombre @cliente?.Apellido</strong>
+                                        <br />
+                                        <small class="text-muted">@cliente?.Email</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No seleccionado</span>
+                                    }
+                                </p>
+                            </div>
+
+                            <!-- Evento seleccionado -->
+                            <div class="mb-3">
+                                <h6><i class="bi bi-calendar-event text-success"></i> Evento</h6>
+                                <p class="mb-1">
+                                    @if (nuevaReserva.EventoId > 0)
+                                    {
+                                        var evento = eventos.FirstOrDefault(e => e.Id == nuevaReserva.EventoId);
+                                        <strong>@evento?.NombreEvento</strong>
+                                        <br />
+                                        <small class="text-muted">@evento?.FechaEvento.ToString("dd/MM/yyyy")</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No seleccionado</span>
+                                    }
+                                </p>
+                            </div>
+
+                            <!-- Detalles de la reserva -->
+                            <div class="mb-3">
+                                <h6><i class="bi bi-clock text-warning"></i> Detalles</h6>
+                                <p class="mb-1">
+                                    <strong>Estado:</strong>
+                                    <span class="badge @GetEstadoBadgeClass(nuevaReserva.Estado)">
+                                        @nuevaReserva.Estado
+                                    </span>
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Finaliza:</strong>
+                                    @nuevaReserva.FechaFinalizacion.ToString("dd/MM/yyyy")
+                                </p>
+                            </div>
+
+                            <!-- Productos seleccionados -->
+                            <div class="mb-3">
+                                <h6><i class="bi bi-box text-info"></i> Productos</h6>
+                                <p class="mb-1">
+                                    <strong>Cantidad total:</strong>
+                                    @productosSeleccionados.Sum(p => p.CantidadReservada) unidades
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Tipos de productos:</strong>
+                                    @productosSeleccionados.Count tipos
+                                </p>
+                            </div>
+
+                            <!-- Total estimado -->
+                            <div class="mt-4 pt-3 border-top">
+                                <h5 class="text-end text-success">
+                                    Total estimado: $@CalcularTotalEstimado().ToString("N2")
+                                </h5>
+                                <small class="text-muted d-block text-end">
+                                    @productosSeleccionados.Count productos diferentes
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ayuda -->
+                    <div class="card border-warning mt-3">
+                        <div class="card-header bg-warning text-white">
+                            <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Ayuda Rápida</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0 small">
+                                <li>Selecciona cliente y evento primero</li>
+                                <li>Agrega productos desde el catálogo</li>
+                                <li>Verifica el stock disponible</li>
+                                <li>La fecha de finalización debe ser futura</li>
+                                <li>El backend calculará el total final</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    // Modelo
+    private CreateReservaRequest nuevaReserva = new();
+
+    // Datos para los selects
+    private List<ClienteDTO> clientes = new();
+    private List<EventoDTO> eventos = new();
+    private List<ProductoDTO> productos = new();
+
+    // Productos seleccionados (lista auxiliar para la UI)
+    private List<CreateReservaProductoRequest> productosSeleccionados = new();
+    private int productoSeleccionadoId = 0;
+    private int cantidadSeleccionada = 1;
+
+    // Estados
+    private bool _hasInitialized = false;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private bool ShowRetryButton = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+    private Dictionary<string, string> validationErrors = new();
+
+    // Propiedad calculada
+    private List<ProductoDTO> productosDisponibles =>
+        productos.Where(p => p.Stock > 0).ToList();
+
+    // Inicialización
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            Console.WriteLine("=== INICIALIZANDO PÁGINA CREAR RESERVA ===");
+            _hasInitialized = true;
+            StateHasChanged();
+
+            await CargarDatosIniciales();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando: {ex.Message}");
+            ErrorMessage = "Error al inicializar la página.";
+            _hasInitialized = true;
+            isLoading = false;
+            ShowRetryButton = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarDatosIniciales()
+    {
+        isLoading = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        validationErrors.Clear();
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine("Cargando datos iniciales...");
+
+            // Cargar clientes, eventos y productos
+            clientes = await ClienteService.GetClientesAsync();
+            eventos = await EventoService.GetEventosAsync();
+            productos = await ProductoService.GetProductosAsync();
+
+            Console.WriteLine($"Datos cargados: {clientes.Count} clientes, {eventos.Count} eventos, {productos.Count} productos");
+
+            // Establecer fecha por defecto (hoy + 7 días)
+            nuevaReserva.FechaFinalizacion = DateTime.Today.AddDays(7);
+            nuevaReserva.Estado = "Pendiente"; // Valor por defecto
+
+            // Inicializar lista de productos vacía
+            nuevaReserva.Productos = new List<CreateReservaProductoRequest>();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para crear reservas.";
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/", true);
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
+            ShowRetryButton = true;
+            Console.WriteLine($"Error HTTP: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+            ShowRetryButton = true;
+            Console.WriteLine($"Error general: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    // Métodos para productos
+    private void IncrementarCantidad()
+    {
+        var maxStock = ObtenerStockDisponible(productoSeleccionadoId);
+        if (cantidadSeleccionada < maxStock)
+        {
+            cantidadSeleccionada++;
+        }
+    }
+
+    private void DecrementarCantidad()
+    {
+        if (cantidadSeleccionada > 1)
+        {
+            cantidadSeleccionada--;
+        }
+    }
+
+    private int ObtenerStockDisponible(int productoId)
+    {
+        if (productoId == 0) return 0;
+
+        var producto = productos.FirstOrDefault(p => p.Id == productoId);
+        if (producto == null) return 0;
+
+        // Considerar cantidad ya reservada en la lista
+        var reservado = productosSeleccionados
+            .Where(p => p.ProductoId == productoId)
+            .Sum(p => p.CantidadReservada);
+
+        return Math.Max(0, producto.Stock - reservado);
+    }
+
+    private decimal CalcularTotalEstimado()
+    {
+        decimal total = 0;
+        foreach (var item in productosSeleccionados)
+        {
+            var producto = productos.FirstOrDefault(p => p.Id == item.ProductoId);
+            if (producto != null)
+            {
+                total += producto.Precio * item.CantidadReservada;
+            }
+        }
+        return total;
+    }
+
+    private async Task AgregarProducto()
+    {
+        if (productoSeleccionadoId == 0 || cantidadSeleccionada <= 0)
+            return;
+
+        var producto = productos.FirstOrDefault(p => p.Id == productoSeleccionadoId);
+        if (producto == null) return;
+
+        var stockDisponible = ObtenerStockDisponible(productoSeleccionadoId);
+        if (cantidadSeleccionada > stockDisponible)
+        {
+            await JSRuntime.InvokeVoidAsync("alert",
+                $"Stock insuficiente. Solo hay {stockDisponible} unidades disponibles.");
+            return;
+        }
+
+        // Verificar si ya existe en la lista
+        var productoExistente = productosSeleccionados
+            .FirstOrDefault(p => p.ProductoId == productoSeleccionadoId);
+
+        if (productoExistente != null)
+        {
+            productoExistente.CantidadReservada += cantidadSeleccionada;
+        }
+        else
+        {
+            productosSeleccionados.Add(new CreateReservaProductoRequest
+            {
+                ProductoId = productoSeleccionadoId,
+                CantidadReservada = cantidadSeleccionada
+            });
+        }
+
+        // Actualizar el modelo de la reserva (sincronizar)
+        nuevaReserva.Productos = productosSeleccionados.Select(p => new CreateReservaProductoRequest
+        {
+            ProductoId = p.ProductoId,
+            CantidadReservada = p.CantidadReservada
+        }).ToList();
+
+        // Resetear selección
+        productoSeleccionadoId = 0;
+        cantidadSeleccionada = 1;
+
+        StateHasChanged();
+    }
+
+    private void RemoverProducto(int productoId)
+    {
+        var producto = productosSeleccionados.FirstOrDefault(p => p.ProductoId == productoId);
+        if (producto != null)
+        {
+            productosSeleccionados.Remove(producto);
+
+            // Actualizar el modelo de la reserva
+            nuevaReserva.Productos = productosSeleccionados.Select(p => new CreateReservaProductoRequest
+            {
+                ProductoId = p.ProductoId,
+                CantidadReservada = p.CantidadReservada
+            }).ToList();
+
+            StateHasChanged();
+        }
+    }
+
+    // Método para crear la reserva
+    private async Task HandleCrearReserva()
+    {
+        if (!ValidarReserva())
+            return;
+
+        isSaving = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        validationErrors.Clear();
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine("=== CREANDO RESERVA ===");
+            Console.WriteLine($"ClienteId: {nuevaReserva.ClienteId}");
+            Console.WriteLine($"EventoId: {nuevaReserva.EventoId}");
+            Console.WriteLine($"FechaFinalizacion: {nuevaReserva.FechaFinalizacion}");
+            Console.WriteLine($"Estado: {nuevaReserva.Estado}");
+            Console.WriteLine($"Productos: {nuevaReserva.Productos.Count}");
+
+            foreach (var producto in nuevaReserva.Productos)
+            {
+                Console.WriteLine($"  - ProductoId: {producto.ProductoId}, Cantidad: {producto.CantidadReservada}");
+            }
+
+            var reservaCreada = await ReservaService.CreateReservaAsync(nuevaReserva);
+
+            if (reservaCreada != null && reservaCreada.Id > 0)
+            {
+                SuccessMessage = $"¡Reserva #{reservaCreada.Id} creada exitosamente!";
+                Console.WriteLine($"Reserva creada: ID {reservaCreada.Id}");
+
+                // Opcional: Redirigir después de un tiempo
+                await Task.Delay(2000);
+                Navigation.NavigateTo($"/reservas/");
+            }
+            else
+            {
+                ErrorMessage = "No se pudo crear la reserva. Intenta nuevamente.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            ErrorMessage = "No tienes permisos para crear reservas.";
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/", true);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ErrorMessage = "Datos inválidos. Verifica la información ingresada.";
+            Console.WriteLine($"Error 400: {ex.Message}");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        {
+            ErrorMessage = "No tienes permisos para crear reservas. Contacta al administrador.";
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
+            Console.WriteLine($"Error HTTP: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error inesperado: {ex.Message}";
+            Console.WriteLine($"Error general: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private bool ValidarReserva()
+    {
+        validationErrors.Clear();
+        bool isValid = true;
+
+        // Validar Cliente
+        if (nuevaReserva.ClienteId <= 0)
+        {
+            validationErrors["ClienteId"] = "Debes seleccionar un cliente.";
+            isValid = false;
+        }
+
+        // Validar Evento
+        if (nuevaReserva.EventoId <= 0)
+        {
+            validationErrors["EventoId"] = "Debes seleccionar un evento.";
+            isValid = false;
+        }
+
+        // Validar Fecha Finalización
+        if (nuevaReserva.FechaFinalizacion < DateTime.Today)
+        {
+            validationErrors["FechaFinalizacion"] = "La fecha de finalización no puede ser pasada.";
+            isValid = false;
+        }
+
+        // Validar Productos
+        if (nuevaReserva.Productos.Count == 0)
+        {
+            ErrorMessage = "Debes agregar al menos un producto a la reserva.";
+            isValid = false;
+        }
+
+        // Validar stock de productos
+        foreach (var producto in nuevaReserva.Productos)
+        {
+            var productoInfo = productos.FirstOrDefault(p => p.Id == producto.ProductoId);
+            if (productoInfo == null)
+            {
+                ErrorMessage = "Uno de los productos seleccionados no existe.";
+                isValid = false;
+                break;
+            }
+
+            // Verificar stock total (no solo lo ya reservado en esta sesión)
+            if (producto.CantidadReservada > productoInfo.Stock)
+            {
+                ErrorMessage = $"El producto '{productoInfo.Nombre}' no tiene suficiente stock. Stock disponible: {productoInfo.Stock}";
+                isValid = false;
+                break;
+            }
+        }
+
+        return isValid;
+    }
+
+    private async Task LimpiarFormulario()
+    {
+        if (!string.IsNullOrEmpty(SuccessMessage))
+            return;
+
+        var confirmar = await JSRuntime.InvokeAsync<bool>("confirm",
+            "¿Estás seguro de limpiar el formulario? Se perderán todos los datos ingresados.");
+
+        if (confirmar)
+        {
+            nuevaReserva = new CreateReservaRequest();
+            productosSeleccionados.Clear();
+            productoSeleccionadoId = 0;
+            cantidadSeleccionada = 1;
+            nuevaReserva.FechaFinalizacion = DateTime.Today.AddDays(7);
+            nuevaReserva.Estado = "Pendiente";
+            nuevaReserva.Productos = new List<CreateReservaProductoRequest>();
+
+            validationErrors.Clear();
+            ErrorMessage = string.Empty;
+            SuccessMessage = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    private void VolverALista()
+    {
+        Navigation.NavigateTo("/reservas");
+    }
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private string GetEstadoBadgeClass(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "bg-warning",
+            "Confirmada" => "bg-success",
+            "Cancelada" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<style>
+    .form-select.is-invalid,
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.8em;
+    }
+
+    .table-sm th,
+    .table-sm td {
+        padding: 0.5rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+            .d-flex.justify-content-between .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+        .row.g-3 > .col-md-5,
+        .row.g-3 > .col-md-3,
+        .row.g-3 > .col-md-4 {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
