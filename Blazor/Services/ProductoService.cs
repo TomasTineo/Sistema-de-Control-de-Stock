@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Blazor.Auth;
+using Blazor.Interfaces;
 using DTOs.Productos;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -13,13 +15,13 @@ namespace Blazor.Services
     public class ProductoService : IProductoService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
 
         private readonly NavigationManager _navigationManager;
 
         public ProductoService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             IJSRuntime jsRuntime,
             NavigationManager navigationManager)
         {

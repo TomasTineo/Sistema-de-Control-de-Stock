@@ -1,3 +1,5 @@
+using Blazor.Auth;
+using Blazor.Interfaces;
 using DTOs.Reportes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -7,12 +9,12 @@ namespace Blazor.Services
     public class ReportesService : IReportesService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public ReportesService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");

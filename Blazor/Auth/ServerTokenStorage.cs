@@ -1,9 +1,8 @@
-﻿using Blazor.Services;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-namespace Blazor.Services
+namespace Blazor.Auth
 {
-    public class ServerTokenStorage : ITokenStorage
+    public class ServerTokenStorage : IServerTokenStorage
     {
         private readonly ProtectedSessionStorage _sessionStorage;
 

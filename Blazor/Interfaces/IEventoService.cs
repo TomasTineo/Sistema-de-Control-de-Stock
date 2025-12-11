@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using DTOs.Eventos;
 
-namespace Blazor.Services
+namespace Blazor.Interfaces
 {
     public interface IEventoService
     {

@@ -1,7 +1,7 @@
 ﻿using DTOs.Auth;
 using System.Threading.Tasks;
 
-namespace Blazor.Services
+namespace Blazor.Auth
 {
     public interface IAuthService
     {

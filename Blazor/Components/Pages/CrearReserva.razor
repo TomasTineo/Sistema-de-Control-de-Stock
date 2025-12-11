@@ -1,10 +1,11 @@
 ﻿@page "/reservas/nueva"
 @rendermode InteractiveServer
-@using DTOs.Reservas
+@using Blazor.Interfaces
+@using Blazor.Services
 @using DTOs.Clientes
 @using DTOs.Eventos
 @using DTOs.Productos
-@using Blazor.Services
+@using DTOs.Reservas
 @inject IReservaService ReservaService
 @inject IClienteService ClienteService
 @inject IEventoService EventoService

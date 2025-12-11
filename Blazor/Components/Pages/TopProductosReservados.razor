@@ -1,7 +1,8 @@
 @page "/reportes/top-productos-reservados"
 @rendermode InteractiveServer
+@using Blazor.Interfaces
 @using DTOs.Reportes
-@inject Blazor.Services.IReportesService ReportesService
+@inject IReportesService ReportesService
 @inject NavigationManager Navigation
 
 <h3>Reporte: Top Productos Más Reservados</h3>

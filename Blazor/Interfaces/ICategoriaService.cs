@@ -1,6 +1,6 @@
 ﻿using DTOs.Categorias;
 
-namespace Blazor.Services
+namespace Blazor.Interfaces
 {
     public interface ICategoriaService
     {

@@ -1,4 +1,6 @@
-﻿using DTOs.Clientes;
+﻿using Blazor.Auth;
+using Blazor.Interfaces;
+using DTOs.Clientes;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 
@@ -7,12 +9,12 @@ namespace Blazor.Services
     public class ClienteService : IClienteService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public ClienteService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");
