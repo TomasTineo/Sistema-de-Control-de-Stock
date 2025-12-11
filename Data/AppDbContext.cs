@@ -17,7 +17,6 @@ namespace Data
         
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            this.Database.Migrate();
             
             SeedInitialData();
         }
@@ -154,7 +153,6 @@ namespace Data
                 entity.Property(e => e.Categoria).IsRequired().HasMaxLength(30);
                 entity.Property(e => e.Activo).IsRequired();
 
-                // para evitar permisos duplicados
                 entity.HasIndex(e => new { e.Nombre, e.Categoria })
                     .IsUnique();
             });
@@ -170,16 +168,14 @@ namespace Data
                 entity.Property(e => e.FechaCreacion).IsRequired();
                 entity.Property(e => e.Activo).IsRequired();
 
-                // para evitar grupos de permisos duplicados
                 entity.HasIndex(e => e.Nombre)
                     .IsUnique();
 
                 // Configurar la relación muchos a muchos entre GrupoPermiso y Permiso
-                modelBuilder.Entity<GrupoPermiso>()
-                    .HasMany(gp => gp.Permisos)
+                entity.HasMany(gp => gp.Permisos)
                     .WithMany(p => p.Grupos)
                     .UsingEntity<Dictionary<string, object>>(
-                        "GrupoPermisoPermiso",
+                        "GrupoPermisoPermisos",
                         j => j
                             .HasOne<Permiso>()
                             .WithMany()
@@ -240,17 +236,57 @@ namespace Data
                 new { Id = 26, Nombre = "agregar", Descripcion = "Agregar productos a reserva", Categoria = "reservaproducto", Activo = true },
                 new { Id = 27, Nombre = "actualizar", Descripcion = "Actualizar productos de reserva", Categoria = "reservaproducto", Activo = true },
                 new { Id = 28, Nombre = "eliminar", Descripcion = "Eliminar productos de reserva", Categoria = "reservaproducto", Activo = true }
-
             );
 
             // seed de grupos de permisos
-            var fechaCreacion = DateTime.Now;
+            var fechaCreacion = new DateTime(2024, 1, 1); // Fecha fija para evitar problemas con migraciones
             modelBuilder.Entity<GrupoPermiso>().HasData(
                 new { Id = 1, Nombre = "Administrador", Descripcion = "Acceso completo a todas las funcionalidades", Activo = true, FechaCreacion = fechaCreacion },
                 new { Id = 2, Nombre = "Operador", Descripcion = "Manejo de reservas", Activo = true, FechaCreacion = fechaCreacion }
             );
 
+            // SEED DE RELACIONES MUCHOS-A-MUCHOS: GrupoPermiso - Permiso
+            // Administrador tiene TODOS los permisos (IDs 1-28)
+            var adminPermisos = new List<object>();
+            for (int i = 1; i <= 28; i++)
+            {
+                adminPermisos.Add(new { GrupoPermisoId = 1, PermisoId = i });
+            }
 
+            // Operador tiene permisos específicos
+            var operadorPermisos = new List<object>
+            {
+                // Clientes - solo leer
+                new { GrupoPermisoId = 2, PermisoId = 5 },
+                
+                // Eventos - todos
+                new { GrupoPermisoId = 2, PermisoId = 9 },
+                new { GrupoPermisoId = 2, PermisoId = 10 },
+                new { GrupoPermisoId = 2, PermisoId = 11 },
+                new { GrupoPermisoId = 2, PermisoId = 12 },
+                
+                // Categorias - solo leer
+                new { GrupoPermisoId = 2, PermisoId = 13 },
+                
+                // Productos - leer y actualizar (para stock)
+                new { GrupoPermisoId = 2, PermisoId = 17 },
+                new { GrupoPermisoId = 2, PermisoId = 19 },
+                
+                // Reservas - todos
+                new { GrupoPermisoId = 2, PermisoId = 21 },
+                new { GrupoPermisoId = 2, PermisoId = 22 },
+                new { GrupoPermisoId = 2, PermisoId = 23 },
+                new { GrupoPermisoId = 2, PermisoId = 24 },
+                
+                // ReservaProducto - todos
+                new { GrupoPermisoId = 2, PermisoId = 25 },
+                new { GrupoPermisoId = 2, PermisoId = 26 },
+                new { GrupoPermisoId = 2, PermisoId = 27 },
+                new { GrupoPermisoId = 2, PermisoId = 28 }
+            };
+
+            modelBuilder.Entity("GrupoPermisoPermisos").HasData(adminPermisos);
+            modelBuilder.Entity("GrupoPermisoPermisos").HasData(operadorPermisos);
         }
 
         /// <summary>
@@ -616,6 +652,7 @@ namespace Data
                 System.Diagnostics.Debug.WriteLine($"[AppDbContext] Error creando reservas iniciales: {ex.Message}");
             }
         }
+
 
         /// <summary>
         /// ? Asigna grupos y permisos a los usuarios existentes

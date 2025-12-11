@@ -25,7 +25,6 @@ builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddScoped<IReportesRepository, ReporteRepository>();
 
-
 // Dependency Injection - Application Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -35,8 +34,6 @@ builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IReportesService, ReporteService>();
-
-
 
 // CORS
 builder.Services.AddCors(options =>
@@ -158,40 +155,31 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ReservaProductoActualizar", policy => policy.RequireClaim("permission", "reservaproducto.actualizar"));
     options.AddPolicy("ReservaProductoEliminar", policy => policy.RequireClaim("permission", "reservaproducto.eliminar"));
 
-
     // Fallback: Requerir autenticación para endpoints no especificados
     options.FallbackPolicy = options.DefaultPolicy;
-
-
-
-
 });
 
 #endregion
 
 var app = builder.Build();
 
-
-
-// Ensure database is created - RECREAR SI HAY CAMBIOS EN EL MODELO
+// Ensure database is created
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    
-    // Borrar y recrear (SOLO EN DESARROLLO) 
-    // DESCOMENTAR SOLO CUANDO NECESITES RECREAR LA BD CON DATOS INICIALES
-    if (app.Environment.IsDevelopment())
-    {
-        await context.Database.EnsureDeletedAsync();  // ?? BORRA LA BD
-        await context.Database.EnsureCreatedAsync();  // ? CREA NUEVA
-    }
-    
-    // Solo asegurar que exista (sin borrar)
+
+    // SOLO DESCOMENTAR ESTO CUANDO NECESITES RECREAR LA BD COMPLETAMENTE
+    //if (app.Environment.IsDevelopment())
+    //{
+    //    await context.Database.EnsureDeletedAsync();  // BORRA LA BD
+    //}
+
+    // Asegurar que la BD existe (crea si no existe)
+    // El seed de datos se hace automáticamente en el constructor de AppDbContext
     await context.Database.EnsureCreatedAsync();
 }
 
 // Configure the HTTP request pipeline.
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -207,15 +195,12 @@ else
     app.UseHsts();
 }
 
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowWinForms");
 app.UseAuthentication();
 app.UseAuthorization();
-
-
 
 app.MapAuthEndpoints();
 app.MapUsuariosEndpoints();

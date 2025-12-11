@@ -2,16 +2,20 @@ using DTOs.Usuarios;
 using Domain.Model;
 using Data.Repositories;
 using Application.Services.Interfaces;
+using Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Implementations
 {
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly AppDbContext _context;
 
-        public UsuarioService(IUsuarioRepository usuarioRepository)
+        public UsuarioService(IUsuarioRepository usuarioRepository, AppDbContext context)
         {
             _usuarioRepository = usuarioRepository;
+            _context = context;
         }
 
         public async Task<UsuarioDTO?> LoginAsync(string username, string password)
@@ -37,6 +41,16 @@ namespace Application.Services.Implementations
 
             // Constructor SIN ID - EF asignará automáticamente
             var usuario = new Usuario(request.Username, request.Email, request.Password);
+            
+            // Obtener el grupo "Operador" por defecto para nuevos usuarios
+            var grupoOperador = await _context.GruposPermisos
+                .Include(g => g.Permisos)
+                .FirstOrDefaultAsync(g => g.Nombre == "Operador");
+            
+            if (grupoOperador != null)
+            {
+                usuario.SetGrupo(grupoOperador);
+            }
             
             var usuarioCreado = await _usuarioRepository.AddAsync(usuario);
 
