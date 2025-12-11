@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor", "Blazor\Blazor.csproj", "{77EC18B6-D02F-4BA2-B399-1298D0E40E09}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Auth.Blazor", "API.Auth.Blazor\API.Auth.Blazor.csproj", "{7DAFB49A-F3A0-4F0D-A475-B34A911C1611}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77EC18B6-D02F-4BA2-B399-1298D0E40E09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DAFB49A-F3A0-4F0D-A475-B34A911C1611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DAFB49A-F3A0-4F0D-A475-B34A911C1611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DAFB49A-F3A0-4F0D-A475-B34A911C1611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DAFB49A-F3A0-4F0D-A475-B34A911C1611}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

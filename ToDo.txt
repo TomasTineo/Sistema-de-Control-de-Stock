@@ -1,20 +1,30 @@
 # Falta:
 	
 
-	- Validaciones en web
+	- Validaciones en web (crasheaba)
+
 	- Registro de web
-	- Revisar operaciones CRUD en web
-	- Revisar botones en web
+
 	- Añadir reportes en web
 
 	- API.Auth.BlazorServer
+
 	- Cambiar validaciones de front a back con funciones de API.Auth.BlazorServer
+
+
 
 	- Modificar Menu principal
 	- Revisar botones de gestiones
 
 	- Revisar usuario operador
 	- Crear reportes exportables
-	
+
+
 
 	- BORRAR INITIALDATA DE LA BASE DE DATOS 
+
+	- EDITAR RESERVA NO FUNCIONA DESDE LA API
+
+	Testeo general
+	- Revisar operaciones CRUD en web
+	- Revisar botones en web
