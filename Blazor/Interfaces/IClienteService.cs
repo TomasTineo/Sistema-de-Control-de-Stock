@@ -1,6 +1,6 @@
 ﻿using DTOs.Clientes;
 
-namespace Blazor.Services
+namespace Blazor.Interfaces
 {
     public interface IClienteService
     {

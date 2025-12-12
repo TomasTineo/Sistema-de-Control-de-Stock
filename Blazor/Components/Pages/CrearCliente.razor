@@ -1,7 +1,8 @@
 ﻿@page "/clientes/nuevo"
 @rendermode InteractiveServer
-@using DTOs.Clientes
+@using Blazor.Interfaces
 @using Blazor.Services
+@using DTOs.Clientes
 @inject IClienteService ClienteService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -363,7 +364,7 @@
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            ErrorMessage = "Datos inválidos. Verifica la información ingresada.";
+            ErrorMessage = ErrorMessage = $"Error: {ex.Message}";
         }
         catch (HttpRequestException ex)
         {
@@ -420,29 +421,7 @@
             isValid = false;
         }
 
-        // Validar Email
-        if (string.IsNullOrWhiteSpace(nuevoCliente.Email))
-        {
-            validationErrors["Email"] = "El email es obligatorio.";
-            isValid = false;
-        }
-        else if (!IsValidEmail(nuevoCliente.Email))
-        {
-            validationErrors["Email"] = "Ingresa un email válido.";
-            isValid = false;
-        }
-
-        // Validar Teléfono
-        if (string.IsNullOrWhiteSpace(nuevoCliente.Telefono))
-        {
-            validationErrors["Telefono"] = "El teléfono es obligatorio.";
-            isValid = false;
-        }
-        else if (nuevoCliente.Telefono.Length < 8)
-        {
-            validationErrors["Telefono"] = "El teléfono debe tener al menos 8 dígitos.";
-            isValid = false;
-        }
+        
 
         // Validar Dirección
         if (!string.IsNullOrWhiteSpace(nuevoCliente.Direccion) && nuevoCliente.Direccion.Length < 10)

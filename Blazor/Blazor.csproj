@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Syncfusion.Blazor" Version="31.2.18" />
   </ItemGroup>
 
   <ItemGroup>

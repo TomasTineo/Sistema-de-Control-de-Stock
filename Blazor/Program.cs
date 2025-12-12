@@ -1,5 +1,8 @@
-﻿using Blazor.Components;
+﻿using Blazor.Auth;
+using Blazor.Components;
+using Blazor.Interfaces;
 using Blazor.Services;
+using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +23,12 @@ builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IReportesService, ReportesService>();
+builder.Services.AddScoped<IRegistroService, RegistroService>();
 
-builder.Services.AddScoped<ITokenStorage, ServerTokenStorage>();
+builder.Services.AddScoped<IServerTokenStorage, ServerTokenStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddAuthorizationCore();
 

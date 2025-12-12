@@ -1,4 +1,7 @@
-﻿using DTOs.Clientes;
+﻿using Blazor.Auth;
+using Blazor.Interfaces;
+using DTOs.Clientes;
+using DTOs.Usuarios;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 
@@ -7,12 +10,12 @@ namespace Blazor.Services
     public class ClienteService : IClienteService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public ClienteService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");
@@ -47,10 +50,26 @@ namespace Blazor.Services
 
         public async Task<ClienteDTO> CreateClienteAsync(CreateClienteRequest cliente)
         {
+
             await ConfigurarTokenAlRequest();
             var response = await _httpClient.PostAsJsonAsync("api/clientes", cliente);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ClienteDTO>();
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                var createdCliente = await response.Content.ReadFromJsonAsync<ClienteDTO>();
+                return createdCliente!;
+            }
+            else
+            {
+                // Leer el mensaje de error del body
+                var errorContent = await response.Content.ReadAsStringAsync();
+
+                // Remover las comillas si el mensaje viene entre comillas
+                errorContent = errorContent.Trim('"');
+
+                throw new ApplicationException($"{errorContent}");
+            }
         }
 
         public async Task<ClienteDTO> UpdateClienteAsync(int id, ClienteDTO cliente)

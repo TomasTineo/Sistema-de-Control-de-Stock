@@ -1,5 +1,4 @@
-﻿using Blazor.Services;
-using DTOs.Auth;
+﻿using DTOs.Auth;
 using Microsoft.JSInterop;
 using System;
 using System.Net.Http;
@@ -7,14 +6,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Blazor.Services
+namespace Blazor.Auth
 {
     public class AuthService : IAuthService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
 
-        public AuthService(IHttpClientFactory httpClientFactory, ITokenStorage tokenStorage)
+        public AuthService(IHttpClientFactory httpClientFactory, IServerTokenStorage tokenStorage)
         {
             _httpClientFactory = httpClientFactory;
             _tokenStorage = tokenStorage;

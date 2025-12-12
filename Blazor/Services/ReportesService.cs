@@ -1,18 +1,21 @@
+using Blazor.Auth;
+using Blazor.Interfaces;
 using DTOs.Reportes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Text.Json;
 
 namespace Blazor.Services
 {
     public class ReportesService : IReportesService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public ReportesService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");
@@ -63,32 +66,60 @@ namespace Blazor.Services
         {
             try
             {
-                Console.WriteLine("=== DEBUG GET TOP PRODUCTOS RESERVADOS ===");
-                
+                Console.WriteLine("=== GET TOP PRODUCTOS RESERVADOS ===");
+
                 await AgregarTokenAlRequest();
 
                 var response = await _httpClient.GetAsync($"api/reportes/top-productos-reservados?top={top}");
 
                 Console.WriteLine($"Status Code: {response.StatusCode}");
 
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                // LEER EL CONTENIDO COMO STRING PRIMERO
+                var contentString = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"=== CONTENIDO CRUDO ===");
+                Console.WriteLine(contentString);
+                Console.WriteLine($"=== FIN CONTENIDO ===");
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("Token inválido o expirado. Limpiando token...");
-                    await _tokenStorage.RemoveTokenAsync();
-                    _navigationManager.NavigateTo("/", true);
+                    Console.WriteLine($"Error: {contentString}");
                     return new List<TopProductoReservadoDTO>();
                 }
 
-                response.EnsureSuccessStatusCode();
+                // Intentar deserializar manualmente
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
 
-                var productos = await response.Content.ReadFromJsonAsync<List<TopProductoReservadoDTO>>();
-                Console.WriteLine($"Top productos reservados obtenidos: {productos?.Count ?? 0}");
+                    var productos = JsonSerializer.Deserialize<List<TopProductoReservadoDTO>>(contentString, options);
 
-                return productos ?? new List<TopProductoReservadoDTO>();
+                    Console.WriteLine($"Deserializados {productos?.Count ?? 0} productos");
+
+                    if (productos != null && productos.Any())
+                    {
+                        Console.WriteLine("Primeros 3 productos:");
+                        foreach (var p in productos.Take(3))
+                        {
+                            Console.WriteLine($"- {p.NombreProducto}: {p.CantidadReservada}");
+                        }
+                    }
+
+                    return productos ?? new List<TopProductoReservadoDTO>();
+                }
+                catch (JsonException jsonEx)
+                {
+                    Console.WriteLine($"ERROR DESERIALIZACIÓN: {jsonEx.Message}");
+                    Console.WriteLine($"JSON recibido: {contentString}");
+                    return new List<TopProductoReservadoDTO>();
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en GetTopProductosReservadosAsync: {ex.Message}");
+                Console.WriteLine($"ERROR: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 throw;
             }
         }

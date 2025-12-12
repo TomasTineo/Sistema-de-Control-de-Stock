@@ -1,23 +1,26 @@
-﻿using System;
+﻿using Blazor.Auth;
+using Blazor.Interfaces;
+using DTOs.Categorias;
+using DTOs.Clientes;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using DTOs.Categorias;
-using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 namespace Blazor.Services
 {
     public class CategoriaService : ICategoriaService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public CategoriaService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");
@@ -60,10 +63,30 @@ namespace Blazor.Services
 
         public async Task<CategoriaDTO> CreateCategoriaAsync(CreateCategoriaRequest categoria)
         {
+           // await ConfigurarTokenAlRequest();
+           // var response = await _httpClient.PostAsJsonAsync("api/categorias", categoria);
+           // response.EnsureSuccessStatusCode();
+           // return await response.Content.ReadFromJsonAsync<CategoriaDTO>();
+
             await ConfigurarTokenAlRequest();
             var response = await _httpClient.PostAsJsonAsync("api/categorias", categoria);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<CategoriaDTO>();
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                var createdCategoria = await response.Content.ReadFromJsonAsync<CategoriaDTO>();
+                return createdCategoria!;
+            }
+            else
+            {
+                // Leer el mensaje de error del body
+                var errorContent = await response.Content.ReadAsStringAsync();
+
+                // Remover las comillas si el mensaje viene entre comillas
+                errorContent = errorContent.Trim('"');
+
+                throw new ApplicationException($"{errorContent}");
+            }
         }
 
         public async Task<CategoriaDTO> UpdateCategoriaAsync(int id, CategoriaDTO categoria)

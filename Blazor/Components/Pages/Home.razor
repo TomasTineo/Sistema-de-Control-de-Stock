@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Blazor.Auth
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @rendermode InteractiveServer
@@ -9,43 +10,97 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<h3>Formulario de Login</h3>
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5">
 
-<EditForm Model="@LoginR" OnValidSubmit="@Enviar" FormName="formLogin">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+                        <!-- Encabezado -->
+                        <div class="text-center mb-5">
+                            <h2 class="fw-bold text-primary mb-3">Iniciar Sesión</h2>
+                            <p class="text-muted">Ingresa tus credenciales para acceder a tu cuenta</p>
+                        </div>
 
-    <div class="form-group">
-        <label>Username:</label>
-        <InputText @bind-Value="LoginR.Username" class="form-control" />
-        <ValidationMessage For="@(() => LoginR.Username)" />
-    </div>
+                        <!-- Formulario -->
+                        <EditForm Model="@LoginR" OnValidSubmit="@Enviar" FormName="formLogin">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
 
-    <div class="form-group mt-3">
-        <label>Password:</label>
-        <InputText type="password" @bind-Value="LoginR.Password" class="form-control" />
-        <ValidationMessage For="@(() => LoginR.Password)" />
-    </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Usuario</label>
+                                <InputText @bind-Value="LoginR.Username"
+                                           class="form-control form-control-lg py-3"
+                                           placeholder="Username" />
+                                <ValidationMessage For="@(() => LoginR.Username)" class="text-danger small mt-1" />
+                            </div>
 
-    @if (!string.IsNullOrEmpty(ErrorMessage))
-    {
-        <div class="alert alert-danger mt-3">
-            @ErrorMessage
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Contraseña</label>
+                                <InputText type="password"
+                                           @bind-Value="LoginR.Password"
+                                           class="form-control form-control-lg py-3"
+                                           placeholder="Ingresa tu contraseña" />
+                                <ValidationMessage For="@(() => LoginR.Password)" class="text-danger small mt-1" />
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(ErrorMessage))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    @ErrorMessage
+                                    <button type="button" class="btn-close""></button>
+                                </div>
+                            }
+
+                            <!-- Botón de Login -->
+                            <div class="d-grid mt-4">
+                                <button class="btn btn-primary btn-lg py-3 fw-bold"
+                                        type="submit"
+                                        disabled="@isLoading">
+                                    @if (isLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                        <span>Procesando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                                        <span>Iniciar Sesión</span>
+                                    }
+                                </button>
+                            </div>
+
+                        </EditForm>
+
+                        <!-- Separador -->
+                        <div class="d-flex align-items-center my-5">
+                            <hr class="flex-grow-1" />
+                            <span class="px-3 text-muted small">O</span>
+                            <hr class="flex-grow-1" />
+                        </div>
+
+                        <!-- Sección de registro -->
+                        <div class="text-center">
+                            <p class="text-muted mb-3">¿No tienes una cuenta todavía?</p>
+                            <a href="/registrarse"
+                               class="btn btn-outline-success btn-lg px-5 py-2 fw-semibold">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Registrarse
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
         </div>
-    }
+    </div>
+</div>
 
-    <button class="btn btn-primary mt-3" type="submit" disabled="@isLoading">
-        @if (isLoading)
-        {
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            <span>Procesando...</span>
-        }
-        else
-        {
-            <span>Iniciar Sesión</span>
-        }
-    </button>
-</EditForm>
+
+
 
 @code {
     private LoginRequest LoginR = new LoginRequest();

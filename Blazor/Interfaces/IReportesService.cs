@@ -1,6 +1,6 @@
 using DTOs.Reportes;
 
-namespace Blazor.Services
+namespace Blazor.Interfaces
 {
     public interface IReportesService
     {

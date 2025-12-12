@@ -1,7 +1,8 @@
 ﻿@page "/eventos/editar/{id:int}"
 @rendermode InteractiveServer
-@using DTOs.Eventos
+@using Blazor.Interfaces
 @using Blazor.Services
+@using DTOs.Eventos
 @inject IEventoService EventoService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime

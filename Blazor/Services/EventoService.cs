@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Blazor.Auth;
+using Blazor.Interfaces;
 using DTOs.Eventos;
 using Microsoft.AspNetCore.Components;
 
@@ -11,12 +13,12 @@ namespace Blazor.Services
     public class EventoService : IEventoService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public EventoService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");

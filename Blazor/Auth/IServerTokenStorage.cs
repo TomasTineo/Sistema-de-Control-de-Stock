@@ -1,9 +1,12 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Blazor.Services
+namespace Blazor.Auth
 {
-    public interface ITokenStorage
+    public interface IServerTokenStorage
     {
         Task SaveTokenAsync(string token);
         Task<string> GetTokenAsync();

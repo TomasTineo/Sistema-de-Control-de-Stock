@@ -1,7 +1,8 @@
-using DTOs.Clientes;
-using Domain.Model;
-using Data.Repositories;
 using Application.Services.Interfaces;
+using Data.Repositories;
+using Domain.Model;
+using DTOs.Clientes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.Services.Implementations
 {
@@ -48,6 +49,46 @@ namespace Application.Services.Implementations
 
         public async Task<ClienteDTO> CreateAsync(CreateClienteRequest request)
         {
+
+
+            // Validar nombre
+            if (request.Nombre == null) 
+            {
+                throw new ArgumentNullException("El nombre no puede ser nulo");
+            }
+            if(request.Nombre.Any(char.IsDigit)) 
+            {
+                throw new ArgumentException("El nombre no puede contener números");
+            }
+
+            // Validar apellido
+            if (request.Apellido == null) 
+            {
+                throw new ArgumentNullException("El apellido no puede ser nulo");
+            }
+            if(request.Apellido.Any(char.IsDigit)) 
+            {
+                throw new ArgumentException("El apellido no puede contener números");
+            }
+
+            // Validar mail
+            var emailAttribute = new EmailAddressAttribute();
+            if (!emailAttribute.IsValid(request.Email))
+                throw new InvalidOperationException("El email no es válido");
+
+
+            // Validar telefono
+            if (request.Telefono.Any(char.IsLetter))
+            {
+                throw new InvalidOperationException("El telefono no puede tener letras");
+            }
+
+            if(request.Telefono.Length < 7 || request.Telefono.Length > 15) 
+            {
+                throw new InvalidOperationException("El telefono debe tener entre 7 y 15 dígitos");
+            }
+
+
             var cliente = new Cliente(
                 request.Nombre,
                 request.Apellido,

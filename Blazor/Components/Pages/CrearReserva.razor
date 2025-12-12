@@ -1,10 +1,11 @@
 ﻿@page "/reservas/nueva"
 @rendermode InteractiveServer
-@using DTOs.Reservas
+@using Blazor.Interfaces
+@using Blazor.Services
 @using DTOs.Clientes
 @using DTOs.Eventos
 @using DTOs.Productos
-@using Blazor.Services
+@using DTOs.Reservas
 @inject IReservaService ReservaService
 @inject IClienteService ClienteService
 @inject IEventoService EventoService
@@ -233,6 +234,7 @@
                                                                 <button class="btn btn-outline-secondary" type="button"
                                                                         @onclick="DecrementarCantidad"
                                                                         disabled="@(cantidadSeleccionada <= 1)">
+                                                                        -
                                                                     <i class="bi bi-dash"></i>
                                                                 </button>
                                                                 <input type="number"
@@ -244,6 +246,7 @@
                                                                 <button class="btn btn-outline-secondary" type="button"
                                                                         @onclick="IncrementarCantidad"
                                                                         disabled="@(cantidadSeleccionada >= ObtenerStockDisponible(productoSeleccionadoId))">
+                                                                        +
                                                                     <i class="bi bi-plus"></i>
                                                                 </button>
                                                             </div>

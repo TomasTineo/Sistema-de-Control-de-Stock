@@ -1,4 +1,5 @@
-﻿using DTOs.Reservas;
+﻿using Blazor.Auth;
+using DTOs.Reservas;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 
@@ -7,12 +8,12 @@ namespace Blazor.Services
     public class ReservaService : IReservaService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly IServerTokenStorage _tokenStorage;
         private readonly NavigationManager _navigationManager;
 
         public ReservaService(
             IHttpClientFactory httpClientFactory,
-            ITokenStorage tokenStorage,
+            IServerTokenStorage tokenStorage,
             NavigationManager navigationManager)
         {
             _httpClient = httpClientFactory.CreateClient("AuthAPI");

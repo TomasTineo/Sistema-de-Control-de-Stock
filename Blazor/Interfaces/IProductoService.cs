@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using DTOs.Productos;
 
-namespace Blazor.Services
+namespace Blazor.Interfaces
 {
     public interface IProductoService
     {
