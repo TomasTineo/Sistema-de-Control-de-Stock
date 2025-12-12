@@ -3,7 +3,9 @@
 @using Blazor.Interfaces
 @using Blazor.Services
 @using DTOs.Productos
+@using DTOs.Categorias
 @inject IProductoService ProductoService
+@inject ICategoriaService categoriaService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
@@ -86,14 +88,21 @@
                     <!-- Categoría ID -->
                     <div class="col-md-6 mb-3">
                         <label for="categoriaId" class="form-label fw-bold">
-                            <i class="bi bi-folder"></i> Categoría ID *
+                            <i class="bi bi-box"></i> Categoría ID *
                         </label>
-                        <InputNumber id="categoriaId"
-                                     @bind-Value="NuevoProducto.CategoriaId"
-                                     class="form-control form-control-lg"
-                                     placeholder="Ej: 1, 2, 3..." />
-                        <ValidationMessage For="@(() => NuevoProducto.CategoriaId)" class="text-danger small" />
-                        <div class="form-text">ID de la categoría del producto</div>
+                        <select id="clienteId"
+                                class="form-select form-control-lg"
+                                @bind="NuevoProducto.CategoriaId"
+                                @bind:event="onchange">
+                            <option value="0">Seleccionar categoria...</option>
+                            @foreach (var categoria in categorias)
+                            {
+                                <option value="@categoria.Id">
+                                    @categoria.Nombre
+                                </option>
+                            }
+                        </select>
+                        
                     </div>
                 </div>
 
@@ -166,16 +175,47 @@
 </div>
 
 @code {
+    private bool _hasInitialized = false;
+
     private CreateProductoRequest NuevoProducto = new();
     private bool isLoading = false;
     private string ErrorMessage = string.Empty;
     private string SuccessMessage = string.Empty;
+
+    private List<CategoriaDTO> categorias = new();
+    private int categoriaSeleccionadaId;
+
+
+
+    // Inicializar categorias
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            await InicializarPagina();
+        }
+    }
+
+    private async Task InicializarPagina()
+    {
+        try
+        {
+            categorias = await categoriaService.GetCategoriasAsync();
+            StateHasChanged();
+			Console.WriteLine($"Categorías cargadas");
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"Error al cargar categorías: {ex.Message}";
+        }
+    }
 
     private async Task HandleCrearProducto()
     {
         isLoading = true;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+
 
         try
         {
@@ -187,8 +227,9 @@
             Console.WriteLine($"Descripción: {NuevoProducto.Descripcion}");
 
             // Llamar al servicio para crear el producto
-          
+
             var producto = await ProductoService.CreateProductoAsync(NuevoProducto);
+            
 
             SuccessMessage = $"¡Producto '{producto.Nombre}' creado exitosamente! ID: {producto.Id}";
 

@@ -1,10 +1,12 @@
 # Falta:
 	
-	-borrar productos?
+	- Al crear producto te muestre categorias
+
 	- Validaciones en web
 x	- Registro de web 
 	- Revisar operaciones CRUD en web
 	- Revisar botones en web
+
 	- Añadir reportes en web
 
 x	- API.Auth.BlazorServer
@@ -16,5 +18,10 @@ x	- API.Auth.BlazorServer
 	- Revisar usuario operador
 	- Crear reportes exportables
 	
+	- Que en los productos se muestre el nombre de las categorias a las que pertenecen y se puedan filtrar por ellas?
+	(habria que cambiar el Dto)
 
+
+	- validaciones clientes
 	- BORRAR INITIALDATA DE LA BASE DE DATOS 
+	- ERROR DE BASE DE DATOS AL ELMINAR PRODUCTO (creo que es por las asociaciones)

@@ -193,30 +193,10 @@
                 await Task.Delay(2000);
                 Navigation.NavigateTo("/");
             }
-            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
-            {
-                ErrorMessage = "Error en los datos enviados. Verifica la información.";
-            }
-            else if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
-            {
-                ErrorMessage = "Ya existe una categoría con ese nombre.";
-            }
-            else if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
-                ErrorMessage = "Requiere admin";
-            }
-            else
-            {
-                ErrorMessage = $"Error al crear categoría: {ex.Message}";
-            }
-        }
-        catch (ArgumentException ex)
-        {
-            ErrorMessage = ex.Message;
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error inesperado: {ex.Message}";
+            ErrorMessage = $"Error: {ex.Message}";
             Console.WriteLine($"Error: {ex}");
         }
         finally
