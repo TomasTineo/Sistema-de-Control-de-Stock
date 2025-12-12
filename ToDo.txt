@@ -7,10 +7,10 @@ x	- Registro de web
 	- Revisar operaciones CRUD en web
 	- Revisar botones en web
 
-	- Añadir reportes en web
+x	- Añadir reportes en web
 
 x	- API.Auth.BlazorServer
-	- Cambiar validaciones de front a back con funciones de API.Auth.BlazorServer
+x	- Cambiar validaciones de front a back
 
 	- Modificar Menu principal
 	- Revisar botones de gestiones
@@ -23,5 +23,9 @@ x	- API.Auth.BlazorServer
 
 
 	- validaciones clientes
-	- BORRAR INITIALDATA DE LA BASE DE DATOS 
+	- BORRAR INITIALDATA DE LA BASE DE DATOS
+	
+
+
 	- ERROR DE BASE DE DATOS AL ELMINAR PRODUCTO (creo que es por las asociaciones)
+	Creo que no se pueden borrar los productos que tienen un evento asociado. Y falta la validacion en el back

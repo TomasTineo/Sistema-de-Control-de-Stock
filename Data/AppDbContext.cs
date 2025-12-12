@@ -17,7 +17,7 @@ namespace Data
         
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            this.Database.Migrate();
+            
             
             SeedInitialData();
         }
