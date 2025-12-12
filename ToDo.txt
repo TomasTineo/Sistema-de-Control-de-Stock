@@ -20,7 +20,7 @@ WINDOWS:
 	- Modificar Menu principal
 	- Revisar botones de gestiones
 X	- Crear reportes exportables
-	- validaciones clientes
+X	- validaciones clientes
 
 
 
