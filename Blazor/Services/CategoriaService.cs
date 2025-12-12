@@ -140,7 +140,20 @@ namespace Blazor.Services
                 await ConfigurarTokenAlRequest();
                 var response = await _httpClient.DeleteAsync($"api/categorias/{id}");
 
-                
+                // Verificar específicamente el código 409 Conflict
+                if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error 409 Conflict: {errorContent}");
+                    
+                    // Lanzar HttpRequestException con el StatusCode
+                    throw new HttpRequestException(
+                        "No se puede eliminar la categoría porque tiene productos asociados.",
+                        null,
+                        System.Net.HttpStatusCode.Conflict);
+                }
+
+                // Verificar otros códigos de error
                 if (!response.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"DeleteCategoriaAsync - Código: {(int)response.StatusCode} - {response.StatusCode}");
@@ -149,10 +162,10 @@ namespace Blazor.Services
 
                 return response.IsSuccessStatusCode;
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                Console.WriteLine($"HttpRequestException en DeleteCategoriaAsync: {ex.Message}");
-                throw; 
+                // Re-lanzar HttpRequestException tal como viene
+                throw;
             }
             catch (Exception ex)
             {

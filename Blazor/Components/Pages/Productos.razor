@@ -285,13 +285,41 @@
         {
             try
             {
-                await ProductoService.DeleteProductoAsync(producto.Id);
-                await CargarProductos(); // Recargar la lista
+                var resultado = await ProductoService.DeleteProductoAsync(producto.Id);
+                
+                if (resultado)
+                {
+                    await CargarProductos(); // Recargar la lista
+                }
+                else
+                {
+                    ErrorMessage = "No se pudo eliminar el producto. Puede que tenga reservas asociadas.";
+                    StateHasChanged();
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                ErrorMessage = "❌ No se puede eliminar el producto porque tiene reservas asociadas. Elimina o completa las reservas primero.";
+                Console.WriteLine($"Producto con reservas asociadas: {ex.Message}");
+                StateHasChanged();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                ErrorMessage = "❌ Acceso denegado: Se requiere ser administrador para ejecutar la acción.";
+                StateHasChanged();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                ErrorMessage = "No autorizado: Tu sesión ha expirado.";
+                StateHasChanged();
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
             }
             catch (Exception ex)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "No se pudo eliminar el producto");
-                ErrorMessage = $"Error al eliminar producto: {ex.Message}";
+                ErrorMessage = $"❌ Error al eliminar producto: {ex.Message}";
+                Console.WriteLine($"Error eliminando producto: {ex.Message}");
+                StateHasChanged();
             }
         }
     }

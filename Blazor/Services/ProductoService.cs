@@ -189,9 +189,43 @@ namespace Blazor.Services
 
         public async Task<bool> DeleteProductoAsync(int id)
         {
-            await AgregarTokenAlRequest();
-            var response = await _httpClient.DeleteAsync($"api/productos/{id}");
-            return response.IsSuccessStatusCode;
+            try
+            {
+                await AgregarTokenAlRequest();
+                var response = await _httpClient.DeleteAsync($"api/productos/{id}");
+
+                // Verificar específicamente el código 409 Conflict
+                if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error 409 Conflict: {errorContent}");
+                    
+                    // Lanzar HttpRequestException con el StatusCode
+                    throw new HttpRequestException(
+                        "No se puede eliminar el producto porque tiene reservas asociadas.",
+                        null,
+                        System.Net.HttpStatusCode.Conflict);
+                }
+
+                // Verificar otros códigos de error
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"DeleteProductoAsync - Código: {(int)response.StatusCode} - {response.StatusCode}");
+                    response.EnsureSuccessStatusCode();
+                }
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException)
+            {
+                // Re-lanzar HttpRequestException tal como viene
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Excepción general en DeleteProductoAsync: {ex.Message}");
+                throw;
+            }
         }
 
         private async Task AgregarTokenAlRequest()
