@@ -63,11 +63,12 @@ namespace Blazor.Services
 
         public async Task<CategoriaDTO> CreateCategoriaAsync(CreateCategoriaRequest categoria)
         {
-           // await ConfigurarTokenAlRequest();
-           // var response = await _httpClient.PostAsJsonAsync("api/categorias", categoria);
-           // response.EnsureSuccessStatusCode();
-           // return await response.Content.ReadFromJsonAsync<CategoriaDTO>();
+            await ConfigurarTokenAlRequest();
+            var response = await _httpClient.PostAsJsonAsync("api/categorias", categoria);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<CategoriaDTO>();
 
+            /*
             await ConfigurarTokenAlRequest();
             var response = await _httpClient.PostAsJsonAsync("api/categorias", categoria);
 
@@ -86,7 +87,7 @@ namespace Blazor.Services
                 errorContent = errorContent.Trim('"');
 
                 throw new ApplicationException($"{errorContent}");
-            }
+            }*/
         }
 
         public async Task<CategoriaDTO> UpdateCategoriaAsync(int id, CategoriaDTO categoria)
@@ -131,11 +132,33 @@ namespace Blazor.Services
             }
         }
 
+    
         public async Task<bool> DeleteCategoriaAsync(int id)
         {
-            await ConfigurarTokenAlRequest();
-            var response = await _httpClient.DeleteAsync($"api/categorias/{id}");
-            return response.IsSuccessStatusCode;
+            try
+            {
+                await ConfigurarTokenAlRequest();
+                var response = await _httpClient.DeleteAsync($"api/categorias/{id}");
+
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"DeleteCategoriaAsync - Código: {(int)response.StatusCode} - {response.StatusCode}");
+                    response.EnsureSuccessStatusCode();
+                }
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"HttpRequestException en DeleteCategoriaAsync: {ex.Message}");
+                throw; 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Excepción general en DeleteCategoriaAsync: {ex.Message}");
+                throw;
+            }
         }
 
         private async Task ConfigurarTokenAlRequest()

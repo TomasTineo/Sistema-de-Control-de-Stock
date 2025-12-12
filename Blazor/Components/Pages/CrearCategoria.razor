@@ -25,7 +25,6 @@
         <div class="card-body">
             <EditForm Model="@NuevaCategoria" OnValidSubmit="@HandleCrearCategoria" FormName="crearCategoriaForm">
                 <DataAnnotationsValidator />
-                <ValidationSummary class="alert alert-danger" />
 
                 <!-- Campo Nombre -->
                 <div class="mb-4">
@@ -151,7 +150,7 @@
         if (firstRender && !_hasInitialized)
         {
             _hasInitialized = true;
-            
+
         }
     }
 
@@ -189,15 +188,25 @@
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                ErrorMessage = "No tienes permiso para crear categorías. Contacta al administrador.";
-                await Task.Delay(2000);
-                Navigation.NavigateTo("/");
+                ErrorMessage = "No estas autorizado";
+                
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                ErrorMessage = "❌ Acceso denegado: Se requiere ser administrador para ejecutar la acción";
+                
+            }
+            else
+            {
+                ErrorMessage = "No se pudo crear categoria";
+
+               
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error: {ex.Message}";
-            Console.WriteLine($"Error: {ex}");
+            ErrorMessage = $"Error 0 : {ex.Message}";
+            Console.WriteLine($"Error 1 : {ex}");
         }
         finally
         {
@@ -278,7 +287,7 @@
 
     /* Responsive */
     @@media (max-width: 768px) {
-        .d-flex.gap-3 {
+        .d-flex.gap-3 
             flex-direction: column;
         }
 

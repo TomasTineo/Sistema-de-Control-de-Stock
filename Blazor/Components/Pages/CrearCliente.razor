@@ -356,33 +356,39 @@
                 ErrorMessage = "No se pudo crear el cliente. Intenta nuevamente.";
             }
         }
-        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-        {
-            ErrorMessage = "No tienes permisos para crear clientes.";
-            await Task.Delay(2000);
-            Navigation.NavigateTo("/", true);
-        }
-        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
-        {
-            ErrorMessage = ErrorMessage = $"Error: {ex.Message}";
-        }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
-                ErrorMessage = $"Requiere admin";
-            }
-            else
-            {
-                ErrorMessage = $"Error {ex.StatusCode}: {ex.Message}";
-                Console.WriteLine($"Error HTTP: {ex.Message}");
-            }
+            var statusCode = ex.StatusCode;
+            var mensajeError = ex.Message; // ← Esto ahora contiene tu mensaje de la API
 
-           
+            Console.WriteLine($"Error HTTP {statusCode}: {mensajeError}");
+
+            switch (statusCode)
+            {
+                case System.Net.HttpStatusCode.Forbidden:
+                    ErrorMessage = "❌ Acceso denegado: Se requiere ser administrador para ejecutar la acción";
+                    break;
+                case System.Net.HttpStatusCode.Unauthorized:
+                    ErrorMessage = "No estás autorizado. Por favor, inicia sesión nuevamente.";
+                    await Task.Delay(2000);
+                    Navigation.NavigateTo("/", true);
+                    break;
+                case System.Net.HttpStatusCode.BadRequest:
+                    // Mostrar el mensaje de la API
+                    ErrorMessage = $"{mensajeError}";
+                    break;
+                case System.Net.HttpStatusCode.Conflict:
+
+                    ErrorMessage = $" {mensajeError}";
+                    break;
+                default:
+                    ErrorMessage = $"❌ Error ({statusCode}): {mensajeError}";
+                    break;
+            }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error: {ex.Message}";
+            ErrorMessage = $"Error inesperado: {ex.Message}";
             Console.WriteLine($"Error general: {ex.Message}");
         }
         finally

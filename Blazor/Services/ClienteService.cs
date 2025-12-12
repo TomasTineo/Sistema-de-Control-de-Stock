@@ -50,25 +50,29 @@ namespace Blazor.Services
 
         public async Task<ClienteDTO> CreateClienteAsync(CreateClienteRequest cliente)
         {
-
             await ConfigurarTokenAlRequest();
             var response = await _httpClient.PostAsJsonAsync("api/clientes", cliente);
 
-
             if (response.IsSuccessStatusCode)
             {
-                var createdCliente = await response.Content.ReadFromJsonAsync<ClienteDTO>();
-                return createdCliente!;
+                
+                return await response.Content.ReadFromJsonAsync<ClienteDTO>();
             }
             else
             {
-                // Leer el mensaje de error del body
+                
+                var statusCode = response.StatusCode;
+
+               
                 var errorContent = await response.Content.ReadAsStringAsync();
 
-                // Remover las comillas si el mensaje viene entre comillas
-                errorContent = errorContent.Trim('"');
+                Console.WriteLine($"CreateClienteAsync - Error {statusCode}: {errorContent}");
 
-                throw new ApplicationException($"{errorContent}");
+               
+                throw new HttpRequestException(
+                    errorContent, // mensaje
+                    null,
+                    statusCode);
             }
         }
 

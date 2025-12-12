@@ -21,8 +21,20 @@
             <button class="btn btn-success" @onclick="GoToCreateCategoria">
                 <i class="bi bi-plus-circle"></i> Nueva Categoría
             </button>
+
+            
+
         </div>
+        
     </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage
+            <button type="button" class="btn-close" @onclick="CerrarMensajes"></button>
+        </div>
+    }
 
     <!-- Estado inicial -->
     @if (!_hasInitialized)
@@ -45,27 +57,7 @@
             </div>
         }
 
-        <!-- Error State -->
-        @if (!string.IsNullOrEmpty(ErrorMessage))
-        {
-            <div class="alert alert-danger" role="alert">
-                <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                <p>@ErrorMessage</p>
-                @if (ErrorMessage.Contains("No autorizado") || ErrorMessage.Contains("401"))
-                {
-                    <button class="btn btn-primary mt-2" @onclick="RedirectToLogin">
-                        Ir al Login
-                    </button>
-                }
-                else
-                {
-                    <button class="btn btn-outline-danger mt-2" @onclick="CargarCategorias">
-                        Reintentar
-                    </button>
-                }
-            </div>
-        }
-
+     
         <!-- Sin categorías -->
         @if (!isLoading && string.IsNullOrEmpty(ErrorMessage) && categorias.Count == 0)
         {
@@ -79,7 +71,7 @@
         }
 
         <!-- Con categorías -->
-        @if (!isLoading && string.IsNullOrEmpty(ErrorMessage) && categorias.Count > 0)
+        @if (!isLoading && categorias.Count > 0)
         {
             <!-- Barra de búsqueda -->
             <div class="card mb-4">
@@ -217,8 +209,7 @@
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             ErrorMessage = "No tienes permisos para ver las categorías.";
-            await Task.Delay(2000);
-            RedirectToLogin();
+
         }
         catch (HttpRequestException ex)
         {
@@ -256,6 +247,13 @@
     private void EditarCategoria(int id) => Navigation.NavigateTo($"/categorias/editar/{id}");
     private void RedirectToLogin() => Navigation.NavigateTo("/", true);
 
+
+
+    private void CerrarMensajes()
+    {
+        ErrorMessage = string.Empty;
+    }
+
     // Métodos de acciones
     private async Task EliminarCategoria(CategoriaDTO categoria)
     {
@@ -266,20 +264,57 @@
         {
             try
             {
+                // Intentar eliminar
                 var resultado = await CategoriaService.DeleteCategoriaAsync(categoria.Id);
+
                 if (resultado)
                 {
                     await CargarCategorias(); // Recargar lista
                 }
                 else
                 {
-                    ErrorMessage = "No se pudo eliminar la categoría.";
+                    // Si DeleteCategoriaAsync devuelve false (no lanza excepción)
+                    ErrorMessage = "No se pudo eliminar la categoría. Puede que tenga productos asociados.";
                     StateHasChanged();
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Error al eliminar categoría: {ex.Message}";
+                // Captura genérica primero para debug
+                Console.WriteLine($"EXCEPCIÓN COMPLETA:");
+                Console.WriteLine($"Mensaje: {ex.Message}");
+                Console.WriteLine($"Tipo: {ex.GetType().Name}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                // Verifica si es HttpRequestException
+                if (ex is HttpRequestException httpEx)
+                {
+                    Console.WriteLine($"StatusCode: {httpEx.StatusCode}");
+
+                    if (httpEx.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                    {
+                        ErrorMessage = "❌ Acceso denegado: Se requiere ser administrador para ejecutar la acción";
+                    }
+                    else if (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        ErrorMessage = "No autorizado: Tu sesión ha expirado.";
+                        await Task.Delay(2000);
+                        Navigation.NavigateTo("/");
+                    }
+                    else if (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
+                    {
+                        ErrorMessage = "La categoría tiene productos asociados. Elimina los productos primero.";
+                    }
+                    else
+                    {
+                        ErrorMessage = $" Error {httpEx.StatusCode}: {ex.Message}";
+                    }
+                }
+                else
+                {
+                    ErrorMessage = $"❌ Error: {ex.Message}";
+                }
+
                 StateHasChanged();
             }
         }
