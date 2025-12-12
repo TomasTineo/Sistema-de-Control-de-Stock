@@ -1,35 +1,36 @@
 # Falta:
-	
-	- Al crear producto te muestre categorias
+
+	- Que en los productos se muestre el nombre de las categorias a las que pertenecen y se puedan filtrar por ellas?
+	(habria que cambiar el Dto) PARA WEB Y WINDOWS
 	
 
+BLAZOR WEB:
+x	- Al crear producto te muestre categorias
 x	- Barra de busqueda en productos
 x	- Validaciones en web
 x	- Registro de web 
-	- Revisar operaciones CRUD en web
-	- Revisar botones en web
-
-x	- Exportar a excel en web ambos reportes
-
 x	- Añadir reportes en web
+x	- Exportar a excel en web ambos reportes web
+x	- API.Auth.BlazorServer (No pude por la logica de la autenticacion)
+X	- validaciones clientes
 
-x	- API.Auth.BlazorServer
-x	- Cambiar validaciones de front a back
 
+
+WINDOWS:
 	- Modificar Menu principal
 	- Revisar botones de gestiones
-
-	- Revisar usuario operador
 	- Crear reportes exportables
-	
-	- Que en los productos se muestre el nombre de las categorias a las que pertenecen y se puedan filtrar por ellas?
-	(habria que cambiar el Dto)
-
-
 	- validaciones clientes
+
+
+
+BACKEND:
+x	- Cambiar validaciones de front a back
+	- Revisar usuario operador
 	- BORRAR INITIALDATA DE LA BASE DE DATOS
-	
+	- ERROR DE BASE DE DATOS AL ELMINAR PRODUCTO 
 
 
-	- ERROR DE BASE DE DATOS AL ELMINAR PRODUCTO (creo que es por las asociaciones)
-	Creo que no se pueden borrar los productos que tienen un evento asociado. Y falta la validacion en el back
+	CHEQUEOS ANTES DE ENTREGAR:
+		- Revisar operaciones CRUD en web
+		- Revisar botones en web
