@@ -1,8 +1,10 @@
 # Falta:
 	
 	- Al crear producto te muestre categorias
+	
 
-	- Validaciones en web
+x	- Barra de busqueda en productos
+x	- Validaciones en web
 x	- Registro de web 
 	- Revisar operaciones CRUD en web
 	- Revisar botones en web
