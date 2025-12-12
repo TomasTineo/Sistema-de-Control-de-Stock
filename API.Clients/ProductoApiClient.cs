@@ -81,6 +81,14 @@ namespace API.Clients
             var requestMessage = await CreateAuthenticatedRequest(HttpMethod.Delete, $"api/productos/{id}");
             var response = await _httpClient.SendAsync(requestMessage);
             await HandleUnauthorizedResponseAsync(response);
+            
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(content, _jsonOptions);
+                throw new InvalidOperationException(errorResponse?.Message ?? "No se puede eliminar el producto porque tiene reservas asociadas.");
+            }
+            
             return response.IsSuccessStatusCode;
         }
 

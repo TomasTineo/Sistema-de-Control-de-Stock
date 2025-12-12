@@ -385,6 +385,12 @@ namespace Escritorio
                                       MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("reservas asociadas"))
+                {
+                    MessageBox.Show("No se puede eliminar el producto porque tiene reservas asociadas.\n\n" +
+                                  "Por favor, elimine las reservas antes de eliminar el producto.", 
+                                  "No se puede eliminar", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
                 catch (UnauthorizedAccessException ex)
                 {
                     MessageBox.Show(ex.Message, "Sesión Expirada",

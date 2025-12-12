@@ -79,13 +79,21 @@ namespace WebAPI.Endpoints
             // DELETE /api/productos/{id} - Requiere permiso de eliminar
             productos.MapDelete("/{id:int}", async (int id, IProductoService productoService) =>
             {
-                var result = await productoService.DeleteAsync(id);
-                return result ? Results.NoContent() : Results.NotFound();
+                try
+                {
+                    var result = await productoService.DeleteAsync(id);
+                    return result ? Results.NoContent() : Results.NotFound();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.Conflict(new { message = ex.Message });
+                }
             })
             .WithName("DeleteProducto")
             .RequireAuthorization("ProductosEliminar")
             .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status409Conflict);
 
 
             // GET /api/productos/categoria/{categoriaId} - Requiere permiso de lectura

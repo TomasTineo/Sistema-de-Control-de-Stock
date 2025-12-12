@@ -45,9 +45,18 @@ namespace Data.Repositories
             var producto = await _context.Productos.FindAsync(id);
             if (producto == null) return false;
 
-            _context.Productos.Remove(producto);
-            var result = await _context.SaveChangesAsync();
-            return result > 0;
+            try
+            {
+                _context.Productos.Remove(producto);
+                var result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            catch (DbUpdateException ex)
+            {
+                // El producto tiene reservas asociadas
+                throw new InvalidOperationException(
+                    "No se puede eliminar el producto porque tiene reservas asociadas.", ex);
+            }
         }
 
         public async Task<IEnumerable<Producto>> GetByCategoriaAsync(int categoriaId)

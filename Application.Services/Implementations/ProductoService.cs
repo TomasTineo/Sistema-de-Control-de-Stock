@@ -79,7 +79,15 @@ namespace Application.Services.Implementations
 
         public async Task<bool> DeleteAsync(int id)
         {
-            return await _productoRepository.DeleteAsync(id);
+            try
+            {
+                return await _productoRepository.DeleteAsync(id);
+            }
+            catch (InvalidOperationException)
+            {
+                // Re-lanzar la excepción para que la capture el endpoint
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ProductoDTO>> GetByCategoriaAsync(int categoriaId)
