@@ -5,6 +5,10 @@
 @using Syncfusion.Blazor.Charts
 @inject IReportesService ReportesService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using ClosedXML.Excel
+
+
 
 <div class="d-flex justify-content-start align-items-center mb-3 gap-5">
     
@@ -109,13 +113,21 @@ else if (topProductos.Any())
 
         <!-- Columna derecha detalles -->
         <div class="col-lg-8 col-xl-auto">
+            
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Detalles Completos</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <h5 class="mb-0">Detalles Completos</h5>
+                        <button class="btn btn-success" @onclick="ExportarAExcel">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Exportar a Excel
+                        </button>
+                    </div>
                     <small class="opacity-75">@topProductos.Count productos</small>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+
                         <table class="table table-hover mb-0">
                             <thead class="table-light sticky-top" style="top: 0;">
                                 <tr>
@@ -169,8 +181,6 @@ else
     private int cant = 5;
     private bool cargando = false;
     private string errorMessage = "";
-    private int totalUnidades = 0;
-    private int totalReservas = 0;
     private int maxCantidad = 0;
 
     protected override async Task OnInitializedAsync()
@@ -201,8 +211,7 @@ else
 
             if (topProductos.Any())
             {
-                totalUnidades = topProductos.Sum(p => p.CantidadReservada);
-                totalReservas = topProductos.Sum(p => p.NumeroReservas);
+         
                 maxCantidad = topProductos.Max(p => p.CantidadReservada);
 
                 // Forzar actualización del gráfico
@@ -266,6 +275,77 @@ else
     {
         Navigation.NavigateTo("/reportes");
     }
+
+    private async Task ExportarAExcel()
+    {
+        try
+        {
+            cargando = true;
+            StateHasChanged();
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Productos Reservados");
+
+                // Encabezados
+                worksheet.Cell(1, 1).Value = "#";
+                worksheet.Cell(1, 2).Value = "Producto";
+                worksheet.Cell(1, 3).Value = "Cantidad Reservada";
+   
+
+
+                // Estilo encabezados
+                var headerRange = worksheet.Range("A1:E1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Datos
+                for (int i = 0; i < topProductos.Count; i++)
+                {
+                    var item = topProductos[i];
+                   
+
+                    worksheet.Cell(i + 2, 1).Value = i + 1;
+                    worksheet.Cell(i + 2, 2).Value = item.NombreProducto;
+                    worksheet.Cell(i + 2, 3).Value = item.CantidadReservada;     
+                }
+
+                // Autoajustar columnas
+                worksheet.Columns().AdjustToContents();
+
+                // Información adicional
+                int lastRow = topProductos.Count + 3;
+                worksheet.Cell(lastRow + 2, 1).Value = "Generado el:";
+                worksheet.Cell(lastRow + 2, 2).Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+                // Guardar en memoria
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    // Descargar usando JavaScript
+                    var fileName = $"Top_Productos_Reservados_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    await JSRuntime.InvokeVoidAsync("downloadFile",
+                        Convert.ToBase64String(content),
+                        fileName,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al exportar: {ex.Message}";
+            Console.WriteLine($"Error exportando: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+            StateHasChanged();
+        }
+    }
+
 }
 
 <style>

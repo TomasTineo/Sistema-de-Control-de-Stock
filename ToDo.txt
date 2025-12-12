@@ -7,6 +7,8 @@ x	- Registro de web
 	- Revisar operaciones CRUD en web
 	- Revisar botones en web
 
+x	- Exportar a excel en web ambos reportes
+
 x	- Añadir reportes en web
 
 x	- API.Auth.BlazorServer

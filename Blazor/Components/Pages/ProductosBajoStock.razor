@@ -4,6 +4,10 @@
 @using DTOs.Reportes
 @inject IReportesService ReportesService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using ClosedXML.Excel
+
+
 
 <h3>Reporte: Productos con Bajo Stock</h3>
 
@@ -17,6 +21,9 @@
     </button>
     <button class="btn btn-secondary" @onclick="Volver">
         Volver
+    </button>
+    <button class="btn btn-success" @onclick="ExportarAExcel">
+        <i class="bi bi-file-earmark-excel me-2"></i> Exportar a Excel
     </button>
 </div>
 
@@ -57,7 +64,7 @@ else if (productos != null && productos.Any())
                             {
                                 <span class="badge bg-danger">Sin Stock</span>
                             }
-                            else if (producto.StockActual < 5)
+                            else if (producto.StockActual < (stockMinimo/2))
                             {
                                 <span class="badge bg-warning">Crítico</span>
                             }
@@ -124,6 +131,97 @@ else if (productos != null)
     {
         Navigation.NavigateTo("/reportes");
     }
+
+    private async Task ExportarAExcel()
+    {
+        try
+        {
+            cargando = true;
+            StateHasChanged();
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Productos bajo stock");
+
+                // Encabezados
+                worksheet.Cell(1, 1).Value = "#";
+                worksheet.Cell(1, 2).Value = "Producto";
+                worksheet.Cell(1, 3).Value = "Stock";
+				worksheet.Cell(1, 4).Value = "Estado";
+
+
+
+                // Estilo encabezados
+                var headerRange = worksheet.Range("A1:E1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Datos
+                for (int i = 0; i < productos.Count; i++)
+                {
+                    var item = productos[i];
+
+
+                    worksheet.Cell(i + 2, 1).Value = i + 1;
+                    worksheet.Cell(i + 2, 2).Value = item.NombreProducto;
+                    worksheet.Cell(i + 2, 3).Value = item.StockActual;
+                    
+
+                    if (item.StockActual == 0)
+                    {
+                        worksheet.Cell(i + 2, 4).Value = "Sin Stock";
+                    }
+                    else if (item.StockActual < (stockMinimo / 2))
+                    {
+                        worksheet.Cell(i + 2, 4).Value = "Crítico";
+                    }
+                    else
+                    {
+                        worksheet.Cell(i + 2, 4).Value = "Bajo";
+                    }
+
+                }
+
+                // Autoajustar columnas
+                worksheet.Columns().AdjustToContents();
+
+                // Información adicional
+                int lastRow = productos.Count + 3;
+                worksheet.Cell(lastRow + 2, 1).Value = "Generado el:";
+                worksheet.Cell(lastRow + 2, 2).Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+                // Guardar en memoria
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    // Descargar usando JavaScript
+                    var fileName = $"Productos_Bajo_Stock{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    await JSRuntime.InvokeVoidAsync("downloadFile",
+                        Convert.ToBase64String(content),
+                        fileName,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMensaje = $"Error al exportar: {ex.Message}";
+            Console.WriteLine($"Error exportando: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+            StateHasChanged();
+        }
+    }
+
+
+
+
+
 }
 
 <style>
