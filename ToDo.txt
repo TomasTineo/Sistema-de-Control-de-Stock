@@ -19,14 +19,14 @@ X	- validaciones clientes
 WINDOWS:
 	- Modificar Menu principal
 	- Revisar botones de gestiones
-	- Crear reportes exportables
+X	- Crear reportes exportables
 	- validaciones clientes
 
 
 
 BACKEND:
 x	- Cambiar validaciones de front a back
-	- Revisar usuario operador
+X	- Revisar usuario operador
 	- BORRAR INITIALDATA DE LA BASE DE DATOS
 	- ERROR DE BASE DE DATOS AL ELMINAR PRODUCTO 
 

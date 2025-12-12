@@ -1,6 +1,10 @@
 using Application.Services.Interfaces;
 using Data;
 using Microsoft.EntityFrameworkCore;
+using DTOs.Usuarios;
+using Data.Repositories;
+using System.ComponentModel.DataAnnotations;
+using Domain.Model;
 
 namespace Application.Services.Implementations
 {
