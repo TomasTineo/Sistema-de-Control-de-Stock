@@ -1,7 +1,8 @@
-using DTOs.Usuarios;
-using Domain.Model;
-using Data.Repositories;
 using Application.Services.Interfaces;
+using Data.Repositories;
+using Domain.Model;
+using DTOs.Usuarios;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.Services.Implementations
 {
@@ -31,9 +32,30 @@ namespace Application.Services.Implementations
 
         public async Task<UsuarioDTO> CreateAsync(CreateUsuarioRequest request)
         {
+            // Validar mail
+            var emailAttribute = new EmailAddressAttribute();
+            if (!emailAttribute.IsValid(request.Email)) 
+                throw new InvalidOperationException("El email no es válido");
+
+            // Validar que el mail no exista
+            if (await _usuarioRepository.ExisteEmailAsync(request.Email))
+                throw new InvalidOperationException("El email ya está registrado");
+
+
+            // Validar que el mail sea correcto
+            if (await _usuarioRepository.ExisteUsernameAsync(request.Username))
+                throw new InvalidOperationException("El nombre de usuario ya existe");
+
             // Validar que no exista el username
             if (await _usuarioRepository.ExisteUsernameAsync(request.Username))
                 throw new InvalidOperationException("El nombre de usuario ya existe");
+
+            
+
+            // Validar que la contraseña tenga al menos 6 caracteres
+            if (request.Password.Length < 6)
+                throw new InvalidOperationException("La contraseña debe tener al menos 6 caracteres");
+
 
             // Constructor SIN ID - EF asignará automáticamente
             var usuario = new Usuario(request.Username, request.Email, request.Password);

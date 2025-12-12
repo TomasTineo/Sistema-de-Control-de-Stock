@@ -1,13 +1,13 @@
 # Falta:
 	
-
+	-borrar productos?
 	- Validaciones en web
-	- Registro de web
+x	- Registro de web 
 	- Revisar operaciones CRUD en web
 	- Revisar botones en web
 	- Añadir reportes en web
 
-	- API.Auth.BlazorServer
+x	- API.Auth.BlazorServer
 	- Cambiar validaciones de front a back con funciones de API.Auth.BlazorServer
 
 	- Modificar Menu principal

@@ -1,0 +1,163 @@
+﻿@page "/registrarse"
+@using Blazor.Interfaces
+@using Blazor.Services
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@rendermode InteractiveServer
+
+@using DTOs.Usuarios
+@inject IRegistroService registroService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<h3>Registrarse</h3>
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5">
+
+                        <!-- Encabezado -->
+                        <div class="text-center mb-5">
+                            <h2 class="fw-bold text-primary mb-3 text-success">Registrarse</h2>
+                            <p class="text-muted">Ingresa tus credenciales para registrarte</p>
+                        </div>
+
+                        <!-- Formulario -->
+                        <EditForm Model="@CreateUsuarioR" OnValidSubmit="@Enviar" FormName="formRegister">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Email</label>
+                                <InputText @bind-Value="CreateUsuarioR.Email"
+                                           class="form-control form-control-lg py-3"
+                                           placeholder="Email" />
+                                <ValidationMessage For="@(() => CreateUsuarioR.Email)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Username</label>
+                                <InputText @bind-Value="CreateUsuarioR.Username"
+                                           class="form-control form-control-lg py-3"
+                                           placeholder="Username" />
+                                <ValidationMessage For="@(() => CreateUsuarioR.Username)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Contraseña</label>
+                                <InputText type="password"
+                                           @bind-Value="CreateUsuarioR.Password"
+                                           class="form-control form-control-lg py-3"
+                                           placeholder="Ingresa tu contraseña" />
+                                <ValidationMessage For="@(() => CreateUsuarioR.Password)" class="text-danger small mt-1" />
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    @successMessage
+                                    <button type="button" class="btn-close" "></button>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(ErrorMessage))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    @ErrorMessage
+                                    <button type="button" class="btn-close" "></button>
+                                </div>
+                            }
+
+                            <!-- Botón de Registro -->
+                            <div class="d-grid mt-4">
+                                <button class="btn bg-success btn-lg py-3 fw-bold"
+                                        type="submit"
+                                        disabled="@isLoading">
+                                    @if (isLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2 text-white"></span>
+                                        <span class="text-white">Procesando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                                        <span class="text-white">Registrarse</span>
+                                    }
+                                </button>
+                            </div>
+
+                        </EditForm>
+
+                        <!-- Sección de iniciar sesion -->
+                        <div class="text-center mt-3">
+                            <p class="text-muted mb-3">¿Ya tienes cuenta?</p>
+                            <a href="/"
+                               class="btn btn-primary btn-lg px-5 py-2 fw-semibold">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Iniciar sesión
+                            </a>
+                        </div>
+
+
+                    </div>
+
+                    
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    private CreateUsuarioRequest CreateUsuarioR = new CreateUsuarioRequest();
+    private bool isLoading = false;
+    private string ErrorMessage = "";
+    private string successMessage = "";
+
+    private async Task Enviar()
+    {
+        Console.WriteLine($"Password: {CreateUsuarioR.Email}");
+        Console.WriteLine($"Username: {CreateUsuarioR.Username}");
+        Console.WriteLine($"Password: {CreateUsuarioR.Password}");
+
+
+        isLoading = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            await registroService.CreateUsuario(CreateUsuarioR);
+
+            successMessage = "Usuario registrado, redirigiendo...";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            // Si tu servicio lanza HttpRequestException con StatusCode
+            ErrorMessage = "Error en la solicitud: Datos inválidos";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

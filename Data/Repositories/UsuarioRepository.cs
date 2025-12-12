@@ -69,5 +69,15 @@ namespace Data.Repositories
 
             return await query.AnyAsync();
         }
+
+        public async Task<bool> ExisteEmailAsync(string Email, int? excludeId = null)
+        {
+            var query = _context.Usuarios.Where(u => u.Email == Email);
+
+            if (excludeId.HasValue)
+                query = query.Where(u => u.Id != excludeId.Value);
+
+            return await query.AnyAsync();
+        }
     }
 }

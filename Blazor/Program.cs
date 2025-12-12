@@ -22,6 +22,7 @@ builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IReportesService, ReportesService>();
+builder.Services.AddScoped<IRegistroService, RegistroService>();
 
 builder.Services.AddScoped<IServerTokenStorage, ServerTokenStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();

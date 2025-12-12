@@ -11,5 +11,7 @@ namespace Data.Repositories
         Task<bool> UpdateAsync(Usuario usuario);
         Task<bool> DeleteAsync(int id);
         Task<bool> ExisteUsernameAsync(string username, int? excludeId = null);
+
+        Task<bool> ExisteEmailAsync(string email, int? excludeId = null);
     }
 }
