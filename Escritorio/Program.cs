@@ -11,7 +11,7 @@ namespace Escritorio
         public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
         [STAThread]
-        static async Task Main()
+        static void Main()
         {
             // Registrar AuthService PRIMERO (antes de DI)
             var authService = new WindowsFormsAuthService();
@@ -99,8 +99,8 @@ namespace Escritorio
 
             ApplicationConfiguration.Initialize();
 
-            // Verificar conexión con la API al inicio
-            if (await VerificarConexionApi(configuration))
+            // Verificar conexión con la API al inicio (de manera síncrona)
+            if (VerificarConexionApi(configuration))
             {
                 var mainForm = ServiceProvider.GetRequiredService<Form_Acceso>();
                 Application.Run(mainForm);
@@ -124,14 +124,14 @@ namespace Escritorio
             }
         }
 
-        private static async Task<bool> VerificarConexionApi(IConfiguration configuration)
+        private static bool VerificarConexionApi(IConfiguration configuration)
         {
             try
             {
                 var apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5239/";
                 
                 // Intentar HTTPS primero
-                if (await TryConnectToApi(apiBaseUrl))
+                if (TryConnectToApi(apiBaseUrl))
                     return true;
                 
                 // Si HTTPS falla, intentar con HTTP
@@ -139,7 +139,7 @@ namespace Escritorio
                 {
                     var httpUrl = apiBaseUrl.Replace("https://", "http://").Replace(":7001/", ":5239/");
                     
-                    if (await TryConnectToApi(httpUrl))
+                    if (TryConnectToApi(httpUrl))
                     {
                         MessageBox.Show($"API encontrada en: {httpUrl}", 
                                       "Conexión establecida", 
@@ -159,7 +159,7 @@ namespace Escritorio
             }
         }
 
-        private static async Task<bool> TryConnectToApi(string baseUrl)
+        private static bool TryConnectToApi(string baseUrl)
         {
             try
             {
@@ -176,7 +176,7 @@ namespace Escritorio
                 {
                     try
                     {
-                        var response = await httpClient.GetAsync(endpoint);
+                        var response = httpClient.GetAsync(endpoint).GetAwaiter().GetResult();
                         if (response.IsSuccessStatusCode)
                         {
                             return true;

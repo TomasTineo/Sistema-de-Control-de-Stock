@@ -8,10 +8,11 @@ namespace WebAPI.Endpoints
     {
         public static void MapReportesEndpoints(this WebApplication app)
         {
-            // Agrupamos el endpoint, lo etiquetamos para Swagger y lo protegemos
+            // Agrupamos el endpoint, lo etiquetamos para Swagger
+            // Permitimos acceso anónimo para reportes (o puedes agregar .RequireAuthorization() si deseas protegerlos)
             var group = app.MapGroup("/api/reportes")
-                .WithTags("Reportes");
-            // AGREGAR AUTORIZACION SI ES NECESARIO
+                .WithTags("Reportes")
+                .AllowAnonymous(); // Permitir acceso sin autenticación
 
             // Endpoint GET para el reporte de Bajo Stock
             group.MapGet("/stock-bajo", async (
@@ -34,6 +35,38 @@ namespace WebAPI.Endpoints
                 return Results.Ok(reporte);
             })
             .WithDescription("Obtiene los productos más reservados ordenados por cantidad.");
+
+            // Endpoint para exportar - Productos Bajo Stock (Excel)
+            group.MapGet("/stock-bajo/export", async (
+                [FromServices] IReportesService reporteService,
+                [FromServices] IReporteExportService exportService,
+                [FromQuery] int stockMinimo = 10)
+            =>
+            {
+                var datos = await reporteService.GetProductosBajoStockAsync(stockMinimo);
+                var bytes = await exportService.ExportarProductosBajoStockAsync(datos, stockMinimo);
+                
+                return Results.File(bytes, 
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    $"ProductosBajoStock_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+            })
+            .WithDescription("Exporta el reporte de productos con bajo stock a Excel (.xlsx)");
+
+            // Endpoint para exportar - Top Productos Reservados (Excel)
+            group.MapGet("/top-productos-reservados/export", async (
+                [FromServices] IReportesService reporteService,
+                [FromServices] IReporteExportService exportService,
+                [FromQuery] int top = 10)
+            =>
+            {
+                var datos = await reporteService.GetTopProductosReservadosAsync(top);
+                var bytes = await exportService.ExportarTopProductosReservadosAsync(datos, top);
+                
+                return Results.File(bytes, 
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    $"TopProductosReservados_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+            })
+            .WithDescription("Exporta el reporte de top productos más reservados a Excel (.xlsx)");
         }
     }
 }

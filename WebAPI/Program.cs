@@ -34,6 +34,7 @@ builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IReportesService, ReporteService>();
+builder.Services.AddScoped<IReporteExportService, ReporteExportService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -154,6 +155,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ReservaProductoAgregar", policy => policy.RequireClaim("permission", "reservaproducto.agregar"));
     options.AddPolicy("ReservaProductoActualizar", policy => policy.RequireClaim("permission", "reservaproducto.actualizar"));
     options.AddPolicy("ReservaProductoEliminar", policy => policy.RequireClaim("permission", "reservaproducto.eliminar"));
+
+    // Políticas para Reportes
+    options.AddPolicy("ReportesLeer", policy => policy.RequireClaim("permission", "reportes.leer"));
+    options.AddPolicy("ReportesExportar", policy => policy.RequireClaim("permission", "reportes.exportar"));
 
     // Fallback: Requerir autenticación para endpoints no especificados
     options.FallbackPolicy = options.DefaultPolicy;

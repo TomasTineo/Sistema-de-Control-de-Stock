@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="FastReport.OpenSource" Version="2026.1.3" />
+    <PackageReference Include="FastReport.OpenSource.Export.PdfSimple" Version="2026.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.21" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
@@ -19,6 +21,14 @@
     <ProjectReference Include="..\Application.Services\Application.Services.csproj" />
     <ProjectReference Include="..\Clases\Domain.Model.csproj" />
     <ProjectReference Include="..\DTOs\DTOs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copiar archivos de reportes desde el proyecto Escritorio -->
+    <None Include="..\Escritorio\Reports\*.frx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Reports\%(Filename)%(Extension)</Link>
+    </None>
   </ItemGroup>
 
 </Project>

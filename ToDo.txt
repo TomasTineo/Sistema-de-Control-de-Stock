@@ -5,7 +5,6 @@
 	- Registro de web
 	- Revisar operaciones CRUD en web
 	- Revisar botones en web
-	- Añadir reportes en web
 
 	- API.Auth.BlazorServer
 	- Cambiar validaciones de front a back con funciones de API.Auth.BlazorServer
@@ -13,8 +12,14 @@
 	- Modificar Menu principal
 	- Revisar botones de gestiones
 
-	- Revisar usuario operador
-	- Crear reportes exportables
+	---- Revisar usuario operador 
 	
 
 	- BORRAR INITIALDATA DE LA BASE DE DATOS 
+
+
+# Hecho
+
+	- Añadir reportes en web (Blazor)
+	- Crear reportes exportables a excel
+	- Corregido bug en registro : faltaba función para asignar grupoPermiso al ususario en UserService.CreateAsync
